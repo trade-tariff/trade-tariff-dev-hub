@@ -1,0 +1,20 @@
+default: &default
+  adapter: postgresql
+  encoding: utf8
+
+development:
+  <<: *default
+  host: <%= ENV.fetch('PGHOST', "localhost") %>
+  user: <%= ENV.fetch("DB_USER", "postgres") %>
+  database: tariff_dev_hub_development
+
+test:
+  <<: *default
+  user: <%= ENV.fetch("DB_USER", "postgres") %>
+  host: <%= ENV.fetch('PGHOST', "localhost") %>
+  database: tariff_dev_hub_test
+
+production:
+  <<: *default
+  url: <%= ENV['DATABASE_URL'] %>
+  pool: <%= ENV['DB_POOL'] || ENV['MAX_THREADS'] || 5 %>

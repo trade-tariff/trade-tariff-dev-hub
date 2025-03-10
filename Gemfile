@@ -1,22 +1,29 @@
 source "https://rubygems.org"
 
-gem "pg"
+ruby file: ".ruby-version"
+
 gem "rails"
+
+gem "importmap-rails"
+gem "pg"
+gem "propshaft"
+gem "puma", ">= 5.0"
+gem "stimulus-rails"
+gem "turbo-rails"
+
+gem "bootsnap", require: false
+
+group :development, :test do
+  gem "brakeman", require: false
+  gem "dotenv-rails"
+  gem "factory_bot_rails"
+  gem "pry-rails"
+  gem "rspec-rails"
+  gem "webmock"
+end
 
 group :development do
   gem "awesome_print"
-  gem "rubocop-govuk"
+  gem "rubocop-govuk", require: false
   gem "solargraph-rails"
-end
-
-group :development, :test do
-  gem "dotenv-rails"
-  gem "pry-rails"
-end
-
-group :test do
-  gem "brakeman"
-  gem "factory_bot_rails"
-  gem "rspec-rails"
-  gem "webmock"
 end

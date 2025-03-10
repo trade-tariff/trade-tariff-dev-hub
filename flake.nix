@@ -71,6 +71,8 @@
             export BUNDLE_BUILD__PSYCH="${
               builtins.concatStringsSep " " psychBuildFlags
             }"
+
+            ${pg-environment-variables}
           '';
 
           buildInputs = [
