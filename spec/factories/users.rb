@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :user do
-    organisations { nil }
+    organisation
     email_address { "MyString" }
     user_id { "MyString" }
   end
