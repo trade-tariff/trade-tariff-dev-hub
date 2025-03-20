@@ -12,6 +12,8 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "homepage#index"
 
+  get 'dashboard', to: 'api_keys#index', as: :api_keys
+
   match '/400', to: 'errors#bad_request', via: :all
   match '/404', to: 'errors#not_found', via: :all, as: :not_found
   match '/405', to: 'errors#method_not_allowed', via: :all
