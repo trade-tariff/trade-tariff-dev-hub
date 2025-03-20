@@ -15,16 +15,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_12_092224) do
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
 
-  create_table "api_gateway_api_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "api_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "organisation_id", null: false
     t.string "api_key_id", null: false
     t.string "api_gateway_id", null: false
-    t.boolean "enabled"
+    t.boolean "enabled", default: true
     t.string "secret", null: false
     t.string "usage_plan_id", null: false
+    t.string "description", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["organisation_id"], name: "index_api_gateway_api_keys_on_organisation_id"
+    t.index ["api_key_id", "organisation_id"], name: "index_api_keys_on_api_key_id_and_organisation_id", unique: true
+    t.index ["organisation_id"], name: "index_api_keys_on_organisation_id"
   end
 
   create_table "organisations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -37,6 +39,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_12_092224) do
     t.string "uk_acs_reference"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["organisation_id"], name: "index_organisations_on_organisation_id", unique: true
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -46,6 +49,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_12_092224) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["organisation_id"], name: "index_users_on_organisation_id"
+    t.index ["user_id", "organisation_id"], name: "index_users_on_user_id_and_organisation_id", unique: true
   end
 
   create_table "versions", force: :cascade do |t|
@@ -58,6 +62,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_12_092224) do
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
 
-  add_foreign_key "api_gateway_api_keys", "organisations"
+  add_foreign_key "api_keys", "organisations"
   add_foreign_key "users", "organisations"
 end

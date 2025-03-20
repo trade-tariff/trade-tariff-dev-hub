@@ -1,0 +1,42 @@
+<h1 class="govuk-heading-l">Your API keys</h1>
+<p class="govuk-body">Manage all API keys that have been generated for your organisation.</p>
+
+<%= govuk_table do |table|
+  table.with_head do |head|
+    head.with_row do |row|
+      row.with_cell(text: 'API key')
+      row.with_cell(text: 'Description')
+      row.with_cell(text: 'Created on')
+      row.with_cell(text: 'Status')
+      row.with_cell(text: '')
+    end
+  end
+
+  @api_keys.each do |api_key|
+    table.with_body do |body|
+      body.with_row do |row|
+        row.with_cell(header: true, text: mask_api_key(api_key))
+        row.with_cell(text: api_key.description)
+        row.with_cell(text: creation_date(api_key))
+        row.with_cell(text: api_key_status(api_key))
+
+        if api_key.enabled
+          row.with_cell do
+            link_to 'Revoke', api_keys_update_revoke_path(api_key.id), class: 'govuk-link'
+          end
+        else
+          row.with_cell do
+            link_to 'Delete', api_keys_update_delete_path(api_key.id), class: 'govuk-link'
+          end
+        end
+      end
+    end
+  end
+end %>
+
+<%= govuk_button_link_to('Create new key', api_keys_new_path, secondary: true) %>
+
+<h2 class="govuk-heading-m">If you need help</h2>
+<p class="govuk-body">If you have any further queries relating to the developer hub contact:
+  <%= mail_to 'hmrc-trade-tariff-support-g@digital.hmrc.gov.uk', 'hmrc-trade-tariff-support-g@digital.hmrc.gov.uk', class: 'govuk-link' %>.
+</p>

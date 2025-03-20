@@ -3,8 +3,9 @@ FactoryBot.define do
     organisation
     api_key_id { "MyString" }
     api_gateway_id { "MyString" }
-    enabled { false }
+    enabled { true }
     secret { "MyString" }
     usage_plan_id { "MyString" }
+    description { "An api key" }
   end
 end

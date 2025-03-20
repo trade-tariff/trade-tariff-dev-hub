@@ -4,14 +4,16 @@ ruby file: ".ruby-version"
 
 gem "rails"
 
+gem "aws-sdk-apigateway"
+gem "aws-sdk-dynamodb"
+gem "govuk-components"
+gem "govuk_design_system_formbuilder"
 gem "importmap-rails"
 gem "ostruct"
 gem "paper_trail"
 gem "pg"
 gem "propshaft"
 gem "puma", ">= 5.0"
-gem "stimulus-rails"
-gem "turbo-rails"
 
 gem "bootsnap", require: false
 
@@ -26,8 +28,12 @@ group :development, :test do
 end
 
 group :development do
-  gem "awesome_print"
+  gem "amazing_print"
   gem "rubocop-govuk", require: false
   gem "ruby-lsp-rails"
   gem "ruby-lsp-rspec"
+end
+
+group :test do
+  gem "rails-controller-testing"
 end

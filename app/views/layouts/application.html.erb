@@ -1,28 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html class="govuk-template app-html-class">
   <head>
-    <title><%= content_for(:title) || "Trade Tariff Dev Hub" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title><%= content_for(:title) || "Commodity Code Identification Tool Developer Hub" %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta charset="utf-8">
+    <meta name="theme-color" content="blue">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%= yield :head %>
+    <%= favicon_link_tag 'favicon.ico' %>
+    <%= favicon_link_tag 'favicon.svg' %>
+    <%= favicon_link_tag 'govuk-icon-mask.svg', rel: 'mask-icon', type: 'image/svg', color: "#0b1c0c" %>
+    <%= favicon_link_tag 'govuk-icon-180.png', rel: 'apple-touch-icon', type: 'image/png', size: '180x180' %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+    <%= stylesheet_link_tag "govuk-frontend.min", "data-turbo-track": "reload" %>
 
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <%= yield %>
+  <%= govuk_header(homepage_url: "https://www.gov.uk", service_name: "Commodity Code Identification Tool Developer Hub", service_url: "#") do |header|
+    header.with_navigation_item(text: "Dashboard", href: "/dashboard", active: false)
+    header.with_navigation_item(text: "Update Profile", href: "#", active: false)
+    header.with_navigation_item(text: "Manage Team", href: "#", active: false)
+    header.with_navigation_item(text: "Sign Out", href: "#", active: false)
+  end %>
+
+  <body class="govuk-template__body app-body-class">
+    <div class="govuk-width-container app-width-container">
+    <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+    <%= govuk_phase_banner(tag: { text: "Beta" }) do %>This is a new service, your
+      <%= govuk_link_to("feedback (opens in a new tab)", ENV["FEEDBACK_URL"] || 'https://www.trade-tariff.service.gov.uk/feedback', target: "_blank") %>
+      will help us improve it.
+    <% end %>
+    <main class="govuk-main-wrapper app-main-class" id="main-content">
+      <%= yield %>
+    </main>
+  </div>
   </body>
+
+  <%= govuk_footer(meta_items_title: "Helpful links", meta_items: {
+    "API Documentation" => "https://api.trade-tariff.service.gov.uk/fpo.html",
+    "Feedback" => ENV["FEEDBACK_URL"] || "https://trade-tariff.service.gov.uk/feedback",
+    "Privacy policy" => "https://hub.trade-tariff.service.gov.uk/privacyPolicy",
+    "Cookies" => "#",
+    "Terms and conditions" => "https://api.trade-tariff.service.gov.uk/fpo/terms-and-conditions.html",
+  }) %>
 </html>

@@ -1,0 +1,21 @@
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <%= govuk_panel(title_text: "Your API Key has been created successfully") %>
+    <h2 class="govuk-heading-l">What happens next</h2>
+    <p class="govuk-body">Use the API key to access the Commodity Code Identification Tool. Use this API in the <strong>X-Api-Key</strong> header of any calls you make.</p>
+    <%= govuk_warning_text(text: "You must copy this key to somewhere safe. You will not be able to view this API key again once you leave this page.") %>
+    <div class="govuk-inset-text">
+      <strong>API Key</strong>
+      <br>
+      <code class="govuk-code" id="api-key-id"><%= session[:api_key_id] %></code>
+    </div>
+    <div>
+      <button type="button" class="govuk-button govuk-button--secondary" data-module="govuk-button" id="copy-to-clipboard">
+        Copy to clipboard
+      </button>
+      <p class="govuk-body">
+        <%= govuk_link_to 'Back to dashboard', '/dashboard', class: 'govuk-link' %>
+      </p>
+    </div>
+  </div>
+</div>

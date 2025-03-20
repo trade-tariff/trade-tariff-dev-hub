@@ -1,0 +1,6 @@
+services:
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - 4566:4566           # LocalStack edge port
+      - 4510-4559:4510-4559 # maps various AWS services ports
