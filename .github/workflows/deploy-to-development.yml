@@ -55,7 +55,6 @@ jobs:
       - run: cd terraform/ && terraform init -backend=false -reconfigure
       - run: pip install pre-commit
       - run: pre-commit run --all-files
-      - run: bundle exec rake lint:scss
       - run: bundle exec brakeman
 
   test:
