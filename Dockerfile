@@ -7,7 +7,7 @@ WORKDIR /app
 # build-base: compilation tools for bundle
 # git: used to pull gems from git
 # yarn: node package manager
-RUN apk add --update --no-cache build-base git yarn tzdata yaml-dev && \
+RUN apk add --update --no-cache build-base git yarn tzdata yaml-dev postgresql-dev && \
   cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
   echo "Europe/London" > /etc/timezone
 
@@ -42,7 +42,7 @@ RUN rm -rf node_modules log tmp && \
 # Build runtime image
 FROM ruby:3.4.2-alpine3.21 AS production
 
-RUN apk add --update --no-cache tzdata && \
+RUN apk add --update --no-cache tzdata postgresql-client && \
   cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
   echo "Europe/London" > /etc/timezone
 
