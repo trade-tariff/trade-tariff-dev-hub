@@ -13,3 +13,6 @@ AllCops:
     - 'tmp/**/*'
     - 'config/**/*'
     - 'node_modules/**/*'
+
+RSpec/ExampleLength:
+  Enabled: false
