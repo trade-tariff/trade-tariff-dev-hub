@@ -12,6 +12,30 @@ data "aws_iam_policy_document" "task" {
     ]
     resources = ["*"]
   }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:Scan",
+    ]
+    resources = [
+      "arn:aws:dynamodb:${var.region}:${local.account_id}:table/Organisations",
+      "arn:aws:dynamodb:${var.region}:${local.account_id}:table/Users",
+      "arn:aws:dynamodb:${var.region}:${local.account_id}:table/CustomerApiKeys"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "apigateway:CreateApiKey",
+      "apigateway:CreateUsagePlan",
+      "apigateway:CreateUsagePlanKey",
+      "apigateway:GetUsagePlanKeys",
+      "apigateway:GetUsagePlans",
+    ]
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_policy" "task" {
