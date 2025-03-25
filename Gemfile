@@ -10,8 +10,6 @@ gem "paper_trail"
 gem "pg"
 gem "propshaft"
 gem "puma", ">= 5.0"
-gem "stimulus-rails"
-gem "turbo-rails"
 
 gem "bootsnap", require: false
 
