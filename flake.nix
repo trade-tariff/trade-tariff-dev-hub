@@ -51,10 +51,8 @@
 
           ${postgresql}/bin/postgres -k $PGHOST -c listen_addresses=''' -c unix_socket_directories=$PGHOST
         '';
-        update-providers = pkgs.writeScriptBin "update-providers" ''
-          cd terraform
-          terraform init -backend=false -reconfigure -upgrade
-        '';
+        init = pkgs.writeScriptBin "init" ''cd terraform && terraform init -backend=false'';
+        update-providers = pkgs.writeScriptBin "update-providers" ''cd terraform && terraform init -backend=false -reconfigure -upgrade'';
       in {
         devShells.default = pkgs.mkShell {
           shellHook = ''
@@ -76,6 +74,7 @@
           '';
 
           buildInputs = [
+            init
             lint
             pkgs.circleci-cli
             pkgs.yarn
