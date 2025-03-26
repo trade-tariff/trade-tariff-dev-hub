@@ -28,11 +28,7 @@ data "aws_iam_policy_document" "task" {
   statement {
     effect = "Allow"
     actions = [
-      "apigateway:CreateApiKey",
-      "apigateway:CreateUsagePlan",
-      "apigateway:CreateUsagePlanKey",
-      "apigateway:GetUsagePlanKeys",
-      "apigateway:GetUsagePlans",
+      "apigateway:*",
     ]
     resources = ["*"]
   }
