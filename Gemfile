@@ -4,6 +4,8 @@ ruby file: ".ruby-version"
 
 gem "rails"
 
+gem "aws-sdk-apigateway"
+gem "aws-sdk-dynamodb"
 gem "importmap-rails"
 gem "ostruct"
 gem "paper_trail"
@@ -26,7 +28,7 @@ group :development, :test do
 end
 
 group :development do
-  gem "awesome_print"
+  gem "amazing_print"
   gem "rubocop-govuk", require: false
   gem "ruby-lsp-rails"
   gem "ruby-lsp-rspec"
