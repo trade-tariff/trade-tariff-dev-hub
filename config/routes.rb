@@ -13,7 +13,12 @@ Rails.application.routes.draw do
   root "homepage#index"
 
   get 'dashboard', to: 'api_keys#index', as: :api_keys
-  get 'dashboard/new', to: 'api_keys#create', as: :api_keys_create
+  get 'dashboard/new', to: 'api_keys#new', as: :api_keys_new
+
+  #TODO: change to correspdonding CRUD when services are ready
+  get 'dashboard/create', to: 'api_keys#create', as: :api_keys_create
+  get 'dashboard/revoke', to: 'api_keys#revoke', as: :api_keys_revoke #TODO: change to :id/revoke
+  get 'dashboard/delete', to: 'api_keys#delete', as: :api_keys_delete #TODO: change to :id
 
   match '/400', to: 'errors#bad_request', via: :all
   match '/404', to: 'errors#not_found', via: :all, as: :not_found

@@ -1,0 +1,28 @@
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Revoke an API key</h1>
+    <p class="govuk-body">Check the below details regarding the API Key you have selected to revoke and confirm your choice.</p>
+    <%= govuk_warning_text(text: "Your API Key will be revoked with immediate effect. Once revoked it cannot be reactivated.") %>
+    <%= govuk_table do |table|
+    table.with_body do |body|
+    body.with_row do |row|
+    row.with_cell(header: true, text: 'Generation')
+    row.with_cell(text: @api_key)
+
+    end; end; table.with_body do |body|
+    body.with_row do |row|
+    row.with_cell(header: true, text: 'Description')
+    row.with_cell(text: 'Placeholder description')
+
+    end; body.with_row do |row|
+    row.with_cell(header: true, text: 'Created on')
+    row.with_cell(text: 'DateTime')
+
+    end;  end; end
+    %>
+    <div class="govuk-button-group">
+      <%= govuk_button_to 'Revoke', '/dashboard', class: 'govuk-button govuk-button--warning' %>
+      <%= govuk_link_to 'Cancel', '#', class: 'govuk-link' %>
+    </div>
+  </div>
+</div>

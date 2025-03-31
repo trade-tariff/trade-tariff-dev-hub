@@ -11,7 +11,12 @@
 
 <% content_for :header do %>
   <div class="govuk-header__container app-width-container">
-    <%= govuk_header(homepage_url: "https://www.gov.uk", service_name: "Commodity Code Identification Tool Developer Hub", service_url: "#") %>
+    <%= govuk_header(homepage_url: "https://www.gov.uk", service_name: "Commodity Code Identification Tool Developer Hub", service_url: "#") do |header|
+    header.with_navigation_item(text: "Dashboard", href: "#", active: false)
+    header.with_navigation_item(text: "Update Profile", href: "#", active: false)
+    header.with_navigation_item(text: "Manage Team", href: "#", active: false)
+    header.with_navigation_item(text: "Sign Out", href: "#", active: false)
+    end %>
   </div>
 <% end %>
 
