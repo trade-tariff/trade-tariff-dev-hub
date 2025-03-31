@@ -6,5 +6,6 @@ FactoryBot.define do
     enabled { false }
     secret { "MyString" }
     usage_plan_id { "MyString" }
+    description { "An api key" }
   end
 end
