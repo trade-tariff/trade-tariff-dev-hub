@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   root "homepage#index"
 
   get 'dashboard', to: 'api_keys#index', as: :api_keys
+  get 'dashboard/new', to: 'api_keys#create', as: :api_keys_create
 
   match '/400', to: 'errors#bad_request', via: :all
   match '/404', to: 'errors#not_found', via: :all, as: :not_found
