@@ -1,9 +1,32 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
+if Rails.env.development?
+  localstack_running = Timeout.timeout(1) do
+    begin
+      s = TCPSocket.new("host.docker.internal", "4566")
+      s.close
+      true
+    rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Timeout::Error, Socket::ResolutionError
+      false
+    end
+  end
+
+  org = Organisation.new(organisation_id: 'local-development', description: 'A friendly digital transformation agency').save
+
+  if localstack_running
+    CreateApiKey.new.call("local-development", "development API key")
+    CreateApiKey.new.call("local-development", "staging API key")
+    CreateApiKey.new.call("local-development", "production API key")
+  else
+    ApiKey.new(organisation_id: org.id, description: "development API key").save
+    ApiKey.new(organisation_id: org.id, description: "staging API key").save
+    ApiKey.new(organisation_id: org.id, description: "production API key").save
+  end
+
+  api_key = ApiKey.find_by(description: "staging API key")
+
+  if localstack_running
+    RevokeApiKey.new.call(api_key)
+  else
+    api_key.enabled = false
+    api_key.save!
+  end
+end

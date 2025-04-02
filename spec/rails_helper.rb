@@ -16,6 +16,8 @@ Shoulda::Matchers.configure do |config|
   end
 end
 
+Dir[Rails.root.join("spec/support/**/*.rb")].sort.each { |f| require f }
+
 RSpec.configure do |config|
   config.fixture_paths = [
     Rails.root.join("spec/fixtures"),
