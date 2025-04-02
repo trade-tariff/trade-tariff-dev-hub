@@ -9,16 +9,38 @@ if Rails.env.development?
     end
   end
 
-  org = Organisation.new(organisation_id: 'local-development', description: 'A friendly digital transformation agency').save
+  org = Organisation.new(organisation_id: 'local-development', description: 'A friendly digital transformation agency')
+  org.save
 
   if localstack_running
     CreateApiKey.new.call("local-development", "development API key")
     CreateApiKey.new.call("local-development", "staging API key")
     CreateApiKey.new.call("local-development", "production API key")
   else
-    ApiKey.new(organisation_id: org.id, description: "development API key").save
-    ApiKey.new(organisation_id: org.id, description: "staging API key").save
-    ApiKey.new(organisation_id: org.id, description: "production API key").save
+    ApiKey.new(
+      organisation_id: org.id,
+      description: "development API key",
+      api_key_id: "development-api-key",
+      api_gateway_id: "development-api-gateway-id",
+      secret: "foo",
+      usage_plan_id: "usage-plan-id",
+    ).save
+    ApiKey.new(
+      organisation_id: org.id,
+      description: "staging API key",
+      api_key_id: "staging-api-key",
+      api_gateway_id: "staging-api-gateway-id",
+      secret: "foo",
+      usage_plan_id: "usage-plan-id",
+    ).save
+    ApiKey.new(
+      organisation_id: org.id,
+      description: "production API key",
+      api_key_id: "production-api-key",
+      api_gateway_id: "production-api-gateway-id",
+      secret: "foo",
+      usage_plan_id: "usage-plan-id",
+    ).save
   end
 
   api_key = ApiKey.find_by(description: "staging API key")
