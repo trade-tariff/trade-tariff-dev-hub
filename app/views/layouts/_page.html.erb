@@ -12,7 +12,7 @@
 <% content_for :header do %>
   <div class="govuk-header__container app-width-container">
     <%= govuk_header(homepage_url: "https://www.gov.uk", service_name: "Commodity Code Identification Tool Developer Hub", service_url: "#") do |header|
-    header.with_navigation_item(text: "Dashboard", href: "#", active: false)
+    header.with_navigation_item(text: "Dashboard", href: "/dashboard", active: false)
     header.with_navigation_item(text: "Update Profile", href: "#", active: false)
     header.with_navigation_item(text: "Manage Team", href: "#", active: false)
     header.with_navigation_item(text: "Sign Out", href: "#", active: false)
@@ -23,7 +23,7 @@
 <% content_for :body do %>
   <div class="govuk-width-container app-width-container">
     <%= govuk_phase_banner(tag: { text: "Beta" }) do %>This is a new service, your
-      <%= govuk_link_to("feedback (opens in a new tab)", "#", target: "_blank") %>
+      <%= govuk_link_to("feedback (opens in a new tab)", ENV["FEEDBACK_URL"] || 'https://www.trade-tariff.service.gov.uk/feedback', target: "_blank") %>
       will help us improve it.
     <% end %>
     <main class="govuk-main-wrapper app-main-class" id="main-content">
