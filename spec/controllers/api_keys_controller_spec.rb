@@ -2,6 +2,11 @@ require 'rails_helper'
 
 RSpec.describe "ApiKeys", type: :request do
   describe "GET /index" do
-    pending "add some examples (or delete) #{__FILE__}"
+    api_keys = ApiKey.all
+
+    it "returns a list of api keys" do
+      get "/dashboard"
+      expect(response).to be_successful
+    end
   end
 end
