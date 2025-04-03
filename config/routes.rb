@@ -17,7 +17,8 @@ Rails.application.routes.draw do
 
   #TODO: change to correspdonding CRUD when services are ready
   get 'dashboard/create', to: 'api_keys#create', as: :api_keys_create
-  get 'dashboard/revoke', to: 'api_keys#revoke', as: :api_keys_revoke #TODO: change to :id/revoke
+  get 'dashboard/:id/revoke', to: 'api_keys#revoke', as: :api_keys_revoke
+  patch '/:id/revoke', to: 'api_keys#revoke_confirm', as: :api_keys_revoke_confirm
   get 'dashboard/delete', to: 'api_keys#delete', as: :api_keys_delete #TODO: change to :id
 
   match '/400', to: 'errors#bad_request', via: :all
