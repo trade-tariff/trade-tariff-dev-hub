@@ -1,4 +1,6 @@
 class ApiKeysController < ApplicationController
+  before_action :set_organisation_id
+
   def index
     @api_keys ||= ApiKey.all
   end
@@ -17,12 +19,18 @@ class ApiKeysController < ApplicationController
 
   def revoke_confirm
     @api_key ||= ApiKey.find(params[:id])
-    @api_key.enabled = false
-    @api_key.save!
+    RevokeApiKey.new.call(@api_key)
     redirect_to api_keys_path
   end
 
   def delete
-    @api_key = "some-api-key"
+    @api_key ||= ApiKey.find(params[:id])
+    render 'delete'
+  end
+
+  def delete_confirm
+    @api_key ||= ApiKey.find(params[:id])
+    DeleteApiKey.new.call(@api_key)
+    redirect_to api_keys_path
   end
 end
