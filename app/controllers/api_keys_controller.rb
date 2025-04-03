@@ -5,6 +5,15 @@ class ApiKeysController < ApplicationController
     @api_keys ||= ApiKey.all
   end
 
+  def update
+    @api_key ||= ApiKey.find(params[:id])
+    if @api_key.enabled
+      render 'revoke'
+    else
+      render 'delete'
+    end
+  end
+
   def new
   end
 
@@ -13,11 +22,6 @@ class ApiKeysController < ApplicationController
   end
 
   def revoke
-    @api_key ||= ApiKey.find(params[:id])
-    render 'revoke'
-  end
-
-  def revoke_confirm
     @api_key ||= ApiKey.find(params[:id])
     RevokeApiKey.new.call(@api_key)
     redirect_to api_keys_path
