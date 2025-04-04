@@ -29,11 +29,6 @@ class ApiKeysController < ApplicationController
 
   def delete
     @api_key ||= ApiKey.find(params[:id])
-    render 'delete'
-  end
-
-  def delete_confirm
-    @api_key ||= ApiKey.find(params[:id])
     DeleteApiKey.new.call(@api_key)
     redirect_to api_keys_path
   end
