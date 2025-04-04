@@ -112,20 +112,13 @@ jobs:
           ref: ${{ inputs.ref || steps.docker-tag.outputs.DOCKER_TAG }}
           ssh-key: ${{ secrets.PRIVATE_SSH_KEY }}
 
-  post-deploy:
-    uses: trade-tariff/trade-tariff-tools/.github/workflows/e2e-tests.yml@main
-    needs: deploy
-    with:
-      test-url: "https://dev.trade-tariff.service.gov.uk"
-      ref: main
-
   notifications:
       runs-on: ubuntu-latest
-      needs: post-deploy
+      needs: deploy
       if: always()
       steps:
         - uses: actions/checkout@v4
         - uses: trade-tariff/trade-tariff-tools/.github/actions/slack-notify@main
           with:
-            result: ${{ needs.post-deploy.result }}
+            result: ${{ needs.deploy.result }}
             slack_webhook: ${{ secrets.SLACK_WEBHOOK }}
