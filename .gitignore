@@ -79,3 +79,5 @@ yarn-debug.log*
 /.envrc
 /.nix
 /.ruby-lsp
+
+.tool-versions

@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html class="govuk-template app-html-class">
+
+  <%= render partial: 'layouts/page' %>
+
   <head>
-    <title><%= content_for(:title) || "Trade Tariff Dev Hub" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title><%= content_for(:title) || "Commodity Code Identification Tool Developer Hub" %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
@@ -22,7 +25,15 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <%= yield %>
+  <header class="govuk-header" data-module="govuk-header">
+    <%= yield :header %>
+  </header>
+
+  <body class="govuk-template__body app-body-class">
+    <%= yield :body %>
   </body>
+
+  <footer class="govuk-footer">
+    <%= yield :footer %>
+  </footer>
 </html>

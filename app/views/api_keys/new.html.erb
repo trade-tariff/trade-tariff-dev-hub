@@ -1,0 +1,18 @@
+<fieldset class="govuk-fieldset">
+  <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+    <h1 class="govuk-fieldset__heading">
+      Enter a description for this API key
+    </h1>
+  </legend>
+  <div class="govuk-form-group">
+    <p class="govuk-hint" for="api-key-description">
+      Use a description you will recognise in the future so that you know which system or developer is using this API key. Do not reuse the same description across API keys.
+    </p>
+    <input class="govuk-input" id="api-key-description" name="api-key-description" type="text" aria-describedby="api-key-description-hint" type="text">
+  </div>
+</fieldset>
+
+<div class="govuk-button-group">
+  <%= govuk_button_link_to('Continue', '#') %>
+  <%= govuk_link_to('Cancel', '/dashboard') %>
+</div>
