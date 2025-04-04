@@ -23,7 +23,7 @@
       end
     %>
     <div class="govuk-button-group">
-      <%= govuk_button_to 'Delete', api_keys_delete_path(@api_key.id), method: :delete, class: 'govuk-button govuk-button--warning' %>
+      <%= govuk_link_to 'Delete', api_keys_delete_path(@api_key.id), method: :delete, class: 'govuk-button govuk-button--warning' %>
       <%= govuk_link_to 'Cancel', '/dashboard', class: 'govuk-link' %>
     </div>
   </div>
