@@ -14,10 +14,8 @@ Rails.application.routes.draw do
 
   get 'dashboard', to: 'api_keys#index', as: :api_keys
   get 'dashboard/new', to: 'api_keys#new', as: :api_keys_new
-
-  # POST /api_keys
-  get 'dashboard/create', to: 'api_keys#create', as: :api_keys_create
-
+  post 'create', to: 'api_keys#create', as: :api_keys_create
+  get 'dashboard/create', to: 'api_keys#show', as: :api_keys_show
   get 'dashboard/:id/revoke', to: 'api_keys#update', as: :api_keys_update_revoke
   patch '/:id/revoke', to: 'api_keys#revoke', as: :api_keys_revoke
   get 'dashboard/:id/delete', to: 'api_keys#update', as: :api_keys_update_delete

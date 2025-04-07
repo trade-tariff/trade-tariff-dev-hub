@@ -5,6 +5,17 @@ class ApiKeysController < ApplicationController
     @api_keys ||= ApiKey.all
   end
 
+  def new
+  end
+
+  def show
+    if params[:success] && flash[:redirected]
+      render 'create'
+    else
+      redirect_to not_found_path
+    end
+  end
+
   def update
     @api_key ||= ApiKey.find(params[:id])
     if @api_key.enabled
@@ -14,11 +25,11 @@ class ApiKeysController < ApplicationController
     end
   end
 
-  def new
-  end
-
   def create
-    @api_key = "some-api-key"
+    @api_key = CreateApiKey.new.call(params[:organisation_id], params[:api_key_description])
+    session[:api_key_id] = @api_key.api_key_id
+    flash[:redirected] = true
+    redirect_to api_keys_show_path(success: true)
   end
 
   def revoke
