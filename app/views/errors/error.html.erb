@@ -1,16 +1,15 @@
-<header class="page-header group">
-  <div>
-    <h1 class="govuk-heading-l">
-      <h1><%= header %></h1>
-    </h1>
-  </div>
-</header>
-<div class="article-container">
-  <article role="article" class="group">
-    <div class="inner">
-    <p>
-      <%= message %>
-    </p>
+<div class="govuk-width-container">
+  <%= govuk_link_to "Back", request.referer || root_path, class: "govuk-back-link" %>
+  <main class="govuk-main-wrapper">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-l">
+          <%= header %>
+        </h1>
+        <p class="govuk-body">
+          <%= message %>
+        </p>
+      </div>
     </div>
-  </article>
+  </main>
 </div>
