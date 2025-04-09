@@ -9,7 +9,7 @@ class ApiKeysController < ApplicationController
   end
 
   def show
-    if params[:success] && flash[:redirected]
+    if params[:success]
       render 'create'
     else
       redirect_to not_found_path

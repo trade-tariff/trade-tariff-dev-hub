@@ -32,3 +32,7 @@ group :development do
   gem "ruby-lsp-rails"
   gem "ruby-lsp-rspec"
 end
+
+group :test do
+  gem "rails-controller-testing"
+end
