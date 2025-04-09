@@ -11,6 +11,6 @@ module ApiKeysHelper
   def creation_date(api_key)
     return 'Today' if api_key.created_at.today?
 
-    api_key.updated_at.strftime('%d %B %Y')
+    api_key.created_at.strftime('%d %B %Y')
   end
 end
