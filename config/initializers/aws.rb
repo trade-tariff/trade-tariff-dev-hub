@@ -1,7 +1,7 @@
 if Rails.env.development?
   localstack_running = Timeout.timeout(1) do
     begin
-      s = TCPSocket.new("host.docker.internal", "4566")
+      s = TCPSocket.new(ENV['LOCALSTACK_HOST'], "4566")
       s.close
       true
     rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Timeout::Error, Socket::ResolutionError
