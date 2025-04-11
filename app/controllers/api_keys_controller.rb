@@ -1,5 +1,6 @@
 class ApiKeysController < ApplicationController
   before_action :set_organisation_id
+  before_action :set_api_key_id, only: [ :update, :revoke, :delete ]
 
   def index
     @api_keys ||= ApiKey.all
@@ -17,7 +18,6 @@ class ApiKeysController < ApplicationController
   end
 
   def update
-    @api_key ||= ApiKey.find(params[:id])
     if @api_key.enabled
       render 'revoke'
     else
@@ -32,13 +32,11 @@ class ApiKeysController < ApplicationController
   end
 
   def revoke
-    @api_key ||= ApiKey.find(params[:id])
     RevokeApiKey.new.call(@api_key)
     redirect_to api_keys_path
   end
 
   def delete
-    @api_key ||= ApiKey.find(params[:id])
     DeleteApiKey.new.call(@api_key)
     redirect_to api_keys_path
   end
