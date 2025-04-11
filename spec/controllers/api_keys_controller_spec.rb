@@ -1,8 +1,8 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe ApiKeysController, type: :controller do
   describe "GET #index" do
-    api_keys = ApiKey.all
+    ApiKey.all
 
     it "returns a list of api keys" do
       get :index
@@ -50,7 +50,7 @@ RSpec.describe ApiKeysController, type: :controller do
       end
     end
 
-     context "Api key is disabled" do
+    context "Api key is disabled" do
       it "renders 'delete' template" do
         api_key.update(enabled: false)
 

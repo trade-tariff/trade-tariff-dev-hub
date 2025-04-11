@@ -6,13 +6,13 @@ gem "rails"
 
 gem "aws-sdk-apigateway"
 gem "aws-sdk-dynamodb"
+gem "govuk-components"
 gem "importmap-rails"
 gem "ostruct"
 gem "paper_trail"
 gem "pg"
 gem "propshaft"
 gem "puma", ">= 5.0"
-gem 'govuk-components'
 
 gem "bootsnap", require: false
 

@@ -1,17 +1,16 @@
 class ApiKeysController < ApplicationController
   before_action :set_organisation_id
-  before_action :set_api_key_id, only: [ :update, :revoke, :delete ]
+  before_action :set_api_key_id, only: %i[update revoke delete]
 
   def index
     @api_keys ||= ApiKey.all
   end
 
-  def new
-  end
+  def new; end
 
   def show
     if params[:success]
-      render 'create'
+      render "create"
     else
       redirect_to not_found_path
     end
@@ -19,9 +18,9 @@ class ApiKeysController < ApplicationController
 
   def update
     if @api_key.enabled
-      render 'revoke'
+      render "revoke"
     else
-      render 'delete'
+      render "delete"
     end
   end
 
