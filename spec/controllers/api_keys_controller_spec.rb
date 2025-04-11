@@ -1,35 +1,36 @@
 require 'rails_helper'
 
-RSpec.describe "ApiKeys", type: :request do
-  describe "GET /index" do
+RSpec.describe ApiKeysController, type: :controller do
+  describe "GET #index" do
     api_keys = ApiKey.all
 
     it "returns a list of api keys" do
-      get "/dashboard"
+      get :index
       expect(response).to be_successful
     end
   end
 
-  describe "GET /new" do
+  describe "GET #new" do
     it "renders 'new' template" do
-      get "/dashboard/new"
+      get :new
       expect(response).to be_successful
+      expect(response).to render_template("new")
     end
   end
 
-  describe "GET /show" do
-    context "Api key creation is successful" do
+  describe "GET #show" do
+    context "When success is set" do
       it "renders 'create' template" do
-        get "/dashboard/create", params: { success: true }
+        get :show, params: { success: true }
 
         expect(response).to be_successful
         expect(response).to render_template("create")
       end
     end
 
-    context "Api key creation is unsuccessful" do
+    context "When success is missing" do
       it "redirects to error page" do
-        get "/dashboard/create"
+        get :show
 
         expect(response).not_to be_successful
         expect(response).to redirect_to(not_found_path)
@@ -37,14 +38,12 @@ RSpec.describe "ApiKeys", type: :request do
     end
   end
 
-  describe "GET /update" do
+  describe "GET #update" do
     let(:api_key) { create(:api_key) }
 
     context "Api key is enabled" do
       it "renders 'revoke' template" do
-        get "/dashboard/#{api_key.id}/revoke"
-
-        binding.pry
+        get :update, params: { id: api_key.id }
 
         expect(response).to be_successful
         expect(response).to render_template("revoke")
@@ -55,11 +54,54 @@ RSpec.describe "ApiKeys", type: :request do
       it "renders 'delete' template" do
         api_key.update(enabled: false)
 
-        get "/dashboard/#{api_key.id}/delete"
+        get :update, params: { id: api_key.id }
 
         expect(response).to be_successful
         expect(response).to render_template("delete")
       end
     end
-   end
+  end
+
+  describe "POST #create" do
+    let(:api_key) { double("API Key", api_key_id: "abc123") }
+
+    before do
+      allow(CreateApiKey).to receive(:new).and_return(double(call: api_key))
+    end
+
+    it "stores api_key_id in session and redirects" do
+      post :create, params: { id: "some-id", description: "test desc" }
+
+      expect(session[:api_key_id]).to eq("abc123")
+      expect(response).to redirect_to(api_keys_show_path(success: true))
+    end
+  end
+
+  describe "PATCH #revoke" do
+    let(:api_key) { create(:api_key) }
+
+    before do
+      allow(RevokeApiKey).to receive(:new).and_return(double(call: true))
+    end
+
+    it "revokes api key and redirects" do
+      post :revoke, params: { id: api_key.id }
+
+      expect(response).to redirect_to(api_keys_path)
+    end
+  end
+
+  describe "DELETE #delete" do
+    let(:api_key) { create(:api_key) }
+
+    before do
+      allow(DeleteApiKey).to receive(:new).and_return(double(call: true))
+    end
+
+    it "deletes api key and redirects" do
+      post :delete, params: { id: api_key.id }
+
+      expect(response).to redirect_to(api_keys_path)
+    end
+  end
 end

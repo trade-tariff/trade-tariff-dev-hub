@@ -28,7 +28,6 @@ class ApiKeysController < ApplicationController
   def create
     @api_key = CreateApiKey.new.call(params[:organisation_id], params[:api_key_description])
     session[:api_key_id] = @api_key.api_key_id
-    flash[:redirected] = true
     redirect_to api_keys_show_path(success: true)
   end
 
