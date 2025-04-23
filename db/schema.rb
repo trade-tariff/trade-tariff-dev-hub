@@ -19,7 +19,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_12_092224) do
     t.uuid "organisation_id", null: false
     t.string "api_key_id", null: false
     t.string "api_gateway_id", null: false
-    t.boolean "enabled"
+    t.boolean "enabled", default: true
     t.string "secret", null: false
     t.string "usage_plan_id", null: false
     t.string "description", null: false

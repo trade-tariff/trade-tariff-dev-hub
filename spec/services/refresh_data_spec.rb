@@ -56,6 +56,7 @@ RSpec.describe RefreshData do
     allow(DecryptSecret).to receive(:new).and_call_original
   end
 
+  # rubocop:disable RSpec/ExampleLength
   describe "#call" do
     it "creates organisations" do
       call
@@ -115,5 +116,6 @@ RSpec.describe RefreshData do
         ],
       )
     end
+    # rubocop:enable RSpec/ExampleLength
   end
 end

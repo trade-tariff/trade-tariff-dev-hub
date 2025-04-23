@@ -11,9 +11,7 @@ class DecryptSecret
     cipher.iv = iv
     cipher.auth_tag = tag
     cipher.auth_data = ""
-    # rubocop:disable Rails/SaveBang
-    cipher.update(ciphertext) + cipher.final
-    # rubocop:enable Rails/SaveBang
+    cipher.update(ciphertext) + cipher.final # rubocop:disable Rails/SaveBang
   rescue StandardError => e
     Rails.logger.warn "Failed to decrypt data: #{e.message}. Possibly an unencrypted value?"
     encrypted
