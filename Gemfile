@@ -15,6 +15,10 @@ gem "pg"
 gem "propshaft"
 gem "puma", ">= 5.0"
 
+# Government Gateway integration
+gem "omniauth_openid_connect"
+gem "omniauth-rails_csrf_protection"
+
 gem "bootsnap", require: false
 
 group :development, :test do

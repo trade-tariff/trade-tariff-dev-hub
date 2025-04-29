@@ -2,7 +2,7 @@ class CreateApiKey
   CLIENT_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".freeze
   CLIENT_ID_LENGTH = 17
   CLIENT_ID_PREFIX = "HUB".freeze
-  SECRET_LENGTH = 24
+  SECRET_LENGTH = 48
   API_KEY_TYPE = "API_KEY".freeze
   PLAN_LIST_LIMIT = (ENV["USAGE_PLAN_LIST_PAGINATION_LIMIT"] || "100").to_i
   PER_FPO_RATE_LIMIT = (ENV["USAGE_PLAN_PER_FPO_RATE_LIMIT"] || "100").to_i
@@ -17,7 +17,7 @@ class CreateApiKey
 
   def call(organisation_id, description = nil)
     api_key = ApiKey.new
-    api_key.organisation_id = Organisation.find_by(organisation_id: organisation_id).id
+    api_key.organisation_id = organisation_id
     api_key.api_key_id = generate_client_id
     api_key.secret = generate_random_secret
     api_key.enabled = true
@@ -54,6 +54,7 @@ private
       name: api_key.api_key_id,
       description: api_key.description,
       enabled: api_key.enabled,
+      value: api_key.secret,
     )
 
     api_key.api_gateway_id = response.id.presence || raise("Failed to create API key")

@@ -20,32 +20,6 @@ RSpec.describe ApiKeysController, type: :controller do
     end
   end
 
-  describe "GET #show" do
-    context "when success is set" do
-      it "renders 'create' template" do
-        get :show, params: { success: true }
-        expect(response).to render_template("create")
-      end
-
-      it "is successful" do
-        get :show, params: { success: true }
-        expect(response).to be_successful
-      end
-    end
-
-    context "when success is missing" do
-      it "redirects to error page" do
-        get :show
-        expect(response).to redirect_to(not_found_path)
-      end
-
-      it "is not successful" do
-        get :show
-        expect(response).not_to be_successful
-      end
-    end
-  end
-
   describe "GET #update" do
     let(:api_key) { create(:api_key) }
 
@@ -87,15 +61,9 @@ RSpec.describe ApiKeysController, type: :controller do
       allow(CreateApiKey).to receive(:new).and_return(service)
     end
 
-    it "stores api_key_id in session" do
+    it "renders the create template" do
       post :create, params: { id: "some-id", description: "test desc" }
-
-      expect(session[:api_key_id]).to eq("abc123")
-    end
-
-    it "redirects" do
-      post :create, params: { id: "some-id", description: "test desc" }
-      expect(response).to redirect_to(api_keys_show_path(success: true))
+      expect(response).to render_template("create")
     end
   end
 

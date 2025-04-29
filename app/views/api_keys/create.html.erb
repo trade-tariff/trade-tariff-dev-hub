@@ -7,7 +7,7 @@
     <div class="govuk-inset-text">
       <strong>API Key</strong>
       <br>
-      <code class="govuk-code" id="api-key-id"><%= session[:api_key_id] %></code>
+      <code class="govuk-code" id="api-key-id"><%= @api_key.secret %></code>
     </div>
     <div>
       <button type="button" class="govuk-button govuk-button--secondary" data-module="govuk-button" id="copy-to-clipboard">
