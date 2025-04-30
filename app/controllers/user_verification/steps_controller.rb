@@ -1,5 +1,7 @@
 module UserVerification
   class StepsController < AuthenticatedController
+    skip_before_action :require_registration
+
     include WizardSteps
 
     def on_complete(result)

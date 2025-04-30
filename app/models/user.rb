@@ -3,6 +3,8 @@ class User < ApplicationRecord
 
   belongs_to :organisation
 
+  delegate :status, :application_reference, to: :organisation
+
   def self.from_profile!(government_gateway_profile)
     organisation = Organisation.from_profile!(government_gateway_profile)
 
