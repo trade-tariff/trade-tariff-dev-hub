@@ -24,6 +24,7 @@ Rails.application.routes.draw do
     resources :steps, only: %i[show update index] do
       collection do
         get :completed
+        get :rejected
       end
     end
   end

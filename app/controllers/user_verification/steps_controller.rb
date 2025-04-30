@@ -8,6 +8,8 @@ module UserVerification
       redirect_to action: :completed, application_reference: result
     end
 
+    def rejected; end
+
   private
 
     self.wizard_class = Wizard

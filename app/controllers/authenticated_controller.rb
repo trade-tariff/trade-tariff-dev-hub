@@ -20,6 +20,8 @@ class AuthenticatedController < ApplicationController
       redirect_to user_verification_steps_path
     when "pending"
       redirect_to completed_user_verification_steps_path(application_reference: current_user.application_reference)
+    when "rejected"
+      redirect_to rejected_user_verification_steps_path(application_reference: current_user.application_reference)
     end
   end
 
