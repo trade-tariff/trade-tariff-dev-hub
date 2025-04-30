@@ -1,33 +1,24 @@
-class ApiKeysController < ApplicationController
-  before_action :set_organisation_id
-  before_action :set_api_key_id, only: %i[update revoke delete]
+class ApiKeysController < AuthenticatedController
+  before_action :set_api_key, only: %i[update revoke delete]
 
   def index
-    @api_keys = ApiKey.all
+    @api_keys = ApiKey.where(organisation_id: organisation_id)
   end
 
   def new; end
 
-  def show
-    if params[:success]
-      render "create"
-    else
-      redirect_to not_found_path
-    end
-  end
-
   def update
     if @api_key.enabled
       render "revoke"
-    else
+    elsif deletion_enabled?
       render "delete"
+    else
+      raise NotImplementedError, "API key deletion is not implemented"
     end
   end
 
   def create
-    @api_key = CreateApiKey.new.call(params[:organisation_id], params[:api_key_description])
-    session[:api_key_id] = @api_key.api_key_id
-    redirect_to api_keys_show_path(success: true)
+    @api_key = CreateApiKey.new.call(organisation_id, params[:api_key_description])
   end
 
   def revoke
@@ -39,4 +30,12 @@ class ApiKeysController < ApplicationController
     DeleteApiKey.new.call(@api_key)
     redirect_to api_keys_path
   end
+
+private
+
+  def set_api_key
+    @api_key = ApiKey.where(id: params[:id], organisation_id:).first
+  end
+
+  delegate :deletion_enabled?, to: TradeTariffDevHub
 end

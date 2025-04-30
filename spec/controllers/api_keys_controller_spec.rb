@@ -1,6 +1,10 @@
 require "rails_helper"
 
 RSpec.describe ApiKeysController, type: :controller do
+  before { session[:organisation_id] = organisation.id }
+
+  let(:organisation) { create(:organisation, organisation_id: "local-development") }
+
   describe "GET #index" do
     it "returns a list of api keys" do
       get :index
@@ -20,34 +24,8 @@ RSpec.describe ApiKeysController, type: :controller do
     end
   end
 
-  describe "GET #show" do
-    context "when success is set" do
-      it "renders 'create' template" do
-        get :show, params: { success: true }
-        expect(response).to render_template("create")
-      end
-
-      it "is successful" do
-        get :show, params: { success: true }
-        expect(response).to be_successful
-      end
-    end
-
-    context "when success is missing" do
-      it "redirects to error page" do
-        get :show
-        expect(response).to redirect_to(not_found_path)
-      end
-
-      it "is not successful" do
-        get :show
-        expect(response).not_to be_successful
-      end
-    end
-  end
-
   describe "GET #update" do
-    let(:api_key) { create(:api_key) }
+    let(:api_key) { create(:api_key, organisation:) }
 
     context "when api key is enabled" do
       it "renders 'revoke' template" do
@@ -80,27 +58,21 @@ RSpec.describe ApiKeysController, type: :controller do
   end
 
   describe "POST #create" do
-    let(:api_key) { create(:api_key, api_key_id: "abc123") }
+    let(:api_key) { create(:api_key, api_key_id: "abc123", organisation:) }
     let(:service) { instance_double(CreateApiKey, call: api_key) }
 
     before do
       allow(CreateApiKey).to receive(:new).and_return(service)
     end
 
-    it "stores api_key_id in session" do
+    it "renders the create template" do
       post :create, params: { id: "some-id", description: "test desc" }
-
-      expect(session[:api_key_id]).to eq("abc123")
-    end
-
-    it "redirects" do
-      post :create, params: { id: "some-id", description: "test desc" }
-      expect(response).to redirect_to(api_keys_show_path(success: true))
+      expect(response).to render_template("create")
     end
   end
 
   describe "PATCH #revoke" do
-    let(:api_key) { create(:api_key) }
+    let(:api_key) { create(:api_key, organisation: organisation) }
     let(:service) { instance_double(RevokeApiKey, call: true) }
 
     before do
@@ -115,7 +87,7 @@ RSpec.describe ApiKeysController, type: :controller do
   end
 
   describe "DELETE #delete" do
-    let(:api_key) { create(:api_key) }
+    let(:api_key) { create(:api_key, organisation:) }
     let(:service) { instance_double(DeleteApiKey, call: true) }
 
     before do

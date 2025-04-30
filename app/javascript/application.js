@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   GOVUKFrontend.initAll();
 
   const button = document.getElementById('copy-to-clipboard')
-  const target = document.getElementById('api-key-id')
+  const target = document.getElementById('api-key-secret')
 
   button?.addEventListener('click', () => {
     navigator.clipboard.writeText(target.textContent)

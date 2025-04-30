@@ -1,5 +1,7 @@
 require_relative "boot"
 
+require_relative '../app/lib/trade_tariff_dev_hub'
+
 require "rails"
 # Pick the frameworks you want:
 require "active_model/railtie"

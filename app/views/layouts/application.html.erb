@@ -20,11 +20,13 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <%= govuk_header(homepage_url: "https://www.gov.uk", service_name: "Commodity Code Identification Tool Developer Hub", service_url: "#") do |header|
-    header.with_navigation_item(text: "Dashboard", href: "/dashboard", active: false)
-    header.with_navigation_item(text: "Update Profile", href: "#", active: false)
-    header.with_navigation_item(text: "Manage Team", href: "#", active: false)
-    header.with_navigation_item(text: "Sign Out", href: "#", active: false)
+  <%= govuk_header(homepage_url: ENV.fetch("GOVUK_APP_DOMAIN", "http://localhost:3000"), service_name: "Commodity Code Identification Tool Developer Hub", service_url: "#") do |header|
+    if respond_to?(:current_user) && current_user.present?
+      header.with_navigation_item(text: "Dashboard", href: api_keys_path, active: true)
+      header.with_navigation_item(text: "Update Profile", href: update_profile_url, active: false)
+      header.with_navigation_item(text: "Manage Team", href: manage_team_url, active: false)
+      header.with_navigation_item(text: "Sign Out", href: logout_path, active: false)
+    end
   end %>
 
   <body class="govuk-template__body app-body-class">
@@ -41,10 +43,10 @@
   </body>
 
   <%= govuk_footer(meta_items_title: "Helpful links", meta_items: {
-    "API Documentation" => "https://api.trade-tariff.service.gov.uk/fpo.html",
-    "Feedback" => ENV["FEEDBACK_URL"] || "https://trade-tariff.service.gov.uk/feedback",
+    "API Documentation" => documentation_url,
+    "Feedback" =>  feedback_url,
     "Privacy policy" => "https://hub.trade-tariff.service.gov.uk/privacyPolicy",
     "Cookies" => "#",
-    "Terms and conditions" => "https://api.trade-tariff.service.gov.uk/fpo/terms-and-conditions.html",
+    "Terms and conditions" => terms_and_conditions_url,
   }) %>
 </html>

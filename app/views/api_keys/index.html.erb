@@ -22,11 +22,13 @@
 
         if api_key.enabled
           row.with_cell do
-            link_to 'Revoke', api_keys_update_revoke_path(api_key.id), class: 'govuk-link'
+            link_to 'Revoke', api_keys_revoke_path(api_key.id), class: 'govuk-link'
           end
         else
           row.with_cell do
-            link_to 'Delete', api_keys_update_delete_path(api_key.id), class: 'govuk-link'
+            if TradeTariffDevHub.deletion_enabled?
+              link_to 'Delete', api_keys_delete_path(api_key.id), class: 'govuk-link'
+            end
           end
         end
       end
