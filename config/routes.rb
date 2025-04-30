@@ -13,9 +13,12 @@ Rails.application.routes.draw do
   get "dashboard/new", to: "api_keys#new", as: :api_keys_new
   post "dashboard/create", to: "api_keys#create", as: :api_keys_create
   get "dashboard/:id/revoke", to: "api_keys#update", as: :api_keys_revoke
-  get "dashboard/:id/delete", to: "api_keys#update", as: :api_keys_delete
   patch "dashboard/:id/revoke", to: "api_keys#revoke"
-  delete "dashboard/:id/delete", to: "api_keys#delete"
+
+  if TradeTariffDevHub.deletion_enabled?
+    get "dashboard/:id/delete", to: "api_keys#update", as: :api_keys_delete
+    delete "dashboard/:id/delete", to: "api_keys#delete"
+  end
 
   match "/400", to: "errors#bad_request", via: :all
   match "/404", to: "errors#not_found", via: :all, as: :not_found

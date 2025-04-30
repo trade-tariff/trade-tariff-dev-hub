@@ -26,7 +26,9 @@
           end
         else
           row.with_cell do
-            link_to 'Delete', api_keys_delete_path(api_key.id), class: 'govuk-link'
+            if TradeTariffDevHub.deletion_enabled?
+              link_to 'Delete', api_keys_delete_path(api_key.id), class: 'govuk-link'
+            end
           end
         end
       end

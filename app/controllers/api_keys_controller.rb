@@ -10,8 +10,10 @@ class ApiKeysController < AuthenticatedController
   def update
     if @api_key.enabled
       render "revoke"
-    else
+    elsif deletion_enabled?
       render "delete"
+    else
+      raise NotImplementedError, "API key deletion is not implemented"
     end
   end
 
@@ -32,6 +34,8 @@ class ApiKeysController < AuthenticatedController
 private
 
   def set_api_key
-    @api_key = ApiKey.find(params[:id])
+    @api_key = ApiKey.where(id: params[:id], organisation_id:).first
   end
+
+  delegate :deletion_enabled?, to: TradeTariffDevHub
 end

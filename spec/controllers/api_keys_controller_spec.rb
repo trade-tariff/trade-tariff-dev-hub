@@ -1,6 +1,10 @@
 require "rails_helper"
 
 RSpec.describe ApiKeysController, type: :controller do
+  before { session[:organisation_id] = organisation.id }
+
+  let(:organisation) { create(:organisation, organisation_id: "local-development") }
+
   describe "GET #index" do
     it "returns a list of api keys" do
       get :index
@@ -21,7 +25,7 @@ RSpec.describe ApiKeysController, type: :controller do
   end
 
   describe "GET #update" do
-    let(:api_key) { create(:api_key) }
+    let(:api_key) { create(:api_key, organisation:) }
 
     context "when api key is enabled" do
       it "renders 'revoke' template" do
@@ -54,7 +58,7 @@ RSpec.describe ApiKeysController, type: :controller do
   end
 
   describe "POST #create" do
-    let(:api_key) { create(:api_key, api_key_id: "abc123") }
+    let(:api_key) { create(:api_key, api_key_id: "abc123", organisation:) }
     let(:service) { instance_double(CreateApiKey, call: api_key) }
 
     before do
@@ -68,7 +72,7 @@ RSpec.describe ApiKeysController, type: :controller do
   end
 
   describe "PATCH #revoke" do
-    let(:api_key) { create(:api_key) }
+    let(:api_key) { create(:api_key, organisation: organisation) }
     let(:service) { instance_double(RevokeApiKey, call: true) }
 
     before do
@@ -83,7 +87,7 @@ RSpec.describe ApiKeysController, type: :controller do
   end
 
   describe "DELETE #delete" do
-    let(:api_key) { create(:api_key) }
+    let(:api_key) { create(:api_key, organisation:) }
     let(:service) { instance_double(DeleteApiKey, call: true) }
 
     before do
