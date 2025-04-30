@@ -6,14 +6,17 @@ gem "rails"
 
 gem "aws-sdk-apigateway"
 gem "aws-sdk-dynamodb"
-gem "govuk-components"
-gem "govuk_design_system_formbuilder"
 gem "importmap-rails"
 gem "ostruct"
 gem "paper_trail"
 gem "pg"
 gem "propshaft"
 gem "puma", ">= 5.0"
+
+# Govuk Design System
+gem "govuk-components"
+gem "govuk_design_system_formbuilder"
+gem "wizard_steps"
 
 # Government Gateway integration
 gem "omniauth_openid_connect"

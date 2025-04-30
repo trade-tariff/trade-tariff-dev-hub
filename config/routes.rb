@@ -20,6 +20,14 @@ Rails.application.routes.draw do
     delete "dashboard/:id/delete", to: "api_keys#delete"
   end
 
+  namespace :user_verification do
+    resources :steps, only: %i[show update index] do
+      collection do
+        get :completed
+      end
+    end
+  end
+
   match "/400", to: "errors#bad_request", via: :all
   match "/404", to: "errors#not_found", via: :all, as: :not_found
   match "/405", to: "errors#method_not_allowed", via: :all

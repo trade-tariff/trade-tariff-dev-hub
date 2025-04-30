@@ -1,0 +1,13 @@
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <%= form_for current_step, url: user_verification_step_path(current_step.key) do |f| %>
+      <%= f.govuk_error_summary %>
+
+      <%= render current_step.key, current_step: current_step, f: f %>
+
+      <%= f.govuk_submit do %>
+         <%= govuk_link_to 'Cancel', root_path %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
