@@ -42,6 +42,8 @@ RSpec.describe UserVerification::Wizard, type: :model do
     end
 
     context "when the organisation does not yet have an application reference" do
+      include_context "with stubbed emails"
+
       let(:organisation) { create(:organisation, application_reference: nil, status: :unregistered) }
 
       it { expect { wizard.do_complete }.to(change { organisation.reload.application_reference }) }
@@ -50,6 +52,13 @@ RSpec.describe UserVerification::Wizard, type: :model do
       it { expect { wizard.do_complete }.to change { organisation.reload.uk_acs_reference }.to("XIUK134123213123") }
       it { expect { wizard.do_complete }.to change { organisation.reload.organisation_name }.to("Flibble Exteriors") }
       it { expect { wizard.do_complete }.to change { current_user.reload.email_address }.to("foo@bar.com") }
+
+      it "sends a registration emails to the user and support", :aggregate_failures do
+        wizard.do_complete
+
+        expect(notifier_service).to have_received(:call).with("foo@bar.com", "bar", reference: be_present)
+        expect(notifier_service).to have_received(:call).with("foo@bar.com", "foo", email: "foo@bar.com", eori: "GB12345678", organisation: "Flibble Exteriors", reference: be_present, scp_email: "foo@bar.com", ukc: "XIUK134123213123")
+      end
     end
   end
 end

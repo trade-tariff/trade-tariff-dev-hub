@@ -1,0 +1,2 @@
+class GovukNotifierAudit < ApplicationRecord
+end

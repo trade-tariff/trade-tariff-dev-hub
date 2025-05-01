@@ -1,5 +1,10 @@
 module UserVerification
   class Wizard < WizardSteps::Base
+    delegate :govuk_notifier_application_template_id,
+             :govuk_notifier_registration_template_id,
+             :application_support_email,
+             to: :TradeTariffDevHub
+
     APPLICATION_REFERENCE_LENGTH = 8
 
     self.steps = [
@@ -27,6 +32,8 @@ module UserVerification
 
         current_user.email_address = answers["email_address"]
         current_user.save! if current_user.changed?
+
+        send_email_now(current_user)
       end
 
       organisation.application_reference
@@ -39,7 +46,40 @@ module UserVerification
     end
 
     def application_reference
-      current_user.organisation.application_reference.presence || SecureRandom.hex(APPLICATION_REFERENCE_LENGTH / 2)
+      @application_reference ||= current_user.organisation.application_reference.presence ||
+        SecureRandom.hex(APPLICATION_REFERENCE_LENGTH / 2)
+    end
+
+    def send_email_now(current_user)
+      send_registration_email_now(current_user)
+      send_support_email_now(current_user)
+    end
+
+    def send_registration_email_now(current_user)
+      notifier_service.call(
+        current_user.email_address,
+        govuk_notifier_registration_template_id,
+        reference: application_reference,
+      )
+    end
+
+    def send_support_email_now(current_user)
+      organisation = current_user.organisation
+
+      notifier_service.call(
+        application_support_email,
+        govuk_notifier_application_template_id,
+        organisation: organisation.organisation_name,
+        reference: organisation.application_reference,
+        eori: organisation.eori_number,
+        ukc: organisation.uk_acs_reference,
+        email: current_user.email_address,
+        scp_email: current_user.email_address,
+      )
+    end
+
+    def notifier_service
+      @notifier_service ||= GovukNotifier.new
     end
   end
 end

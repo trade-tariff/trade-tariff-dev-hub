@@ -1,3 +1,5 @@
+require "notifications/client"
+
 require_relative "boot"
 
 require_relative '../app/lib/trade_tariff_dev_hub'
