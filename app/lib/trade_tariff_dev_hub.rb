@@ -1,5 +1,9 @@
 module TradeTariffDevHub
   class << self
+    def scp_enabled?
+      ENV.fetch("SCP_ENABLED", "true") == "true"
+    end
+
     def deletion_enabled?
       ENV.fetch("DELETION_ENABLED", "false") == "true"
     end

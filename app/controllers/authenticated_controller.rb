@@ -2,18 +2,18 @@
 
 class AuthenticatedController < ApplicationController
   before_action :require_authentication,
-                :require_registration
-
-  before_action :set_paper_trail_whodunnit
+                :require_registration,
+                :set_paper_trail_whodunnit
 
   def require_authentication
-    return if current_user.present? || Rails.env.test?
+    return if current_user.present?
+    return unless TradeTariffDevHub.scp_enabled?
 
     redirect_to "/auth/openid_connect"
   end
 
   def require_registration
-    return if Rails.env.test?
+    return unless TradeTariffDevHub.scp_enabled?
 
     case current_user&.status
     when "unregistered"
