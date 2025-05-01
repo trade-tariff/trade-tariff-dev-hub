@@ -10,7 +10,6 @@ module UserVerification
       attribute :eori_number, :string
       attribute :ukacs_reference, :string
       attribute :email_address, :string
-      attribute :application_reference, :string
 
       validates :organisation_name, presence: true
       validates :ukacs_reference, presence: true
@@ -18,6 +17,8 @@ module UserVerification
       validates :eori_number, presence: true
 
       validate :validate_eori_number
+
+    private
 
       def validate_eori_number
         valid = CheckEoriNumber.new.call(eori_number)

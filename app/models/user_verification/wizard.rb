@@ -18,9 +18,10 @@ module UserVerification
     def do_complete
       unless organisation.application_reference
         organisation.update!(
+          eori_number: answers["eori_number"],
           uk_acs_reference: answers["ukacs_reference"],
           organisation_name: answers["organisation_name"],
-          application_reference: answers["application_reference"],
+          application_reference: application_reference,
           status: :pending,
         )
 
