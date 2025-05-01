@@ -1,0 +1,58 @@
+<h1 class="govuk-heading-l">Check your answers</h1>
+
+<h2 class="govuk-heading-m">Application details</h2>
+
+<%= answers = f.object.answers %>
+
+<%= govuk_summary_list do |summary_list|
+  summary_list.with_row do |row|
+    row.with_key { 'Organisation name' }
+    row.with_value { answers["organisation_name"] }
+    row.with_action(
+        text: 'Change',
+        href: user_verification_step_path("details"),
+        visually_hidden_text: 'organisation name',
+    )
+  end
+
+  summary_list.with_row do |row|
+      row.with_key { 'Organisation EORI' }
+      row.with_value { answers["eori_number"] }
+      row.with_action(
+          text: 'Change',
+          href: user_verification_step_path("details"),
+          visually_hidden_text: 'organisation EORI',
+      )
+  end
+
+  summary_list.with_row do |row|
+      row.with_key { 'UKC reference' }
+      row.with_value { answers["ukacs_reference"] }
+      row.with_action(
+          text: 'Change',
+          href: user_verification_step_path("details"),
+          visually_hidden_text: 'UKC reference',
+      )
+  end
+
+  summary_list.with_row do |row|
+      row.with_key { 'Work email address' }
+      row.with_value { answers["email_address"] }
+      row.with_action(
+          text: 'Change',
+          href: user_verification_step_path("details"),
+          visually_hidden_text: 'work email address',
+      )
+  end
+end %>
+
+<%= f.govuk_collection_check_boxes :terms,
+  fpo_usage_terms,
+  :id,
+  :text,
+  legend: { text: "Terms and conditions", tag: "h1", size: "l" },
+  hint: { text: user_verification_steps_review_answers_terms_hint }
+%>
+<p class="govuk-body">
+  By submitting this application you are confirming that, to the best of your knowledge, the details you are providing are correct.
+</p>

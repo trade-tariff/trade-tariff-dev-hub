@@ -1,22 +1,28 @@
 module ApplicationHelper
-  def documentation_url
-    ENV.fetch(
-      "DOCUMENTATION_URL",
-      "https://api.trade-tariff.service.gov.uk/fpo.html",
-    )
+  def documentation_link
+    govuk_link_to "API documentation (opens in new tab)", TradeTariffDevHub.documentation_url, target: "_blank"
   end
 
-  def feedback_url
-    ENV.fetch(
-      "FEEDBACK_URL",
-      "http://localhost:3001/feedback",
-    )
+  def feedback_link
+    govuk_link_to "What did you think of this service?", TradeTariffDevHub.feedback_url, target: "_blank"
   end
 
-  def terms_and_conditions_url
-    ENV.fetch(
-      "TERMS_AND_CONDITIONS_URL",
-      "https://api.trade-tariff.service.gov.uk/fpo/terms-and-conditions.html",
-    )
+  def terms_link
+    govuk_link_to "terms and conditions of the Commodity Code Identification Tool (opens in new tab)", TradeTariffDevHub.terms_and_conditions_url, target: "_blank", rel: "noopener noreferrer"
+  end
+
+  def fpo_usage_terms
+    option = Struct.new(:id, :text)
+    range = (1..4)
+    range.map do |index|
+      option.new(
+        index,
+        t("fpo_usage_terms.term#{index}"),
+      )
+    end
+  end
+
+  def user_verification_steps_review_answers_terms_hint
+    t("helpers.hint.user_verification_steps_review_answers.terms_html", terms_link: terms_link)
   end
 end

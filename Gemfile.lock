@@ -431,6 +431,7 @@ GEM
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
+    wizard_steps (0.1.4)
     zeitwerk (2.7.2)
 
 PLATFORMS
@@ -470,6 +471,7 @@ DEPENDENCIES
   ruby-lsp-rspec
   shoulda-matchers
   webmock
+  wizard_steps
 
 RUBY VERSION
    ruby 3.4.2p28

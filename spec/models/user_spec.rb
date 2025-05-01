@@ -35,4 +35,20 @@ RSpec.describe User, type: :model do
       it { expect { from_profile! }.to change(Organisation, :count).by(1) }
     end
   end
+
+  describe "#application_reference" do
+    subject { user.application_reference }
+
+    let(:user) do
+      create(
+        :user,
+        organisation: create(
+          :organisation,
+          application_reference: "foo",
+        ),
+      )
+    end
+
+    it { is_expected.to eq("foo") }
+  end
 end

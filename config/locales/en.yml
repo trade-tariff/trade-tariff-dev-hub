@@ -1,31 +1,42 @@
-# Files in the config/locales directory are used for internationalization and
-# are automatically loaded by Rails. If you want to use locales other than
-# English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more about the API, please read the Rails Internationalization guide
-# at https://guides.rubyonrails.org/i18n.html.
-#
-# Be aware that YAML interprets the following case-insensitive strings as
-# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
-# must be quoted to be interpreted as strings. For example:
-#
-#     en:
-#       "yes": yup
-#       enabled: "ON"
-
 en:
-  hello: "Hello world"
+  helpers:
+    label:
+      user_verification_steps_details:
+        organisation_name: "What is the name of your organisation?"
+        eori_number: "What is your EORI number?"
+        ukacs_reference: "What is your UK Carrier Scheme (UKC) reference number?"
+        email_address: "Your work email address"
+    hint:
+      user_verification_steps_details:
+        organisation_name: "This should be the name of the organisation you are accessing the Commodity Code Tool on behalf of."
+        eori_number: "Your organisation will have an Economic Operators Registration and Identification (EORI) number."
+        ukacs_reference: "Your organisation would have received a unique reference number when signing up for the UK Authorised Carrier Scheme."
+        email_address: "We will only use your email address to send essential updates regarding the Commodity Code Identification Tool and your verification request."
+      user_verification_steps_review_answers:
+        terms_html: "Read the information below carefully. By ticking the boxes, you acknowledge that you have read, understood and agree to the %{terms_link}."
+
+  fpo_usage_terms:
+    term1: "The Commodity Code Identification Tool is designated for backend operations only and must not be directly integrated into any customer-facing interfaces, applications, or websites"
+    term2: "Any access credentials are for the sole use of the UK Carrier Scheme (UKC) registered Fast Parcel Operator (FPO) to which they have been granted. They may be shared and used by third party suppliers but must only be used for the purposes of providing services to the FPO. It is the responsibility of the FPO to ensure that their suppliers adhere to these terms and that access credentials are kept confidential"
+    term3: "The API is only intended for generating commodity codes for parcels being transported from Great Britain to Northern Ireland that are classified as \"Not at Risk\" of onward movement out of Northern Ireland, where Northern Ireland is their final destination and place of use/consumption. This includes goods moved under the UK Carrier Scheme (UKC)"
+    term4: "I have read, understood and agree to the terms and conditions of the Commodity Code Identification Tool"
+
+  activemodel:
+    errors:
+      models:
+        user_verification/steps/details:
+          attributes:
+            organisation_name:
+              blank: "Enter the name of your organisation"
+            ukacs_reference:
+              blank: "Enter your UK Carrier Scheme (UKC) reference number"
+            eori_number:
+              blank: "Enter your EORI number"
+              invalid: "Enter a real EORI number"
+            email_address:
+              blank: "Enter your work email address"
+
+        user_verification/steps/review_answers:
+          attributes:
+            terms:
+              blank: "You must agree to all the terms & conditions by ticking the boxes"

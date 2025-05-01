@@ -1,13 +1,28 @@
 # frozen_string_literal: true
 
 class AuthenticatedController < ApplicationController
-  before_action :require_authentication
-  before_action :set_paper_trail_whodunnit
+  before_action :require_authentication,
+                :require_registration,
+                :set_paper_trail_whodunnit
 
   def require_authentication
-    return if current_user.present? || Rails.env.test?
+    return if current_user.present?
+    return unless TradeTariffDevHub.scp_enabled?
 
     redirect_to "/auth/openid_connect"
+  end
+
+  def require_registration
+    return unless TradeTariffDevHub.scp_enabled?
+
+    case current_user&.status
+    when "unregistered"
+      redirect_to user_verification_steps_path
+    when "pending"
+      redirect_to completed_user_verification_steps_path(application_reference: current_user.application_reference)
+    when "rejected"
+      redirect_to rejected_user_verification_steps_path(application_reference: current_user.application_reference)
+    end
   end
 
   def user_profile
