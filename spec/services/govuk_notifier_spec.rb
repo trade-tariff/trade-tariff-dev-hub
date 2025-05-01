@@ -24,18 +24,6 @@ RSpec.describe GovukNotifier do
       }
     end
 
-    let(:expected_audit_attributes) do
-      {
-        subject: "test",
-        body: "test",
-        from_email: "foo@bar.com",
-        template_id: "b0f0c2b2-c5f5-4f3a-8d9c-f4c8e8ea1a7c",
-        template_version: "1",
-        template_uri: "/v2/templates/b0f0c2b2-c5f5-4f3a-8d9c-f4c8e8ea1a7c",
-        notification_uri: "/notifications/aceed36e-6aee-494c-a09f-88b68904bad6",
-      }
-    end
-
     before { call }
 
     it "sends an email" do
@@ -45,7 +33,5 @@ RSpec.describe GovukNotifier do
         personalisation: { foo: "bar" },
       )
     end
-
-    it { expect(last_audit).to have_attributes(expected_audit_attributes) }
   end
 end

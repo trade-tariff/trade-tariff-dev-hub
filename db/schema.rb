@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_01_123620) do
+ActiveRecord::Schema[8.0].define(version: 2025_03_12_092224) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -27,20 +27,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_01_123620) do
     t.datetime "updated_at", null: false
     t.index ["api_key_id", "organisation_id"], name: "index_api_keys_on_api_key_id_and_organisation_id", unique: true
     t.index ["organisation_id"], name: "index_api_keys_on_organisation_id"
-  end
-
-  create_table "govuk_notifier_audits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "notification_uuid", null: false
-    t.string "subject", null: false
-    t.string "body", null: false
-    t.string "from_email", null: false
-    t.string "template_id", null: false
-    t.string "template_version", null: false
-    t.string "template_uri", null: false
-    t.string "notification_uri", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["notification_uuid"], name: "index_govuk_notifier_audits_on_notification_uuid", unique: true
   end
 
   create_table "organisations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
