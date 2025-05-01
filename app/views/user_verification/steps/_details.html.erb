@@ -8,23 +8,10 @@ To allow you to use the FPO Commodity Code Identification Tool API we need to ch
 Enter the following information about your organisation. This will be used to verify your account.
 </p>
 
-<%= f.govuk_text_field :organisation_name,
-  label: { text: "What is the name of your organisation?", class: "govuk-label--m" },
-  hint: { text: "This should be the name of the organisation you are accessing the Commodity Code Tool on behalf of." } %>
-
-<%= f.govuk_text_field :eori_number,
-  label: { text: "What is your EORI number?", class: "govuk-label--m" },
-  hint: { text: "Your organisation will have an Economic Operators Registration and Identification (EORI) number." } %>
-
-<%= f.govuk_text_field :ukacs_reference,
-  label: { text: "What is your UK Carrier Scheme (UKC) reference number?", class: "govuk-label--m" },
-  hint: { text: "Your organisation would have received a unique reference number when signing up for the UK Authorised Carrier Scheme." } %>
-
-<%= f.govuk_email_field :email_address,
-  label: { text: "Your work email address", class: "govuk-label--m" },
-  hint: { text: "We will only use your email address to send essential updates regarding the Commodity Code Identification Tool and your verification request." },
-  autocomplete: "email",
-  spellcheck: false %>
+<%= f.govuk_text_field :organisation_name %>
+<%= f.govuk_text_field :eori_number %>
+<%= f.govuk_text_field :ukacs_reference %>
+<%= f.govuk_email_field :email_address, autocomplete: "email", spellcheck: false %>
 
 <h1 class="govuk-heading-m">If you need help</h1>
 

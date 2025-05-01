@@ -22,7 +22,7 @@ module ApplicationHelper
     end
   end
 
-  def fpo_usage_terms_hint
-    t("fpo_usage_terms.terms_hint_html", terms_link: terms_link)
+  def user_verification_steps_review_answers_terms_hint
+    t("helpers.hint.user_verification_steps_review_answers.terms_html", terms_link: terms_link)
   end
 end

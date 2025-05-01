@@ -31,8 +31,8 @@ RSpec.describe ApplicationHelper, type: :helper do
     end
   end
 
-  describe "#fpo_usage_terms_hint" do
-    subject { helper.fpo_usage_terms_hint }
+  describe "#user_verification_steps_review_answers_terms_hint" do
+    subject { helper.user_verification_steps_review_answers_terms_hint }
 
     it { is_expected.to include("Read the information below carefully") }
     it { is_expected.to be_html_safe }
