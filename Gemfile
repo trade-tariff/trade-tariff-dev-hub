@@ -13,9 +13,10 @@ gem "pg"
 gem "propshaft"
 gem "puma", ">= 5.0"
 
-# Govuk Design System
+# GovUK
 gem "govuk-components"
 gem "govuk_design_system_formbuilder"
+gem "notifications-ruby-client"
 gem "wizard_steps"
 
 # Government Gateway integration
