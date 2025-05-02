@@ -3,6 +3,7 @@ module UserVerification
     delegate :govuk_notifier_application_template_id,
              :govuk_notifier_registration_template_id,
              :application_support_email,
+             :send_emails?,
              to: :TradeTariffDevHub
 
     APPLICATION_REFERENCE_LENGTH = 8
@@ -33,7 +34,7 @@ module UserVerification
         current_user.email_address = answers["email_address"]
         current_user.save! if current_user.changed?
 
-        send_email_now(current_user)
+        send_email_now(current_user) if send_emails?
       end
 
       organisation.application_reference

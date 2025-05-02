@@ -48,5 +48,9 @@ module TradeTariffDevHub
     def govuk_notifier_application_template_id
       ENV["SUPPORT_TEMPLATE_ID"]
     end
+
+    def send_emails?
+      ENV.fetch("SEND_EMAILS", "true") == "true"
+    end
   end
 end
