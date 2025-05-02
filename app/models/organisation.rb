@@ -1,6 +1,8 @@
 class Organisation < ApplicationRecord
   has_paper_trail
 
+  has_many :users, dependent: :destroy
+
   enum :status, {
     unregistered: 0,
     authorised: 1,

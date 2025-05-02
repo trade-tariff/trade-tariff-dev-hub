@@ -32,5 +32,25 @@ module TradeTariffDevHub
     def eori_lookup_url
       ENV.fetch("EORI_LOOKUP_URL", "https://test-api.service.hmrc.gov.uk/customs/eori/lookup/check-multiple-eori")
     end
+
+    def govuk_notifier_api_key
+      @govuk_notifier_api_key ||= ENV["GOVUK_NOTIFY_API_KEY"]
+    end
+
+    def application_support_email
+      @application_support_email ||= ENV["APPLICATION_SUPPORT_EMAIL"]
+    end
+
+    def govuk_notifier_registration_template_id
+      ENV["REGISTRATION_TEMPLATE_ID"]
+    end
+
+    def govuk_notifier_application_template_id
+      ENV["SUPPORT_TEMPLATE_ID"]
+    end
+
+    def send_emails?
+      ENV.fetch("SEND_EMAILS", "true") == "true"
+    end
   end
 end

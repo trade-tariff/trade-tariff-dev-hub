@@ -15,14 +15,9 @@ class AuthenticatedController < ApplicationController
   def require_registration
     return unless TradeTariffDevHub.scp_enabled?
 
-    case current_user&.status
-    when "unregistered"
-      redirect_to user_verification_steps_path
-    when "pending"
-      redirect_to completed_user_verification_steps_path(application_reference: current_user.application_reference)
-    when "rejected"
-      redirect_to rejected_user_verification_steps_path(application_reference: current_user.application_reference)
-    end
+    redirect_to user_verification_steps_path if organisation.unregistered?
+    redirect_to completed_user_verification_steps_path if organisation.pending?
+    redirect_to rejected_user_verification_steps_path if organisation.rejected?
   end
 
   def user_profile
@@ -53,5 +48,5 @@ class AuthenticatedController < ApplicationController
     user_profile["profile"].to_s + "?redirect_uri=#{profile_redirect_url}"
   end
 
-  helper_method :current_user, :manage_team_url, :update_profile_url
+  helper_method :current_user, :organisation, :manage_team_url, :update_profile_url
 end

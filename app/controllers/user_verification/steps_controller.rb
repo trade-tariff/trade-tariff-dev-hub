@@ -4,8 +4,11 @@ module UserVerification
 
     include WizardSteps
 
-    def on_complete(result)
-      redirect_to action: :completed, application_reference: result
+    def show
+      redirect_to api_keys_path if organisation.authorised?
+      redirect_to action: :completed if organisation.pending?
+      redirect_to action: :rejected if organisation.rejected?
+      redirect_to step_path("details") if answers_incomplete?
     end
 
     def rejected; end
@@ -42,6 +45,10 @@ module UserVerification
 
     def review_answers?
       params.key?("user_verification_steps_review_answers")
+    end
+
+    def answers_incomplete?
+      current_step == "review_answers" && !find("details").valid?
     end
   end
 end

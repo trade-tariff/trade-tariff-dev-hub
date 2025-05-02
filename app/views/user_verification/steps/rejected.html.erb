@@ -1,6 +1,6 @@
 <h1 class="govuk-heading-l">Your application has been rejected</h1>
 <p class="govuk-body">
-Your application, with reference number <strong><%= params[:application_reference] %></strong>, has been rejected.
+Your application, with reference number <strong><%= organisation.application_reference %></strong>, has been rejected.
 </p>
 
 <p class="govuk-body">
@@ -12,7 +12,7 @@ Your application, with reference number <strong><%= params[:application_referenc
   href="mailto:hmrc-trade-tariff-support-g@digital.hmrc.gov.uk">hmrc-trade-tariff-support-g@digital.hmrc.gov.uk</a> using below reference number.
 </p>
 
-<h1 class="govuk-heading-l"><%= params[:application_reference] %></h1>
+<h1 class="govuk-heading-l"><%= organisation.application_reference %></h1>
 <p class="govuk-body">
 <p class="govuk-body">
   <%= feedback_link %> (takes 30 seconds)
