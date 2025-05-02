@@ -5,6 +5,7 @@ module UserVerification
     include WizardSteps
 
     def show
+      redirect_to api_keys_path if organisation.authorised?
       redirect_to action: :completed if organisation.pending?
       redirect_to action: :rejected if organisation.rejected?
       redirect_to step_path("details") if answers_incomplete?

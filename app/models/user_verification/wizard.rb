@@ -34,7 +34,7 @@ module UserVerification
         current_user.email_address = answers["email_address"]
         current_user.save! if current_user.changed?
 
-        send_email_now(current_user) if send_emails?
+        send_email_now if send_emails?
       end
 
       organisation.application_reference
@@ -51,12 +51,12 @@ module UserVerification
         SecureRandom.hex(APPLICATION_REFERENCE_LENGTH / 2)
     end
 
-    def send_email_now(current_user)
-      send_registration_email_now(current_user)
-      send_support_email_now(current_user)
+    def send_email_now
+      send_registration_email_now
+      send_support_email_now
     end
 
-    def send_registration_email_now(current_user)
+    def send_registration_email_now
       Rails.logger.info("Sending registration email to #{current_user.email_address}")
 
       notifier_service.call(
@@ -66,7 +66,7 @@ module UserVerification
       )
     end
 
-    def send_support_email_now(current_user)
+    def send_support_email_now
       Rails.logger.info("Sending support email to #{application_support_email}")
 
       organisation = current_user.organisation
