@@ -53,7 +53,7 @@ RSpec.describe UserVerification::Wizard, type: :model do
       it { expect { wizard.do_complete }.to change { organisation.reload.organisation_name }.to("Flibble Exteriors") }
       it { expect { wizard.do_complete }.to change { current_user.reload.email_address }.to("foo@bar.com") }
 
-      it "sends a registration emails to the user and support", :aggregate_failures do
+      it "sends application complete emails to the user and support team", :aggregate_failures do
         wizard.do_complete
 
         expect(notifier_service).to have_received(:call).with("foo@bar.com", "bar", reference: be_present)
