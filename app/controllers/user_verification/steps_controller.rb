@@ -4,6 +4,12 @@ module UserVerification
 
     include WizardSteps
 
+    def show
+      if current_step.key == "review_answers" && !wizard.find("details").valid?
+        redirect_to step_path("details")
+      end
+    end
+
     def on_complete(result)
       redirect_to action: :completed, application_reference: result
     end
