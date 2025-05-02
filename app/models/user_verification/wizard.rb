@@ -21,7 +21,7 @@ module UserVerification
     end
 
     def do_complete
-      unless organisation.application_reference
+      if organisation.application_reference.blank?
         organisation.update!(
           eori_number: answers["eori_number"],
           uk_acs_reference: answers["ukacs_reference"],
@@ -56,6 +56,8 @@ module UserVerification
     end
 
     def send_registration_email_now(current_user)
+      Rails.logger.info("Sending registration email to #{current_user.email_address}")
+
       notifier_service.call(
         current_user.email_address,
         govuk_notifier_registration_template_id,
@@ -64,6 +66,8 @@ module UserVerification
     end
 
     def send_support_email_now(current_user)
+      Rails.logger.info("Sending support email to #{application_support_email}")
+
       organisation = current_user.organisation
 
       notifier_service.call(
