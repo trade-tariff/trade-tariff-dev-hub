@@ -69,5 +69,9 @@ protected
     session[:user_profile]["exp"].to_i
   end
 
-  helper_method :current_user, :organisation, :manage_team_url, :update_profile_url
+  def organisation_account?
+    manage_team_url.present?
+  end
+
+  helper_method :current_user, :organisation, :manage_team_url, :update_profile_url, :organisation_account?
 end
