@@ -6,27 +6,30 @@
       <%= carrier_scheme_inset_text %>
 
       <p class="govuk-body">You can use this service to:</p>
-      <ul class="govuk-list govuk-list--bullet">
-          <li>create an API key for yourself</li>
-          <li>create an API key for someone else in your organisation</li>
-          <li>revoke an API key</li>
-          <li>view active API keys</li>
-      </ul>
+      <%= govuk_list [
+        "create an API key for yourself",
+        "create an API key for someone else in your organisation",
+        "revoke an API key",
+        "view active API keys",
+      ], type: :bullet %>
+
       <p class="govuk-body">
           You'll need a Government Gateway account to use this service. If you do not have a Government Gateway account, you can create one.
       </p>
+
       <p class="govuk-body">If it is your first time registering, you'll also need:</p>
-      <ul class="govuk-list govuk-list--bullet">
-          <li>the name of your organisation</li>
-          <li>the EORI number of your organisation</li>
-          <li>the UK Authorised Carrier Scheme reference number of your organisation</li>
-          <li>an email address for essential updates</li>
-      </ul>
+      <%= govuk_list [
+        "the name of your organisation",
+        "the EORI number of your organisation",
+        "the UK Authorised Carrier Scheme reference number of your organisation",
+        "an email address for essential updates",
+      ], type: :bullet %>
+
       <%= govuk_start_button(text: "Start now", href: "/dashboard") %>
+
       <h2 class="govuk-heading-m">If you need help</h2>
       <p class="govuk-body">
-          If you have any further queries relating to the developer hub contact: <a class="govuk-link"
-  href="mailto:hmrc-trade-tariff-support-g@digital.hmrc.gov.uk">hmrc-trade-tariff-support-g@digital.hmrc.gov.uk</a>
+          If you have any further queries relating to the developer hub contact: <%= govuk_link_to "hmrc-trade-tariff-support-g@digital.hmrc.gov.uk", "mailto:hmrc-trade-tariff-support-g@digital.hmrc.gov.uk" %>
       </p>
     </div>
 </div>
