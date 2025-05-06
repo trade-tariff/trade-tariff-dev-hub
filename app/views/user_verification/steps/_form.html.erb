@@ -1,3 +1,15 @@
+<% unless organisation_account? %>
+    <%= govuk_notification_banner(title_text: "It looks like you're using a personal Government Gateway account")  do %>
+        <p class="govuk-body">
+            If you register using this account you won't be able to invite other users to manage the API keys for this organisation.
+        </p>
+
+        <p class="govuk-body">
+            You can <%= govuk_link_to "sign out", logout_path  %> and create a new Government Gateway account, or use an existing one, for your organisation.
+        </p>
+    <% end %>
+<% end %>
+
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
     <%= form_for current_step, url: user_verification_step_path(current_step.key) do |f| %>

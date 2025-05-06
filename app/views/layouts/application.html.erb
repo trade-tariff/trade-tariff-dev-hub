@@ -24,7 +24,7 @@
     if respond_to?(:current_user) && current_user.present?
       header.with_navigation_item(text: "Dashboard", href: api_keys_path, active: true)
       header.with_navigation_item(text: "Update Profile", href: update_profile_url, active: false)
-      header.with_navigation_item(text: "Manage Team", href: manage_team_url, active: false)
+      header.with_navigation_item(text: "Manage Team", href: manage_team_url, active: false) if organisation_account?
       header.with_navigation_item(text: "Sign Out", href: logout_path, active: false)
     end
   end %>
