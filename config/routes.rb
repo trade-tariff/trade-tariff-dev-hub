@@ -29,6 +29,9 @@ Rails.application.routes.draw do
     end
   end
 
+  get :privacy, to: "pages#privacy", as: :privacy
+  get :cookies, to: "pages#cookies", as: :cookies
+
   match "/400", to: "errors#bad_request", via: :all
   match "/404", to: "errors#not_found", via: :all, as: :not_found
   match "/405", to: "errors#method_not_allowed", via: :all
