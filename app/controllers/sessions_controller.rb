@@ -15,7 +15,7 @@ class SessionsController < ApplicationController
   end
 
   def failure
-    Rails.logger.error("Authentication failure: #{params[:message]}")
+    Rails.logger.error("Authentication failure: #{request.env['omniauth.error']}")
     redirect_to root_path
   end
 
