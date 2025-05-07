@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe ApiKeysController, type: :controller do
-  before { session[:organisation_id] = organisation.id }
+  include_context "with authenticated user"
 
   let(:organisation) { create(:organisation, organisation_id: "local-development") }
 
