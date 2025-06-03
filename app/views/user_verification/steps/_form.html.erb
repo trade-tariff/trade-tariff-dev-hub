@@ -1,4 +1,4 @@
-<% unless organisation_account? %>
+<% unless user_session.organisation_account? %>
     <%= govuk_notification_banner(title_text: "It looks like you're using a personal Government Gateway account")  do %>
         <p class="govuk-body">
             If you register using this account you won't be able to invite other users to manage the API keys for this organisation.

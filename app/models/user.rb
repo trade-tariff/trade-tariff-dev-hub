@@ -2,6 +2,7 @@ class User < ApplicationRecord
   has_paper_trail
 
   belongs_to :organisation
+  has_many :sessions, dependent: :destroy
 
   delegate :status, :application_reference, to: :organisation
 

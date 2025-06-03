@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_12_092224) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_03_084905) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -42,6 +42,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_12_092224) do
     t.index ["organisation_id"], name: "index_organisations_on_organisation_id", unique: true
   end
 
+  create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "token", null: false
+    t.uuid "user_id", null: false
+    t.datetime "expires_at", null: false
+    t.jsonb "raw_info", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["token"], name: "index_sessions_on_token", unique: true
+    t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "organisation_id", null: false
     t.string "email_address"
@@ -63,5 +74,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_12_092224) do
   end
 
   add_foreign_key "api_keys", "organisations"
+  add_foreign_key "sessions", "users"
   add_foreign_key "users", "organisations"
 end

@@ -8,11 +8,15 @@ class AuthenticatedController < ApplicationController
 protected
 
   def require_authentication
-    return if current_user.present?
     return unless TradeTariffDevHub.scp_enabled?
 
-    handle_session_expiry
-    redirect_to "/auth/openid_connect"
+    return if user_session.present? && !user_session.expired?
+
+    if user_session.present? && user_session.expired?
+      redirect_to logout_path
+    else
+      redirect_to "/auth/openid_connect"
+    end
   end
 
   def require_registration
@@ -23,24 +27,8 @@ protected
     redirect_to rejected_user_verification_steps_path if organisation.rejected?
   end
 
-  def handle_session_expiry
-    return if session_expired?
-
-    session[:user_id] = nil
-    session[:organisation_id] = nil
-    session[:user_profile] = nil
-  end
-
-  def user_profile
-    session[:user_profile] || {}
-  end
-
-  def organisation_id
-    session[:organisation_id]
-  end
-
-  def user_id
-    session[:user_id]
+  def user_session
+    @user_session ||= Session.find_by(token: session[:token])
   end
 
   def organisation
@@ -48,30 +36,16 @@ protected
   end
 
   def current_user
-    @current_user ||= User.find_by(id: session[:user_id])
+    @current_user ||= user_session.user
   end
 
-  def manage_team_url
-    user_profile["bas:groupProfile"].to_s + "?redirect_uri=#{group_redirect_url}"
+  def organisation_id
+    organisation.id
   end
 
-  def update_profile_url
-    user_profile["profile"].to_s + "?redirect_uri=#{profile_redirect_url}"
+  def user_id
+    current_user.id
   end
 
-  def session_expired?
-    return true if session[:user_profile].blank?
-
-    expires_at < Time.zone.now.to_i
-  end
-
-  def expires_at
-    session[:user_profile]["exp"].to_i
-  end
-
-  def organisation_account?
-    manage_team_url.present?
-  end
-
-  helper_method :current_user, :organisation, :manage_team_url, :update_profile_url, :organisation_account?
+  helper_method :current_user, :organisation, :user_session
 end

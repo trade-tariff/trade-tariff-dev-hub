@@ -1,19 +1,21 @@
 RSpec.shared_context "with authenticated user" do
-  let(:status) { :authorised }
   let(:current_user) { create(:user, organisation:) }
-  let(:organisation) { create(:organisation, status:) }
-
-  let(:request_session) do
-    {
-      user_id: current_user.id,
-      organisation_id: organisation.id,
-      user_profile: {
+  let(:organisation) { create(:organisation) }
+  let(:user_session) do
+    create(
+      :session,
+      user: current_user,
+      raw_info: {
         "bas:groupProfile" => "https://example.com/manage-team",
         "profile" => "https://example.com/update-profile",
         "exp" => (Time.zone.now + 1.hour).to_i,
         "email" => current_user.email_address,
       },
-    }.merge(extra_session)
+    )
+  end
+
+  let(:request_session) do
+    { token: user_session.token }.merge(extra_session)
   end
 
   let(:extra_session) { {} }
@@ -29,13 +31,7 @@ RSpec.shared_context "with authenticated user" do
       cookies_key_value = env["action_dispatch.cookies"].as_json.first
       cookies[cookies_key_value.first] = cookies_key_value.last
     else
-      session[:user_id] = current_user.id
-      session[:organisation_id] = organisation.id
-      session[:user_profile] = {
-        "bas:groupProfile" => "https://example.com/manage-team",
-        "profile" => "https://example.com/update-profile",
-        "exp" => (Time.zone.now + 1.hour).to_i,
-      }
+      session[:token] = user_session.token
     end
   end
 end
