@@ -49,6 +49,7 @@ RSpec.describe "Steps", type: :request do
       get user_verification_step_path("details")
       expect(response.body).to include("Register for the FPO Commodity Code Identification Tool")
       expect(response).to render_template("user_verification/steps/_details")
+      expect(response.body).to include(user_session.email_address)
     end
   end
 

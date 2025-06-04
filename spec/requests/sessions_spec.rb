@@ -22,6 +22,7 @@ RSpec.describe "Sessions", type: :request do
             "bas:groupId" => organisation_id,
             "email" => current_user.email_address,
             "sub" => user_id,
+            "exp" => 1.hour.from_now.to_i,
           },
         },
       )
@@ -30,6 +31,10 @@ RSpec.describe "Sessions", type: :request do
     let(:user_id) { current_user.user_id }
     let(:organisation_id) { current_user.organisation.organisation_id }
 
+    it "creates a Session" do
+      expect { get auth_redirect_path }.to change(Session, :count).by(1)
+    end
+
     it "redirects the user to see their api keys" do
       get auth_redirect_path
       expect(response).to redirect_to(api_keys_path)
@@ -37,9 +42,7 @@ RSpec.describe "Sessions", type: :request do
 
     it "sets the session", :aggregate_failures do
       get auth_redirect_path
-      expect(session[:user_id]).to be_a_uuid
-      expect(session[:organisation_id]).to be_a_uuid
-      expect(session[:user_profile]).to eq(omniauth_auth_hash.extra.raw_info)
+      expect(session[:token]).to be_a_uuid
     end
 
     it "does not create a new user implicitly for existing user" do
@@ -102,11 +105,13 @@ RSpec.describe "Sessions", type: :request do
   describe "GET /auth/destroy" do
     include_context "with authenticated user"
 
+    it "destroys the Session" do
+      expect { get logout_path }.to change(Session, :count).by(-1)
+    end
+
     it "clears the session", :aggregate_failures do
       get logout_path
-      expect(session[:user_id]).to be_nil
-      expect(session[:organisation_id]).to be_nil
-      expect(session[:user_profile]).to be_nil
+      expect(session[:token]).to be_nil
     end
 
     it "redirects to the provider logout path" do

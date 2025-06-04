@@ -19,7 +19,7 @@ module UserVerification
 
     def wizard_context
       {
-        email_address: user_profile["email"],
+        email_address: user_session.email_address,
         current_user: current_user,
       }
     end
