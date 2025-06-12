@@ -6,11 +6,11 @@ class DeleteApiKey
   def call(api_key)
     result = @api_gateway_client.delete_api_key(api_key: api_key.api_gateway_id)
 
-    api_key.destroy! if result.successful?
+    api_key.destroy! if result.successful? && api_key.persisted?
 
     api_key
   rescue StandardError => e
-    Rails.logger.error("Error updating API key: #{e.message}")
+    Rails.logger.error("Error deleting API key: #{e.message}")
 
     raise
   end

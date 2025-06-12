@@ -17,6 +17,14 @@ RSpec.describe DeleteApiKey do
       end
     end
 
+    context "when the api key does not exist in the database" do
+      before { api_gateway_client.stub_responses(:delete_api_key) }
+
+      it "does not try to delete the api key in the database" do
+        expect { delete_api_key.call(api_key) }.not_to change(ApiKey, :count)
+      end
+    end
+
     context "when the result of deleting in api gateway is unsuccessful" do
       before { api_gateway_client.stub_responses(:delete_api_key, "error") }
 
