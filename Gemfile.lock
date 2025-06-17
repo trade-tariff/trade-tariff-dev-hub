@@ -273,6 +273,9 @@ GEM
       nio4r (~> 2.0)
     racc (1.8.1)
     rack (3.1.16)
+    rack-cors (3.0.0)
+      logger
+      rack (>= 3.0.14)
     rack-oauth2 (2.2.1)
       activesupport
       attr_required
@@ -397,13 +400,11 @@ GEM
       sorbet-runtime (>= 0.5.10782)
     ruby-lsp-rails (0.4.6)
       ruby-lsp (>= 0.24.0, < 0.25.0)
-    ruby-lsp-rspec (0.1.25)
-      ruby-lsp (~> 0.24.0)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
     shoulda-matchers (6.5.0)
       activesupport (>= 5.2.0)
-    sorbet-runtime (0.5.12176)
+    sorbet-runtime (0.5.12184)
     stringio (3.1.7)
     swd (2.0.3)
       activesupport (>= 3)
@@ -471,13 +472,13 @@ DEPENDENCIES
   pg
   propshaft
   pry-rails
-  puma (>= 5.0)
+  puma
+  rack-cors
   rails
   rails-controller-testing
   rspec-rails
   rubocop-govuk
   ruby-lsp-rails
-  ruby-lsp-rspec
   shoulda-matchers
   webmock
   wizard_steps

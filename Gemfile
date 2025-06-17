@@ -12,7 +12,8 @@ gem "ostruct"
 gem "paper_trail"
 gem "pg"
 gem "propshaft"
-gem "puma", ">= 5.0"
+gem "puma"
+gem "rack-cors"
 
 # GovUK
 gem "govuk-components"
@@ -40,7 +41,6 @@ group :development do
   gem "amazing_print"
   gem "rubocop-govuk", require: false
   gem "ruby-lsp-rails"
-  gem "ruby-lsp-rspec"
 end
 
 group :test do

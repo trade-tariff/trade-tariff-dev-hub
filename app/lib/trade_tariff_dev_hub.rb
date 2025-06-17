@@ -52,5 +52,9 @@ module TradeTariffDevHub
     def send_emails?
       ENV.fetch("SEND_EMAILS", "true") == "true"
     end
+
+    def cors_host
+      ENV.fetch("GOVUK_APP_DOMAIN", "*").sub(/https?:\/\//, "")
+    end
   end
 end
