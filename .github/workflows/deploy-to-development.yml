@@ -21,9 +21,18 @@ jobs:
     with:
       app-name: tariff-dev-hub
       environment: development
+      test-flavour: fpo
     secrets:
       scp-password: ${{ secrets.SCP_PASSWORD }}
       scp-username: ${{ secrets.SCP_USERNAME }}
       slack-webhook: ${{ secrets.SLACK_WEBHOOK }}
       ssh-key: ${{ secrets.PRIVATE_SSH_KEY }}
       test-flavour: fpo
+
+  start-services:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: trade-tariff/trade-tariff-tools/.github/actions/start-services@main
+        with:
+          service-names: dev-hub
+          environment: development
