@@ -9,13 +9,20 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, nixpkgs-ruby }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      nixpkgs-ruby,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = import nixpkgs {
           system = system;
           config.allowUnfree = true;
-          overlays = [nixpkgs-ruby.overlays.default];
+          overlays = [ nixpkgs-ruby.overlays.default ];
         };
 
         rubyVersion = builtins.head (builtins.split "\n" (builtins.readFile ./.ruby-version));
@@ -33,7 +40,7 @@
           "--with-libyaml-lib=${libyaml.out}/lib"
         ];
         postgresqlBuildFlags = with pkgs; [
-          "--with-pg-config=${lib.getDev postgresql_16}/bin/pg_config"
+          "--with-pg-config=${lib.getDev postgresql.pg_config}/bin/pg_config"
         ];
         pg-environment-variables = ''
           export PGDATA=$PWD/.nix/postgres/data
@@ -53,7 +60,8 @@
         '';
         init = pkgs.writeScriptBin "init" ''cd terraform && terraform init -backend=false'';
         update-providers = pkgs.writeScriptBin "update-providers" ''cd terraform && terraform init -backend=false -reconfigure -upgrade'';
-      in {
+      in
+      {
         devShells.default = pkgs.mkShell {
           shellHook = ''
             export GEM_HOME=$PWD/.nix/ruby/$(${ruby}/bin/ruby -e "puts RUBY_VERSION")
@@ -62,13 +70,9 @@
             export GEM_PATH=$GEM_HOME
             export PATH=$GEM_HOME/bin:$PATH
 
-            export BUNDLE_BUILD__PG="${
-              builtins.concatStringsSep " " postgresqlBuildFlags
-            }"
+            export BUNDLE_BUILD__PG="${builtins.concatStringsSep " " postgresqlBuildFlags}"
 
-            export BUNDLE_BUILD__PSYCH="${
-              builtins.concatStringsSep " " psychBuildFlags
-            }"
+            export BUNDLE_BUILD__PSYCH="${builtins.concatStringsSep " " psychBuildFlags}"
 
             ${pg-environment-variables}
           '';
@@ -76,13 +80,12 @@
           buildInputs = [
             init
             lint
-            pkgs.circleci-cli
-            pkgs.yarn
             postgresql
             postgresql-start
             ruby
             update-providers
           ];
         };
-      });
+      }
+    );
 }
