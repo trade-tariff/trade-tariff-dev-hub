@@ -9,7 +9,7 @@ class DecodeJwt
               else
                 config = {
                   algorithms: %w[RS256],
-                  jwks: { keys: jwks_keys },
+                  jwks: { keys: identity_cognito_jwks_keys },
                   iss: ISSUER,
                   verify_iss: true,
                 }
@@ -22,7 +22,7 @@ class DecodeJwt
 
 private
 
-  delegate :jwks_keys, to: TradeTariffDevHub
+  delegate :identity_cognito_jwks_keys, to: TradeTariffDevHub
 
   attr_reader :token
 end

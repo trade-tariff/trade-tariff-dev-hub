@@ -15,7 +15,7 @@ class VerifyToken
   # - Verified user not in required group
   def call
     return log_reason(:no_token) if @token.blank?
-    return log_reason(:no_keys) if jwks_keys.nil? && !Rails.env.development?
+    return log_reason(:no_keys) if identity_cognito_jwks_keys.nil? && !Rails.env.development?
 
     decrypted = DecryptToken.new(token).call
     decoded = DecodeJwt.new(decrypted).call
@@ -32,7 +32,7 @@ class VerifyToken
 
 private
 
-  delegate :jwks_keys, to: TradeTariffDevHub
+  delegate :identity_cognito_jwks_keys, to: TradeTariffDevHub
 
   attr_reader :token
 
