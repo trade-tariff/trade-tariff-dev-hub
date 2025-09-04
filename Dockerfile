@@ -1,13 +1,12 @@
 # Build compilation image
-FROM ruby:3.4.2-alpine3.21 AS builder
+FROM ruby:3.4.4-alpine3.21 AS builder
 
 # The application runs from /app
 WORKDIR /app
 
 # build-base: compilation tools for bundle
 # git: used to pull gems from git
-# yarn: node package manager
-RUN apk add --update --no-cache build-base git yarn tzdata yaml-dev postgresql-dev && \
+RUN apk add --update --no-cache build-base git tzdata yaml-dev postgresql-dev && \
   cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
   echo "Europe/London" > /etc/timezone
 
@@ -16,17 +15,12 @@ COPY .ruby-version Gemfile Gemfile.lock /app/
 RUN bundle config set without 'development test'
 RUN bundle install --jobs=4 --no-binstubs
 
-# Install node packages defined in package.json, including webpack
-COPY package.json yarn.lock /app/
-RUN yarn install --frozen-lockfile
-
 # Copy all files to /app (except what is defined in .dockerignore)
 COPY . /app/
 
 ENV GOVUK_APP_DOMAIN=localhost \
   GOVUK_WEBSITE_ROOT=http://localhost/ \
   RAILS_ENV=production \
-  NODE_OPTIONS="--openssl-legacy-provider" \
   SECRET_KEY_BASE=secret
 
 RUN bundle exec rails assets:precompile
@@ -41,7 +35,7 @@ RUN rm -rf node_modules log tmp && \
   find /usr/local/bundle/gems -name "*.html" -delete
 
 # Build runtime image
-FROM ruby:3.4.2-alpine3.21 AS production
+FROM ruby:3.4.4-alpine3.21 AS production
 
 RUN apk add --update --no-cache tzdata postgresql-client && \
   cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
