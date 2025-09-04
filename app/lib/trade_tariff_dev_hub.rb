@@ -73,21 +73,22 @@ module TradeTariffDevHub
       @identity_consumer ||= ENV.fetch("IDENTITY_CONSUMER", "portal")
     end
 
-    def jwks_keys
-      Rails.cache.fetch("cognito_jwks_keys", expires_in: 1.hour) do
-        response = Faraday.get(jwks_url)
-        JSON.parse(response.body)["keys"] if response.success?
+    def identity_cognito_jwks_keys
+      Rails.cache.fetch("identity_cognito_jwks_keys", expires_in: 1.hour) do
+        response = Faraday.get(identity_cognito_jwks_url)
+
+        return JSON.parse(response.body)["keys"] if response.success?
+
+        Rails.logger.error("Failed to fetch JWKS keys: #{response.status} #{response.body}")
+
+        nil
       end
     end
 
   private
 
-    def jwks_url
-      @jwks_url ||= "#{cognito_issuer_url}/.well-known/jwks.json"
-    end
-
-    def cognito_issuer_url
-      @cognito_issuer_url ||= "https://cognito-idp.#{ENV['AWS_REGION']}.amazonaws.com/#{ENV['COGNITO_USER_POOL_ID']}"
+    def identity_cognito_jwks_url
+      @identity_cognito_jwks_url ||= ENV["IDENTITY_COGNITO_JWKS_URL"]
     end
   end
 end
