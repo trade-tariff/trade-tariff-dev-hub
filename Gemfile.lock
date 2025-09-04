@@ -460,6 +460,7 @@ DEPENDENCIES
   brakeman
   dotenv-rails
   factory_bot_rails
+  faraday
   govuk-components
   govuk_design_system_formbuilder
   hashie

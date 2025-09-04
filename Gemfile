@@ -6,6 +6,7 @@ gem "rails"
 
 gem "aws-sdk-apigateway"
 gem "aws-sdk-dynamodb"
+gem "faraday"
 gem "hashie"
 gem "importmap-rails"
 gem "ostruct"
