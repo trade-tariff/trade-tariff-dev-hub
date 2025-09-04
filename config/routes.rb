@@ -9,6 +9,12 @@ Rails.application.routes.draw do
   get '/auth/profile-redirect', to: redirect(path: '/dashboard'), as: :profile_redirect
   get '/auth/group-redirect', to: redirect(path: '/dashboard'), as: :group_redirect
 
+  resources :users, only: %i[new] do
+    collection do
+      get :placeholder, as: :placeholder
+    end
+  end
+
   get "dashboard", to: "api_keys#index", as: :api_keys
   get "dashboard/new", to: "api_keys#new", as: :api_keys_new
   post "dashboard/create", to: "api_keys#create", as: :api_keys_create

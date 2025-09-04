@@ -56,5 +56,38 @@ module TradeTariffDevHub
     def cors_host
       ENV.fetch("GOVUK_APP_DOMAIN", "*").sub(/https?:\/\//, "")
     end
+
+    def identity_consumer_url
+      @identity_consumer_url ||= URI.join(identity_base_url, identity_consumer).to_s
+    end
+
+    def identity_base_url
+      ENV.fetch("IDENTITY_BASE_URL", "http://localhost:3005")
+    end
+
+    def identity_encryption_secret
+      ENV["IDENTITY_ENCRYPTION_SECRET"]
+    end
+
+    def identity_consumer
+      @identity_consumer ||= ENV.fetch("IDENTITY_CONSUMER", "portal")
+    end
+
+    def jwks_keys
+      Rails.cache.fetch("cognito_jwks_keys", expires_in: 1.hour) do
+        response = Faraday.get(jwks_url)
+        JSON.parse(response.body)["keys"] if response.success?
+      end
+    end
+
+  private
+
+    def jwks_url
+      @jwks_url ||= "#{cognito_issuer_url}/.well-known/jwks.json"
+    end
+
+    def cognito_issuer_url
+      @cognito_issuer_url ||= "https://cognito-idp.#{ENV['AWS_REGION']}.amazonaws.com/#{ENV['COGNITO_USER_POOL_ID']}"
+    end
   end
 end
