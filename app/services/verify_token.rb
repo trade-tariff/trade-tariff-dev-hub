@@ -40,16 +40,16 @@ private
     case reason
     when :no_token
       Rails.logger.info("No Cognito id token provided")
-    when :no_keys
-      Rails.logger.info("No JWKS keys available to verify Cognito id token")
     when :expired
       Rails.logger.info("Cognito id token has expired")
     when :invalid
       Rails.logger.info("Cognito id token is invalid")
+    when :no_keys
+      Rails.logger.error("No JWKS keys available to verify Cognito id token")
     when :not_in_group
-      Rails.logger.info("Cognito id token user not in required group")
+      Rails.logger.error("Cognito id token user not in required group")
     when :other
-      Rails.logger.info("An error occurred while verifying Cognito id token: #{error.message}")
+      Rails.logger.error("An error occurred while verifying Cognito id token: #{error.message}")
     end
 
     nil
