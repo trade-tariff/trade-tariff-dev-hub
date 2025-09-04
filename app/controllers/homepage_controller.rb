@@ -1,3 +1,5 @@
 class HomepageController < ApplicationController
-  def index; end
+  def index
+    redirect_to placeholder_users_path
+  end
 end

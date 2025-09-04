@@ -2,7 +2,18 @@ class UsersController < ApplicationController
   before_action :authenticate!, only: %i[placeholder]
 
   def new; end
-  def placeholder; end
+
+  def placeholder
+    cognito_secret_struct = Struct.new(:client_id, :client_secret, :client_name, keyword_init: true)
+
+    @client_secrets = 3.times.map do |i|
+      cognito_secret_struct.new(
+        client_id: SecureRandom.uuid,
+        client_secret: SecureRandom.base64(32),
+        client_name: "Client #{Faker::App.name} #{i + 1}",
+      )
+    end
+  end
 
 private
 

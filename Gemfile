@@ -17,6 +17,7 @@ gem "puma"
 gem "rack-cors"
 
 # GovUK
+gem "faker"
 gem "govuk-components"
 gem "govuk_design_system_formbuilder"
 gem "notifications-ruby-client"
