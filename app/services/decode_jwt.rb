@@ -22,13 +22,13 @@ class DecodeJwt
 
 private
 
-  delegate :identity_cognito_jwks_keys, to: TradeTariffDevHub
+  delegate :identity_cognito_jwks_keys, :identity_cognito_jwks_url, to: TradeTariffDevHub
 
   attr_reader :token
 
   def issuer
-    uri = URI(identity_cognito_jwks_keys)
-    pool_id = uri.path.split("/").first
-    "#{uri.host}/#{pool_id}"
+    URI(identity_cognito_jwks_url).tap { |uri|
+      uri.path = uri.path.split("/").find(&:present?)
+    }.to_s
   end
 end

@@ -85,8 +85,6 @@ module TradeTariffDevHub
       end
     end
 
-  private
-
     def identity_cognito_jwks_url
       @identity_cognito_jwks_url ||= ENV["IDENTITY_COGNITO_JWKS_URL"]
     end
