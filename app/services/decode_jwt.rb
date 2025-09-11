@@ -28,7 +28,7 @@ private
 
   def issuer
     URI(identity_cognito_jwks_url).tap { |uri|
-      uri.path = uri.path.split("/").find(&:present?)
+      uri.path = "/#{uri.path.split('/').find(&:present?)}"
     }.to_s
   end
 end
