@@ -38,7 +38,6 @@ private
 
       Rails.logger.debug("Finding or creating user from token payload...")
       User.from_passwordless_payload!(decoded_token) if decoded_token
-      Rails.logger.debug("Current user set: #{@current_user.inspect}")
     end
   end
 end
