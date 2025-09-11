@@ -27,7 +27,7 @@ class Organisation < ApplicationRecord
       Rails.logger.debug("Finding or associating implicit organisation to user #{user.email_address}")
 
       if user.organisation.blank?
-        find_or_initialize_by(name: user.email_address).tap do |organisation|
+        find_or_initialize_by(organisation_name: user.email_address).tap do |organisation|
           if organisation.new_record?
             Rails.logger.debug("No organisation found for user #{user.email_address}, creating implicit organisation")
             # TODO: This is for backwards compatibility, remove later when organisations are explicitly managed by the dev portal and not the SCP provider.
