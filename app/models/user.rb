@@ -28,13 +28,17 @@ class User < ApplicationRecord
 
       Organisation.find_or_associate_implicit_organisation_to(user) if user.organisation.nil?
 
+      user.save!
+
       user
     end
 
   private
 
     def dummy_user!
-      User.find_or_create_by(user_id: "dummy_user", email_address: "dummy@user.com")
+      User.find_or_create_by!(user_id: "dummy_user", email_address: "dummy@user.com").tap do |user|
+        Organisation.find_or_associate_implicit_organisation_to(user)
+      end
     end
   end
 end

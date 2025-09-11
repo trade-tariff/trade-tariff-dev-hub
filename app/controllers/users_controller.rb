@@ -30,7 +30,8 @@ private
     @current_user ||= begin
       token = cookies[:id_token]
       decoded_token = VerifyToken.new(token).call
-      User.from_passwordless_payload!(payload) if decoded_token
+
+      User.from_passwordless_payload!(decoded_token) if decoded_token
     end
   end
 end
