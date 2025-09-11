@@ -32,7 +32,7 @@ class CreateApiKey
       if api_key.api_gateway_id
         begin
           api_gateway_client.delete_api_key(api_key_id: api_gateway_id)
-          Rails.logger.info("Deleted API key #{api_key.api_gateway_id} from AWS due to error")
+          Rails.logger.debug("Deleted API key #{api_key.api_gateway_id} from AWS due to error")
         rescue StandardError => delete_error
           Rails.logger.error("Failed to delete API key #{api_key.api_gateway_id} from AWS: #{delete_error.message}")
         end

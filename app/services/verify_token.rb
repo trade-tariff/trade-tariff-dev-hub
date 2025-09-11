@@ -39,11 +39,11 @@ private
   def log_reason(reason, error = nil)
     case reason
     when :no_token
-      Rails.logger.info("No Cognito id token provided")
+      Rails.logger.debug("No Cognito id token provided")
     when :expired
-      Rails.logger.info("Cognito id token has expired")
+      Rails.logger.debug("Cognito id token has expired")
     when :invalid
-      Rails.logger.info("Cognito id token is invalid")
+      Rails.logger.debug("Cognito id token is invalid")
     when :no_keys
       Rails.logger.error("No JWKS keys available to verify Cognito id token")
     when :not_in_group

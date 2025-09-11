@@ -24,7 +24,12 @@ class User < ApplicationRecord
     def from_passwordless_payload!(token)
       return dummy_user! if Rails.env.development?
 
+      Rails.logger.debug("Finding or creating user from passwordless payload...")
+
       user = User.find_or_initialize_by(user_id: token["sub"], email_address: token["email"])
+
+      Rails.logger.debug("User found or initialized: #{user.inspect}")
+      Rails.logger.debug("User is new record: #{user.new_record?}")
 
       Organisation.find_or_associate_implicit_organisation_to(user) if user.organisation.nil?
 
@@ -36,6 +41,7 @@ class User < ApplicationRecord
   private
 
     def dummy_user!
+      Rails.logger.debug("Creating or finding dummy user in development environment")
       User.find_or_create_by!(user_id: "dummy_user", email_address: "dummy@user.com").tap do |user|
         Organisation.find_or_associate_implicit_organisation_to(user)
       end
