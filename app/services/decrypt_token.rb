@@ -6,19 +6,18 @@ class DecryptToken
   def call
     return token if Rails.env.development?
 
-    crypt.decrypt_and_verify(token)
+    self.class.crypt.decrypt_and_verify(token)
+  end
+
+  def self.crypt
+    @crypt ||= begin
+      key = ActiveSupport::KeyGenerator.new(TradeTariffDevHub.identity_encryption_secret).generate_key("salt", 32)
+
+      ActiveSupport::MessageEncryptor.new(key)
+    end
   end
 
 private
 
   attr_reader :token
-
-  def crypt
-    @crypt ||= begin
-      secret = TradeTariffDevHub.identity_encryption_secret
-      key = ActiveSupport::KeyGenerator.new(secret).generate_key("salt", 32)
-
-      ActiveSupport::MessageEncryptor.new(key)
-    end
-  end
 end

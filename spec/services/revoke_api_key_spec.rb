@@ -1,5 +1,3 @@
-require "rails_helper"
-
 RSpec.describe RevokeApiKey do
   subject(:revoke_api_key) { described_class.new(api_gateway_client) }
 

@@ -88,5 +88,11 @@ module TradeTariffDevHub
     def identity_cognito_jwks_url
       @identity_cognito_jwks_url ||= ENV["IDENTITY_COGNITO_JWKS_URL"]
     end
+
+    def identity_cognito_issuer_url
+      URI(identity_cognito_jwks_url).tap { |uri|
+        uri.path = "/#{uri.path.split('/').find(&:present?)}"
+      }.to_s
+    end
   end
 end

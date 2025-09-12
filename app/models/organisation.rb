@@ -24,25 +24,16 @@ class Organisation < ApplicationRecord
     end
 
     def find_or_associate_implicit_organisation_to(user)
-      Rails.logger.debug("Finding or associating implicit organisation to user #{user.email_address}")
-
       if user.organisation.blank?
-        find_or_initialize_by(organisation_name: user.email_address).tap do |organisation|
-          if organisation.new_record?
-            Rails.logger.debug("No organisation found for user #{user.email_address}, creating implicit organisation")
-            # TODO: This is for backwards compatibility, remove later when organisations are explicitly managed by the dev portal and not the SCP provider.
-            organisation.organisation_id = SecureRandom.uuid.upcase
-            organisation.description = "Default implicit organisation for initial user #{user.email_address}"
-            organisation.status = :unregistered
-            organisation.save!
-            user.organisation = organisation
-            user.save!
-            Rails.logger.debug("Associated new organisation #{organisation.inspect} to user #{user.email_address}")
-          end
+        new(organisation_name: user.email_address).tap do |organisation|
+          # TODO: This is for backwards compatibility, remove later when organisations are explicitly managed by the dev portal and not the SCP provider.
+          organisation.organisation_id = SecureRandom.uuid.upcase
+          organisation.description = "Default implicit organisation for initial user #{user.email_address}"
+          organisation.status = :unregistered
+          organisation.save!
+          user.organisation = organisation
+          user.save!
         end
-      else
-        Rails.logger.debug("User #{user.email_address} already has an organisation associated")
-        Rails.logger.debug("Organisation: #{user.organisation.inspect}")
       end
     end
   end

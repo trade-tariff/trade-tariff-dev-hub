@@ -15,7 +15,7 @@ class VerifyToken
   # - Verified user not in required group
   def call
     return log_reason(:no_token) if @token.blank?
-    return log_reason(:no_keys) if identity_cognito_jwks_keys.nil? && !Rails.env.development?
+    return log_reason(:no_keys) unless has_keys?
 
     decrypted = DecryptToken.new(token).call
     decoded = DecodeJwt.new(decrypted).call
@@ -53,5 +53,11 @@ private
     end
 
     nil
+  end
+
+  def has_keys?
+    return true if Rails.env.development?
+
+    identity_cognito_jwks_keys.present?
   end
 end

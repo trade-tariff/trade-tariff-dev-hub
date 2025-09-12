@@ -18,25 +18,14 @@ class UsersController < ApplicationController
 private
 
   def authenticate!
-    Rails.logger.debug("Authenticating user...")
-    if current_user.nil?
-      Rails.logger.debug("No user found, redirecting to identity provider... #{TradeTariffDevHub.identity_consumer_url}")
-      redirect_to(
-        TradeTariffDevHub.identity_consumer_url,
-        allow_other_host: true,
-      )
-    end
+    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if current_user.nil?
   end
 
   def current_user
     @current_user ||= begin
-      Rails.logger.debug("Finding current user from token...")
       token = cookies[:id_token]
-      Rails.logger.debug("Token found: #{token}")
       decoded_token = VerifyToken.new(token).call
-      Rails.logger.debug("Decoded token: #{decoded_token}")
 
-      Rails.logger.debug("Finding or creating user from token payload...")
       User.from_passwordless_payload!(decoded_token) if decoded_token
     end
   end
