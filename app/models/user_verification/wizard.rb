@@ -57,7 +57,7 @@ module UserVerification
     end
 
     def send_registration_email_now
-      Rails.logger.debug("Sending registration email to #{current_user.email_address}")
+      Rails.logger.info("Sending registration email to #{current_user.email_address}")
 
       notifier_service.call(
         current_user.email_address,
@@ -67,7 +67,7 @@ module UserVerification
     end
 
     def send_support_email_now
-      Rails.logger.debug("Sending support email to #{application_support_email}")
+      Rails.logger.info("Sending support email to #{application_support_email}")
 
       organisation = current_user.organisation
 
