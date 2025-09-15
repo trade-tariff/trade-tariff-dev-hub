@@ -22,12 +22,12 @@
 
         if api_key.enabled
           row.with_cell do
-            link_to 'Revoke', api_keys_revoke_path(api_key.id), class: 'govuk-link'
+            link_to 'Revoke', revoke_api_key_path(api_key.id), class: 'govuk-link'
           end
         else
           row.with_cell do
             if TradeTariffDevHub.deletion_enabled?
-              link_to 'Delete', api_keys_delete_path(api_key.id), class: 'govuk-link'
+              link_to 'Delete', delete_api_key_path(api_key.id), class: 'govuk-link'
             end
           end
         end
@@ -36,9 +36,9 @@
   end
 end %>
 
-<%= govuk_button_link_to('Create new key', api_keys_new_path, secondary: true) %>
+<%= govuk_button_link_to('Create new key', new_api_key_path, secondary: true) %>
 
 <h2 class="govuk-heading-m">If you need help</h2>
-<p class="govuk-body">If you have any further queries relating to the developer hub contact:
+<p class="govuk-body">If you have any further queries relating to the developer portal contact:
   <%= mail_to 'hmrc-trade-tariff-support-g@digital.hmrc.gov.uk', 'hmrc-trade-tariff-support-g@digital.hmrc.gov.uk', class: 'govuk-link' %>.
 </p>

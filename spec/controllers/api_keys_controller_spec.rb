@@ -1,5 +1,3 @@
-require "rails_helper"
-
 RSpec.describe ApiKeysController, type: :controller do
   include_context "with authenticated user"
 

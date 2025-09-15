@@ -6,18 +6,25 @@ Rails.application.routes.draw do
   get '/auth/redirect', to: 'sessions#handle_redirect'
   get '/auth/failure', to: 'sessions#failure'
   get '/auth/logout', to: 'sessions#destroy', as: :logout
-  get '/auth/profile-redirect', to: redirect(path: '/dashboard'), as: :profile_redirect
-  get '/auth/group-redirect', to: redirect(path: '/dashboard'), as: :group_redirect
+  get '/auth/profile-redirect', to: redirect(path: '/api_keys'), as: :profile_redirect
+  get '/auth/group-redirect', to: redirect(path: '/api_keys'), as: :group_redirect
 
-  get "dashboard", to: "api_keys#index", as: :api_keys
-  get "dashboard/new", to: "api_keys#new", as: :api_keys_new
-  post "dashboard/create", to: "api_keys#create", as: :api_keys_create
-  get "dashboard/:id/revoke", to: "api_keys#update", as: :api_keys_revoke
-  patch "dashboard/:id/revoke", to: "api_keys#revoke"
+  resources :users, only: %i[new] do
+    collection do
+      get :placeholder, as: :placeholder
+    end
+  end
 
-  if TradeTariffDevHub.deletion_enabled?
-    get "dashboard/:id/delete", to: "api_keys#update", as: :api_keys_delete
-    delete "dashboard/:id/delete", to: "api_keys#delete"
+  resources :api_keys, only: %i[index new create] do
+    member do
+      get :revoke, to: 'api_keys#update', as: :revoke
+      patch :revoke
+
+      if TradeTariffDevHub.deletion_enabled?
+        get :delete, to: 'api_keys#update', as: :delete
+        delete :delete
+      end
+    end
   end
 
   namespace :user_verification do

@@ -1,5 +1,3 @@
-require "rails_helper"
-
 RSpec.describe Organisation, type: :model do
   subject(:organisation) { build(:organisation) }
 
@@ -44,6 +42,30 @@ RSpec.describe Organisation, type: :model do
       end
 
       it { expect { from_profile! }.to change(described_class, :count).by(1) }
+    end
+  end
+
+  describe ".find_or_associate_implicit_organisation_to" do
+    context "when the user already has an organisation" do
+      subject(:find_or_associate_implicit_organisation_to) { described_class.find_or_associate_implicit_organisation_to(user) }
+
+      let!(:user) { create(:user, organisation: create(:organisation)) }
+
+      it { expect { find_or_associate_implicit_organisation_to }.not_to change(described_class, :count) }
+    end
+
+    context "when the user does not have an organisation" do
+      subject(:find_or_associate_implicit_organisation_to) { described_class.find_or_associate_implicit_organisation_to(user) }
+
+      let!(:user) { build(:user, organisation: nil) }
+
+      it "creates and associates a new implicit organisation to the user", :aggregate_failures do
+        expect { find_or_associate_implicit_organisation_to }.to change(described_class, :count).by(1)
+        expect(user.organisation.organisation_name).to eq(user.email_address)
+        expect(user.organisation.organisation_id).not_to be_nil
+        expect(user.organisation.description).to include("Default implicit organisation for initial user #{user.email_address}")
+        expect(user.organisation.status).to eq("unregistered")
+      end
     end
   end
 end

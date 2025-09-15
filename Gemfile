@@ -6,6 +6,7 @@ gem "rails"
 
 gem "aws-sdk-apigateway"
 gem "aws-sdk-dynamodb"
+gem "faraday"
 gem "hashie"
 gem "importmap-rails"
 gem "ostruct"
@@ -16,6 +17,7 @@ gem "puma"
 gem "rack-cors"
 
 # GovUK
+gem "faker"
 gem "govuk-components"
 gem "govuk_design_system_formbuilder"
 gem "notifications-ruby-client"
@@ -45,4 +47,9 @@ end
 
 group :test do
   gem "rails-controller-testing"
+end
+
+group :production do
+  gem "lograge"
+  gem "logstash-event"
 end
