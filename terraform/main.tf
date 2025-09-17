@@ -28,7 +28,8 @@ module "service" {
   task_role_policy_arns      = [aws_iam_policy.task.arn]
   enable_ecs_exec            = true
 
-  init_container            = true
+  container_definition_kind = "db-backed"
+
   init_container_entrypoint = [""]
   init_container_command = [
     "/bin/sh",
