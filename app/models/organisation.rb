@@ -5,8 +5,6 @@ class Organisation < ApplicationRecord
   has_many :api_keys, dependent: :destroy
   has_and_belongs_to_many :roles
 
-  validate :no_duplicate_roles
-
   enum :status, {
     unregistered: 0,
     authorised: 1,
@@ -34,7 +32,7 @@ class Organisation < ApplicationRecord
           organisation.description = "Default implicit organisation for initial user #{user.email_address}"
           organisation.status = :unregistered
           organisation.save!
-          organisation.assign_standard_read_role!
+          organisation.assign_role!("ott:full")
           user.organisation = organisation
           user.save!
         end
@@ -46,27 +44,12 @@ class Organisation < ApplicationRecord
     roles.exists?(name: role_name)
   end
 
-  Role.role_names.each do |role_name|
-    define_method("has_#{role_name.tr(':', '_')}_role?") do
-      has_role?(role_name)
-    end
+  def assign_role!(role_name)
+    role = Role.find_by!(name: role_name)
 
-    define_method("assign_#{role_name.tr(':', '_')}_role!") do
-      role = Role.find_by(name: role_name)
-      unless roles.include?(role)
-        roles << role
-        save!
-      end
-    end
-  end
-
-private
-
-  def no_duplicate_roles
-    roles.each do |role|
-      if roles.where(id: role.id).size > 1
-        errors.add(:roles, "cannot have duplicate #{role.name}")
-      end
+    unless roles.include?(role)
+      roles << role
+      save!
     end
   end
 end

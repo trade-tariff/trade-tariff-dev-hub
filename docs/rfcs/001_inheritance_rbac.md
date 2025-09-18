@@ -14,14 +14,14 @@ The developer portal will encapsulate management of various kinds of credentials
 
 ## Motivation and Rationale
 
-Our goal is to provide differential access to various kinds of user to access various kinds of credential that are capable of accessing variout UK Trade Tariff services.
+Our goal is to provide differential access to various kinds of user to manage API credentials. The access should enable adding roles to provide more access and removing roles to restrict access.
 
 For example, we have users that are strictly Fast Parcel Operators (FPOs) who do not typically need access to APIs for Simplified Process for Internal Market Movements (SPIMM) and vice versa. We also have many public APIs which we desire to be publicly accessible with rate limits with more permissive limits when managed credentials are used.
 
 Ultimately, we want to design an RBAC architecture that gets us as close as possible to the following principles:
 
 1. Simple - Its easy to manage and to add new roles
-2. Extensible - Whatever we build can be easily changed
+2. Extensible - Whatever we build can be easily changed (especially enabling Hierarchical RBAC in future)
 3. Principle of Least Privilege - We clearly demarcate access to specific services and avoid cross-service and cross-resource access for granular permissions
 4. Zero Trust - We always verify whether the current organisation has access to the given resource at the correct access level
 
@@ -29,7 +29,7 @@ Ultimately, we want to design an RBAC architecture that gets us as close as poss
 
 ### Flexible Flat RBAC
 
-From the perspective of simple I think it makes sense to not diverge too far from a Flat RBAC (e.g. direct assignment of users to roles) but we also want a degree of flexibility so would benefit from being able to compose sets of permissions that can be inherited from. We can achieve extensibility by building out role granularity that makes composition of permission sets later easier. And can achieve a zero trust setup by making sure that access to each of the different services is part of the granularity of the permissions.
+Flat RBAC is the simplest form of RBAC where users are directly assigned to roles (in our case via their organisation). There is no inheritance of permissions from other roles. Each role permits access to a specific resource at a specific access level. These roles are managed by system administrators and automatically assigned for the most part.
 
 The idea is that we have a table for `roles` that is associated to organisations via an `organisations_roles` table. At the point of asking the question about whether the current user has access to manage a given resource we will check the database for that users' roles.
 
@@ -52,14 +52,13 @@ The idea is that we have a table for `roles` that is associated to organisations
  updated_at  | timestamp(6) without time zone |           | not null |
 ```
 
-The role names themselves will need to conform to a standard structure that encourages granularity to enable zero trust and I propose that we reflect the service, resource and access levels in each role.
+The role names themselves will need to conform to a standard structure that encourages granularity to enable zero trust and I propose that we reflect the service and access levels in each role.
 
 *Access levels* should be standardised to the following:
 
 - `read` - Can view the resource
-- `write` - Can view, create and update (and occasionally destroy) the resource
-
-*Resources* are arbitary labels that reflect the resource being accessed - typically corresponding to some resource path in the developer portal.
+- `write` - Can create and update (and occasionally destroy) the resource
+- `full` - Can do everything including managing access to the resource
 
 *Services* are the different UK Trade Tariff services that we have - e.g. FPO, SPIMM, Public APIs etc.
 
@@ -68,24 +67,24 @@ The role names themselves will need to conform to a standard structure that enco
 My suggestion is that all role parts should be stored in the `name` column of the `roles` table in the following format:
 
 ```xml
-<service>:<resource>:<access-level>
+<service>:<access-level>
 ```
 
 For example a role that has the ability to manage OTT API keys for the public APIs might be called:
 
-- `ott:apikeys:full`
+- `ott:full`
 
-I propose that we also have some flat roles that do not conform to this format for superuser type access to the portal. These roles should be few and far between and only used when absolutely necessary. Examples of such roles might be:
+I propose that we also have some flat roles that do not conform to this format for systems administrator type access to the portal. These roles should be few and far between and only used when absolutely necessary. Examples of such roles might be:
 
 - `admin`
 
 ### Extended Hierarchical RBAC
 
-The above model can be extended to support Hierarchical RBAC by allowing roles to inherit from other roles and adding a step that allows the authorisation process to derive granular permissions from inherited roles.
+The above model can be extended to support Hierarchical RBAC by allowing roles to inherit from other roles and adding a step that allows the authorisation process to derive inherited permissions for a given set of roles.
 
-If the permissions are granular enough we can compose sets of permissions that can be inherited from. This will make it easier to manage roles and to add new roles in future.
+This approach enables easier management and composibility of roles.
 
-We can achieve this by building out a Directed Acyclic Graph (DAG) of roles using a `roles_inheritance` table.
+We can achieve this by building out a Directed Acyclic Graph (DAG) of roles using a `roles_inheritance` table and extended the API for working out the effective roles for a user.
 
 ```sql
            Table "public.roles_inheritance"

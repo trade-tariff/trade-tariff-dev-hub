@@ -1,10 +1,10 @@
 FactoryBot.define do
   factory :role do
-    name { "standard:read" }
+    name { "ott:full" }
     description { "foo" }
 
     trait :standard_read do
-      name { "standard:read" }
+      name { "ott:full" }
     end
 
     trait :standard_write do

@@ -58,9 +58,6 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-      - run: bundle exec rails db:schema:load
-        env:
-          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/tariff_dev_hub_test"
       - run: bundle exec rspec
         env:
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/tariff_dev_hub_test"

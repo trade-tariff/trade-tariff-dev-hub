@@ -11,29 +11,29 @@ class CreateRoles < ActiveRecord::Migration[8.0]
       VALUES
         (
           gen_random_uuid(),
-          'admin:full',
-          'Full access to all features and settings. Typically used to manage organisations, their users, roles and API keys.',
+          'admin',
+          'Full access to all features and settings of all organisations',
           NOW(),
           NOW()
         ),
         (
           gen_random_uuid(),
-          'fpo:read',
-          'Read-only access to FPO (Fast Parcel Operator) APIs via managed API keys. Preexisting organisations and their users will be assigned this role.',
+          'fpo:full',
+          'Full access to manage FPO (Fast Parcel Operator) API keys',
           NOW(),
           NOW()
         ),
         (
           gen_random_uuid(),
-          'standard:read',
-          'Read-only access to Standard APIs via managed API keys. This will be the default role assigned to new organisations.',
+          'ott:full',
+          'Full access to manage Online Trade Tariff API keys',
           NOW(),
           NOW()
         ),
         (
           gen_random_uuid(),
-          'spimm:read',
-          'Read-only access to SPIMM (Simplified Process for Internal Market Movements) APIs via managed API keys.',
+          'spimm:full',
+          'Full access to manage SPIMM (Simplified Process for Internal Market Movements) API keys',
           NOW(),
           NOW()
         );

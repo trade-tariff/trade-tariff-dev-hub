@@ -14,10 +14,10 @@ RSpec.describe Organisation, type: :model do
   it { expect(PaperTrail.request).to be_enabled_for_model(described_class) }
 
   describe "#has_role?" do
-    subject(:has_role?) { organisation.has_role?("standard:read") }
+    subject(:has_role?) { organisation.has_role?("ott:full") }
 
     context "when the organisation has the role" do
-      before { organisation.assign_standard_read_role! }
+      before { organisation.assign_role!("ott:full") }
 
       it { is_expected.to be true }
     end
@@ -27,19 +27,19 @@ RSpec.describe Organisation, type: :model do
     end
   end
 
-  describe "#assign_standard_read_role!" do
-    subject(:assign_standard_read_role!) { organisation.assign_standard_read_role! }
+  describe "#assign_role!" do
+    subject(:assign_role!) { organisation.assign_role!("ott:full") }
 
     let(:organisation) { create(:organisation) }
 
     context "when the organisation does not have the role" do
-      it { expect { assign_standard_read_role! }.to change(organisation.roles, :count).by(1) }
+      it { expect { assign_role! }.to change(organisation.roles, :count).by(1) }
     end
 
     context "when the organisation already has the role" do
-      before { organisation.assign_standard_read_role! }
+      before { organisation.assign_role!("ott:full") }
 
-      it { expect { assign_standard_read_role! }.not_to change(organisation.roles, :count) }
+      it { expect { assign_role! }.not_to change(organisation.roles, :count) }
     end
   end
 
@@ -99,7 +99,7 @@ RSpec.describe Organisation, type: :model do
 
       it "assigns the correct roles" do
         find_or_associate_implicit_organisation_to
-        expect(user.organisation.roles.pluck(:name)).to eq(%w[standard:read])
+        expect(user.organisation.roles.pluck(:name)).to eq(%w[ott:full])
       end
     end
   end

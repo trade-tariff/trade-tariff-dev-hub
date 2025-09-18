@@ -66,7 +66,7 @@ RSpec.describe User, type: :model do
       it "assigns the correct roles to the organisation" do
         user = from_passwordless_payload!
 
-        expect(user.organisation.roles.pluck(:name)).to eq(%w[standard:read])
+        expect(user.organisation.roles.pluck(:name)).to eq(%w[ott:full])
       end
     end
 
