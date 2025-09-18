@@ -5,6 +5,11 @@ require "rspec/rails"
 
 begin
   ActiveRecord::Migration.maintain_test_schema!
+
+  Role.create!(name: "standard:read", description: "foo") if Role.where(name: "standard:read").empty?
+  Role.create!(name: "fpo:read", description: "foo") if Role.where(name: "fpo:read").empty?
+  Role.create!(name: "spimm:read", description: "foo") if Role.where(name: "spimm:read").empty?
+  Role.create!(name: "admin:full", description: "foo") if Role.where(name: "admin:full").empty?
 rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
