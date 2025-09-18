@@ -62,6 +62,12 @@ RSpec.describe User, type: :model do
       it { expect { from_passwordless_payload! }.to change(described_class, :count).by(1) }
       it { expect { from_passwordless_payload! }.to change(Organisation, :count).by(1) }
       it { is_expected.to have_attributes(user_id: decoded_token["sub"], email_address: decoded_token["email"]) }
+
+      it "assigns the correct roles to the organisation" do
+        user = from_passwordless_payload!
+
+        expect(user.organisation.roles.pluck(:name)).to eq(%w[standard:read])
+      end
     end
 
     context "when in development environment" do
