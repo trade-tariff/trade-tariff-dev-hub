@@ -3,6 +3,7 @@ class Organisation < ApplicationRecord
 
   has_many :users, dependent: :destroy
   has_many :api_keys, dependent: :destroy
+  has_and_belongs_to_many :roles
 
   enum :status, {
     unregistered: 0,
@@ -31,10 +32,24 @@ class Organisation < ApplicationRecord
           organisation.description = "Default implicit organisation for initial user #{user.email_address}"
           organisation.status = :unregistered
           organisation.save!
+          organisation.assign_role!("ott:full")
           user.organisation = organisation
           user.save!
         end
       end
+    end
+  end
+
+  def has_role?(role_name)
+    roles.exists?(name: role_name)
+  end
+
+  def assign_role!(role_name)
+    role = Role.find_by!(name: role_name)
+
+    unless roles.include?(role)
+      roles << role
+      save!
     end
   end
 end

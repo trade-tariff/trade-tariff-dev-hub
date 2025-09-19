@@ -52,3 +52,24 @@ if Rails.env.development?
     api_key.save!
   end
 end
+
+[
+  {
+    name: 'admin',
+    description: 'Full access to all features and settings',
+  },
+  {
+    name: 'fpo:full',
+    description: 'Full access to FPO (Fast Parcel Operator) API keys'
+  },
+  {
+    name: 'ott:full',
+    description: 'Full access to Online Trade Tariff public API keys',
+  },
+  {
+    name: 'spimm:full',
+    description: 'Full access to SPIMM (Simplified Process for Internal Market Movements) API keys.'
+  }
+].each do |role_attrs|
+  Role.create(role_attrs)
+end

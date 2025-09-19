@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_03_084905) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_18_072903) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -40,6 +40,22 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_03_084905) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["organisation_id"], name: "index_organisations_on_organisation_id", unique: true
+  end
+
+  create_table "organisations_roles", id: false, force: :cascade do |t|
+    t.uuid "organisation_id", null: false
+    t.uuid "role_id", null: false
+    t.index ["organisation_id", "role_id"], name: "index_organisations_roles_on_organisation_id_and_role_id", unique: true
+    t.index ["organisation_id"], name: "index_organisations_roles_on_organisation_id"
+    t.index ["role_id"], name: "index_organisations_roles_on_role_id"
+  end
+
+  create_table "roles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "description", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_roles_on_name", unique: true
   end
 
   create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -74,6 +90,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_03_084905) do
   end
 
   add_foreign_key "api_keys", "organisations"
+  add_foreign_key "organisations_roles", "organisations"
+  add_foreign_key "organisations_roles", "roles"
   add_foreign_key "sessions", "users"
   add_foreign_key "users", "organisations"
 end
