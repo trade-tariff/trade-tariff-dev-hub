@@ -1,26 +1,27 @@
+# == Schema Information
+#
+# Table name: users
+#
+#  id              :uuid             not null, primary key
+#  organisation_id :uuid             not null
+#  email_address   :string
+#  user_id         :string           not null
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#
+# Indexes
+#
+#  index_users_on_organisation_id              (organisation_id)
+#  index_users_on_user_id_and_organisation_id  (user_id,organisation_id) UNIQUE
+#
+
 class User < ApplicationRecord
   has_paper_trail
 
   belongs_to :organisation
   has_many :sessions, dependent: :destroy
 
-  delegate :status, :application_reference, to: :organisation
-
   class << self
-    def from_profile!(government_gateway_profile)
-      organisation = Organisation.from_profile!(government_gateway_profile)
-
-      find_or_initialize_by(
-        organisation_id: organisation.id,
-        user_id: government_gateway_profile["sub"],
-      ).tap do |user|
-        if user.new_record?
-          user.email_address = government_gateway_profile["email"]
-          user.save!
-        end
-      end
-    end
-
     def from_passwordless_payload!(token)
       return dummy_user! if Rails.env.development?
 
@@ -32,8 +33,6 @@ class User < ApplicationRecord
 
       user
     end
-
-  private
 
     def dummy_user!
       User.find_or_initialize_by(user_id: "dummy_user", email_address: "dummy@user.com").tap do |user|
