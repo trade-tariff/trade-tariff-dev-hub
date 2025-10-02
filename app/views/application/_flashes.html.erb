@@ -1,4 +1,16 @@
 <div class="flashes">
+  <% if alert %>
+    <div class="govuk-notification-banner" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+      <div class="govuk-notification-banner__header">
+        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+          Important
+        </h2>
+      </div>
+      <div class="govuk-notification-banner__content">
+        <p><%= sanitize alert %></p>
+      </div>
+    </div>
+  <% end %>
   <% if notice %>
     <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
       <div class="govuk-notification-banner__header">
@@ -7,20 +19,7 @@
         </h2>
       </div>
       <div class="govuk-notification-banner__content">
-        <p><%= notice %></p>
-      </div>
-    </div>
-  <% end %>
-
-  <% if alert %>
-    <div class="govuk-notification-banner govuk-notification-banner--error" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
-      <div class="govuk-notification-banner__header">
-        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
-          Error
-        </h2>
-      </div>
-      <div class="govuk-notification-banner__content">
-        <p><%= alert %></p>
+        <p><%= sanitize notice %></p>
       </div>
     </div>
   <% end %>
