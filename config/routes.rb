@@ -6,14 +6,6 @@ Rails.application.routes.draw do
   get '/auth/redirect', to: 'sessions#handle_redirect'
   get '/auth/failure', to: 'sessions#failure'
   get '/auth/logout', to: 'sessions#destroy', as: :logout
-  get '/auth/profile-redirect', to: redirect(path: '/api_keys'), as: :profile_redirect
-  get '/auth/group-redirect', to: redirect(path: '/api_keys'), as: :group_redirect
-
-  resources :users, only: %i[new] do
-    collection do
-      get :placeholder, as: :placeholder
-    end
-  end
 
   resources :api_keys, only: %i[index new create] do
     member do
@@ -23,15 +15,6 @@ Rails.application.routes.draw do
       if TradeTariffDevHub.deletion_enabled?
         get :delete, to: 'api_keys#update', as: :delete
         delete :delete
-      end
-    end
-  end
-
-  namespace :user_verification do
-    resources :steps, only: %i[show update index] do
-      collection do
-        get :completed
-        get :rejected
       end
     end
   end

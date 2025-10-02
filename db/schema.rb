@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_18_072903) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_02_145846) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -30,16 +30,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_18_072903) do
   end
 
   create_table "organisations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "organisation_id", null: false
+    t.string "organisation_id"
     t.string "application_reference"
     t.string "description"
     t.string "eori_number"
     t.string "organisation_name"
-    t.integer "status"
     t.string "uk_acs_reference"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["organisation_id"], name: "index_organisations_on_organisation_id", unique: true
+    t.integer "status"
   end
 
   create_table "organisations_roles", id: false, force: :cascade do |t|
@@ -61,10 +60,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_18_072903) do
   create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "token", null: false
     t.uuid "user_id", null: false
-    t.datetime "expires_at", null: false
-    t.jsonb "raw_info", null: false
+    t.jsonb "raw_info"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "expires_at"
+    t.text "id_token", null: false
     t.index ["token"], name: "index_sessions_on_token", unique: true
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end

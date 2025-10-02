@@ -19,22 +19,4 @@ RSpec.describe ApplicationHelper, type: :helper do
     it { is_expected.to include("/fpo/terms-and-conditions.html") }
     it { is_expected.to be_html_safe }
   end
-
-  describe "#fpo_usage_terms" do
-    subject(:terms) { helper.fpo_usage_terms }
-
-    it { is_expected.to all(be_a(Struct)) }
-    it { is_expected.to all(respond_to(:id, :text)) }
-
-    it "translates the terms correctly" do
-      expect(terms.map(&:text).first).to include("designated for backend operations only")
-    end
-  end
-
-  describe "#user_verification_steps_review_answers_terms_hint" do
-    subject { helper.user_verification_steps_review_answers_terms_hint }
-
-    it { is_expected.to include("Read the information below carefully") }
-    it { is_expected.to be_html_safe }
-  end
 end

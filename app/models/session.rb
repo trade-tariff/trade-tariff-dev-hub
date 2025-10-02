@@ -1,31 +1,35 @@
+# == Schema Information
+#
+# Table name: sessions
+#
+#  id         :uuid             not null, primary key
+#  token      :string           not null
+#  user_id    :uuid             not null
+#  raw_info   :jsonb
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  expires_at :datetime
+#  id_token   :text             not null
+#
+# Indexes
+#
+#  index_sessions_on_token    (token) UNIQUE
+#  index_sessions_on_user_id  (user_id)
+#
+
 class Session < ApplicationRecord
   belongs_to :user
 
   validates :token, presence: true, uniqueness: true
-  validates :expires_at, presence: true
-  validates :raw_info, presence: true
+  validates :id_token, presence: true
 
-  def raw_info
-    Hashie::Mash.new(super || {})
+  def renew?
+    decoded_id_token.nil?
   end
 
-  def update_profile_url
-    raw_info.profile.to_s
-  end
+private
 
-  def manage_team_url
-    raw_info["bas:groupProfile"].to_s
-  end
-
-  def email_address
-    raw_info.email.to_s
-  end
-
-  def organisation_account?
-    manage_team_url.present?
-  end
-
-  def expired?
-    expires_at < Time.zone.now
+  def decoded_id_token
+    @decoded_id_token ||= VerifyToken.new(id_token).call
   end
 end
