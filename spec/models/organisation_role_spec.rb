@@ -12,11 +12,6 @@
 #  index_organisations_roles_on_role_id                      (role_id)
 #
 
-class OrganisationRole < ApplicationRecord
-  self.table_name = "organisations_roles"
-
-  belongs_to :organisation
-  belongs_to :role
-
-  has_paper_trail
+RSpec.describe OrganisationRole, type: :model do
+  it { expect(PaperTrail.request).to be_enabled_for_model(described_class) }
 end

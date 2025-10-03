@@ -5,11 +5,9 @@ ruby file: ".ruby-version"
 gem "rails"
 
 gem "aws-sdk-apigateway"
-gem "aws-sdk-dynamodb"
 gem "faraday"
-gem "hashie"
 gem "importmap-rails"
-gem "ostruct"
+gem "jwt"
 gem "paper_trail"
 gem "pg"
 gem "propshaft"
@@ -17,19 +15,13 @@ gem "puma"
 gem "rack-cors"
 
 # GovUK
-gem "faker"
 gem "govuk-components"
 gem "govuk_design_system_formbuilder"
-gem "notifications-ruby-client"
-gem "wizard_steps"
-
-# Government Gateway integration
-gem "omniauth_openid_connect"
-gem "omniauth-rails_csrf_protection"
 
 gem "bootsnap", require: false
 
 group :development, :test do
+  gem "annotate"
   gem "brakeman", require: false
   gem "dotenv-rails"
   gem "factory_bot_rails"
