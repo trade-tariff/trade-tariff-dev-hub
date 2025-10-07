@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 class SessionsController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: :handle_redirect
-
   def handle_redirect
-    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if user.nil?
+    return redirect_to api_keys_path if already_authenticated?
+
+    return redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if user.nil?
 
     create_user_session!
     session[:token] = session_token
@@ -16,7 +16,7 @@ class SessionsController < ApplicationController
   end
 
   def failure
-    Rails.logger.error("Authentication failure: #{request.env['omniauth.error']}")
+    Rails.logger.error("Authentication failure: #{params[:message]}")
     redirect_to root_path, alert: "Authentication failed. Please try again."
   end
 
@@ -58,5 +58,9 @@ private
 
   def user_session
     Session.find_by(token: session[:token])
+  end
+
+  def already_authenticated?
+    user_session.present? && !user_session.renew?
   end
 end

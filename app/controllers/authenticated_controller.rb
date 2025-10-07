@@ -11,11 +11,12 @@ protected
     return unless TradeTariffDevHub.identity_authentication_enabled?
     return if user_session.present? && !user_session.renew?
 
-    if user_session.present? && user_session.renew?
-      redirect_to logout_path
-    else
-      redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
+    if user_session.present?
+      user_session&.destroy!
+      session[:token] = nil
     end
+
+    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
   end
 
   def user_session
@@ -43,15 +44,21 @@ protected
   end
 
   def check_roles!
-    allowed = allowed_roles.any? { |role| organisation&.has_role?(role) }
-
-    if allowed_roles.present? && !allowed
+    unless allowed?
       redirect_to root_path, alert: "Your user <strong>#{current_user&.email_address}</strong> does not have the required permissions to access this section"
     end
   end
 
   def allowed_roles
     ["ott:full"]
+  end
+
+  def allowed?
+    allowed_roles.none? || allowed_roles.any? { |role| organisation&.has_role?(role) }
+  end
+
+  def refresh_session!
+    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if user.nil?
   end
 
   helper_method :current_user, :organisation, :user_session

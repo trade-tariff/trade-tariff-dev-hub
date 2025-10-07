@@ -75,8 +75,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_02_145846) do
     t.string "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["organisation_id"], name: "index_users_on_organisation_id"
-    t.index ["user_id", "organisation_id"], name: "index_users_on_user_id_and_organisation_id", unique: true
   end
 
   create_table "versions", force: :cascade do |t|

@@ -4,18 +4,7 @@ RSpec.describe "Sessions", type: :request do
   let(:organisation) { create(:organisation) }
 
   describe "GET /auth/redirect" do
-    before do
-      allow(VerifyToken).to receive(:new).and_return(instance_double(VerifyToken, call: decoded_id_token))
-    end
-
-    let(:decoded_id_token) do
-      {
-        "sub" => user_id,
-        "email" => current_user.email_address,
-      }
-    end
-
-    let(:user_id) { current_user.user_id }
+    let(:extra_session) { {} }
 
     it "creates a Session" do
       expect { get auth_redirect_path }.to change(Session, :count).by(1)
@@ -26,7 +15,7 @@ RSpec.describe "Sessions", type: :request do
       expect(response).to redirect_to(api_keys_path)
     end
 
-    it "sets the session", :aggregate_failures do
+    it "sets the session token" do
       get auth_redirect_path
       expect(session[:token]).to be_a_uuid
     end
@@ -40,7 +29,7 @@ RSpec.describe "Sessions", type: :request do
     end
 
     context "when the user does not exist" do
-      let(:user_id) { "non-existent-user" }
+      let(:email_address) { "non-existing@bar.com" }
 
       it "creates a new user" do
         expect { get auth_redirect_path }.to change(User, :count).by(1)
@@ -48,6 +37,18 @@ RSpec.describe "Sessions", type: :request do
 
       it "creates a new organisation" do
         expect { get auth_redirect_path }.to change(Organisation, :count).by(1)
+      end
+    end
+
+    context "when the session token is already set" do
+      let(:extra_session) { { token: "existing-token" } }
+
+      before do
+        create(:session, token: "existing-token", user: current_user)
+      end
+
+      it "does not create a new Session" do
+        expect { get auth_redirect_path }.not_to change(Session, :count)
       end
     end
   end

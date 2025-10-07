@@ -11,8 +11,8 @@
 #
 # Indexes
 #
-#  index_users_on_organisation_id              (organisation_id)
-#  index_users_on_user_id_and_organisation_id  (user_id,organisation_id) UNIQUE
+#  index_users_on_email_address    (email_address) UNIQUE
+#  index_users_on_organisation_id  (organisation_id)
 #
 
 class User < ApplicationRecord
@@ -21,13 +21,23 @@ class User < ApplicationRecord
   belongs_to :organisation
   has_many :sessions, dependent: :destroy
 
+  validates :email_address, presence: true, uniqueness: true
+
   class << self
     def from_passwordless_payload!(token)
       return dummy_user! if Rails.env.development?
 
-      user = User.find_or_initialize_by(user_id: token["sub"], email_address: token["email"])
+      user_id = token["sub"]
 
-      Organisation.find_or_associate_implicit_organisation_to(user) if user.organisation.nil?
+      user = User.find_or_initialize_by(email_address: token["email"])
+
+      if !user.new_record? && user.user_id != user_id
+        Rails.logger.warn("User ID mismatch for email #{user.email_address}: existing user_id=#{user.user_id}, new user_id=#{user_id}. Updating to new user_id.")
+      end
+
+      user.user_id = user_id
+
+      Organisation.find_or_associate_implicit_organisation_to(user) if user.organisation.blank?
 
       user.save!
 

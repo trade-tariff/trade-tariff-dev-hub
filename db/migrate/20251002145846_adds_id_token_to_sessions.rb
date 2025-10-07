@@ -7,6 +7,9 @@ class AddsIdTokenToSessions < ActiveRecord::Migration[8.0]
 
     remove_index :organisations, :organisation_id, unique: true
     change_column :organisations, :organisation_id, :string, null: true
+
+    remove_index :users, [:user_id, :organisation_id], unique: true
+    add_index :users, [:email_address], unique: true
   end
 
   def down
@@ -16,5 +19,8 @@ class AddsIdTokenToSessions < ActiveRecord::Migration[8.0]
 
     add_index :organisations, :organisation_id, unique: true
     change_column :organisations, :organisation_id, :string, null: false
+
+    add_index :users, [:user_id, :organisation_id], unique: true
+    remove_index :users, [:email_address], unique: true
   end
 end
