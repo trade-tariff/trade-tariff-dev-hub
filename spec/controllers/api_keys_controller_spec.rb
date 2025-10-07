@@ -1,12 +1,14 @@
 RSpec.describe ApiKeysController, type: :controller do
   include_context "with authenticated user"
 
-  let(:organisation) { create(:organisation, :fpo, organisation_id: "local-development") }
+  before do
+    current_user.organisation.assign_role!("fpo:full")
+  end
 
   shared_examples_for "an unauthorised user" do
     context "when user does not have required role" do
       before do
-        organisation.unassign_role!("fpo:full")
+        current_user.organisation.unassign_role!("fpo:full")
       end
 
       it "redirects to root path" do
@@ -48,7 +50,7 @@ RSpec.describe ApiKeysController, type: :controller do
   describe "GET #update" do
     subject(:do_action) { get :update, params: { id: api_key.id } }
 
-    let(:api_key) { create(:api_key, organisation:) }
+    let(:api_key) { create(:api_key, organisation: current_user.organisation) }
 
     context "when api key is enabled" do
       it "renders 'revoke' template" do
@@ -83,7 +85,7 @@ RSpec.describe ApiKeysController, type: :controller do
   describe "POST #create" do
     subject(:do_action) { post :create, params: { id: "some-id", description: "test desc" } }
 
-    let(:api_key) { create(:api_key, api_key_id: "abc123", organisation:) }
+    let(:api_key) { create(:api_key, api_key_id: "abc123", organisation: current_user.organisation) }
     let(:service) { instance_double(CreateApiKey, call: api_key) }
 
     before do
@@ -101,7 +103,7 @@ RSpec.describe ApiKeysController, type: :controller do
   describe "PATCH #revoke" do
     subject(:do_action) { post :revoke, params: { id: api_key.id } }
 
-    let(:api_key) { create(:api_key, organisation: organisation) }
+    let(:api_key) { create(:api_key, organisation: current_user.organisation) }
     let(:service) { instance_double(RevokeApiKey, call: true) }
 
     before do
@@ -119,7 +121,7 @@ RSpec.describe ApiKeysController, type: :controller do
   describe "DELETE #delete" do
     subject(:do_action) { post :delete, params: { id: api_key.id } }
 
-    let(:api_key) { create(:api_key, organisation:) }
+    let(:api_key) { create(:api_key, organisation: current_user.organisation) }
     let(:service) { instance_double(DeleteApiKey, call: true) }
 
     before do
