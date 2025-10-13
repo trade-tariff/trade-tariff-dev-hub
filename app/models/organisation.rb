@@ -18,21 +18,36 @@ class Organisation < ApplicationRecord
   has_paper_trail
 
   has_many :users, dependent: :destroy
+  has_many :invitations, dependent: :destroy
   has_many :api_keys, dependent: :destroy
   has_and_belongs_to_many :roles
+
+  validates :organisation_name, presence: true
 
   class << self
     def find_or_associate_implicit_organisation_to(user)
       if user.organisation.blank?
-        new(organisation_name: user.email_address).tap do |organisation|
-          organisation.description = "Default implicit organisation for initial user #{user.email_address}"
-          organisation.save!
-          organisation.assign_role!("ott:full")
-          user.organisation = organisation
+        invitation = Invitation.find_by(invitee_email: user.email_address)
+
+        if invitation.present?
+          user.organisation = invitation.organisation
+          invitation.accepted!
           user.save!
+        else
+          new(organisation_name: user.email_address).tap do |organisation|
+            organisation.description = "Default implicit organisation for initial user #{user.email_address}"
+            organisation.save!
+            organisation.assign_role!("ott:full")
+            user.organisation = organisation
+            user.save!
+          end
         end
       end
     end
+  end
+
+  def admin?
+    has_role?("admin")
   end
 
   def has_role?(role_name)

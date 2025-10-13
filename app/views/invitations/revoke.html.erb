@@ -1,0 +1,24 @@
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Revoke invitation</h1>
+    <p class="govuk-body">Check the below details regarding the invitation you have selected to revoke and confirm your choice.</p>
+    <%= govuk_warning_text(text: "Your invitation will be revoked and if the user tries to sign up against your organisation they will no longer be able too.") %>
+    <%= govuk_table do |table|
+          table.with_body do |body|
+            body.with_row do |row|
+              row.with_cell(header: true, text: 'Invitee email')
+              row.with_cell(text: @invitation.invitee_email)
+            end
+            body.with_row do |row|
+              row.with_cell(header: true, text: 'Created on')
+              row.with_cell(text: created_on(@invitation))
+            end
+          end
+        end
+    %>
+    <div class="govuk-button-group">
+      <%= govuk_button_to 'Revoke', invitation_path(@invitation), method: :delete, warning: true %>
+      <%= govuk_link_to 'Cancel', organisation_path(organisation.id) %>
+    </div>
+  </div>
+</div>

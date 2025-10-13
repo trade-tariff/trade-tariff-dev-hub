@@ -1,0 +1,102 @@
+RSpec.describe "Invitations", type: :request do
+  include_context "with authenticated user"
+
+  describe "GET /invitations/new" do
+    it "renders the new invitation form", :aggregate_failures do
+      get new_invitation_path
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Enter the email address")
+    end
+
+    it "includes the correct action URL", :aggregate_failures do
+      get new_invitation_path
+      expect(response.body).to include('action="/invitations"')
+      expect(response.body).to include('method="post"')
+    end
+  end
+
+  describe "POST /invitations" do
+    context "with valid parameters" do
+      let(:params) { { invitation: { invitee_email: "foo@bar.com" } } }
+
+      it "creates a new invitation" do
+        expect { post invitations_path, params: }
+          .to change { Invitation.where(invitee_email: "foo@bar.com").count }.by(1)
+      end
+
+      it "redirects to the organisation page with a success notice", :aggregate_failures do
+        post invitations_path, params: params
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
+        follow_redirect!
+        expect(response.body).to include("Invitation sent to foo@bar.com")
+      end
+    end
+
+    context "with invalid parameters" do
+      let(:params) { { invitation: { invitee_email: "invalid-email" } } }
+
+      it "does not create a new invitation" do
+        expect { post invitations_path, params: }
+          .not_to change(Invitation, :count)
+      end
+
+      it "re-renders the new template with errors", :aggregate_failures do
+        post invitations_path, params: params
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Enter a properly formatted email address")
+      end
+    end
+  end
+
+  describe "GET /invitations/:id/revoke" do
+    let!(:invitation) { create(:invitation, organisation: current_user.organisation, user: current_user) }
+
+    it "renders the revoke confirmation page", :aggregate_failures do
+      get revoke_invitation_path(invitation)
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Your invitation will be revoked")
+    end
+  end
+
+  describe "DELETE /invitations/:id" do
+    let!(:invitation) { create(:invitation, organisation: current_user.organisation, user: current_user) }
+
+    it "revokes the invitation and redirects with a success notice", :aggregate_failures do
+      delete invitation_path(invitation)
+      expect(response).to redirect_to(organisation_path(current_user.organisation))
+      follow_redirect!
+      expect(response.body).to include("Invitation to #{invitation.invitee_email} has been revoked.")
+      expect(invitation.reload.status).to eq("revoked")
+    end
+
+    it "does not delete the invitation record" do
+      expect { delete invitation_path(invitation) }
+        .not_to change(Invitation, :count)
+    end
+
+    context "when an error occurs" do
+      before do
+        allow(Invitation).to receive(:find_by).and_raise(StandardError, "Some error")
+      end
+
+      it "redirects with an alert message", :aggregate_failures do
+        delete invitation_path(invitation)
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
+        follow_redirect!
+        expect(response.body).to include("There was a problem revoking the invitation")
+      end
+    end
+  end
+
+  describe "GET /invitations/:id/resend" do
+    let!(:invitation) { create(:invitation, organisation: current_user.organisation, user: current_user, status: "revoked") }
+
+    it "resends the invitation and redirects with a success notice", :aggregate_failures do
+      get resend_invitation_path(invitation)
+      expect(response).to redirect_to(organisation_path(current_user.organisation))
+      follow_redirect!
+      expect(response.body).to include("Invitation resent to #{invitation.invitee_email}")
+      expect(invitation.reload.status).to eq("pending")
+    end
+  end
+end
