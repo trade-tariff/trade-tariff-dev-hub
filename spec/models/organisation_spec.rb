@@ -58,5 +58,53 @@ RSpec.describe Organisation, type: :model do
         expect(user.organisation.roles.pluck(:name)).to eq(%w[ott:full])
       end
     end
+
+    context "when the user does not have an organisation but an invitation exists for the user's email address" do
+      subject(:find_or_associate_implicit_organisation_to) { described_class.find_or_associate_implicit_organisation_to(user) }
+
+      let!(:user) { build(:user, organisation: nil, email_address: "foo@bar.com") }
+      let(:existing_user) { create(:user, email_address: "baz@bar.com") }
+
+      before do
+        create(
+          :invitation,
+          invitee_email: user.email_address,
+          organisation: existing_user.organisation,
+          status: "pending",
+          user: existing_user,
+        )
+      end
+
+      it "accepts the invitation" do
+        expect { find_or_associate_implicit_organisation_to }.to change { Invitation.accepted.count }.by(1)
+      end
+
+      it "associates the existing organisation to the new user", :aggregate_failures do
+        expect { find_or_associate_implicit_organisation_to }.not_to change(described_class, :count)
+        expect(user.organisation).to eq(existing_user.organisation)
+      end
+
+      it "does not assign any new roles" do
+        expect { find_or_associate_implicit_organisation_to }.not_to change(existing_user.organisation.roles, :count)
+      end
+
+      it "does not create any new organisations" do
+        expect { find_or_associate_implicit_organisation_to }.not_to change(described_class, :count)
+      end
+    end
+  end
+
+  describe "#admin?" do
+    context "when the organisation has the admin role" do
+      subject(:organisation) { create(:organisation, :admin) }
+
+      it { is_expected.to be_admin }
+    end
+
+    context "when the organisation does not have the admin role" do
+      subject(:organisation) { create(:organisation) }
+
+      it { is_expected.not_to be_admin }
+    end
   end
 end

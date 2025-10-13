@@ -1,0 +1,66 @@
+<h1 class="govuk-heading-l">Your organisation</h1>
+
+<p class="govuk-body">Manage your organisation memberships and invitations.</p>
+
+<%= govuk_summary_list do |summary_list| %>
+  <%- summary_list.with_row do |row| %>
+    <% row.with_key(text: 'Organisation name') %>
+    <% row.with_value(text: @organisation.organisation_name) %>
+    <% row.with_action(text: 'Change', href: edit_organisation_path(@organisation)) %>
+  <%- end %>
+
+  <%- summary_list.with_row do |row| %>
+    <% row.with_key(text: 'Created on') %>
+    <% row.with_value(text: created_on(@organisation)) %>
+  <%- end %>
+<% end %>
+
+<%= govuk_table do |table|
+  table.with_caption(size: 'm', text: 'Members')
+  table.with_head do |head|
+    head.with_row do |row|
+      row.with_cell(text: 'Email address')
+      row.with_cell(text: 'Created')
+      row.with_cell(text: 'Actions')
+    end
+  end
+  table.with_body do |body|
+    @users.each do |user|
+      body.with_row do |row|
+        row.with_cell(header: true, text: user.email_address)
+        row.with_cell(text: created_on(user))
+        row.with_cell do
+          if user == current_user
+            'You'
+          else
+            govuk_link_to 'Remove', remove_user_path(user)
+          end
+        end
+      end
+    end
+  end
+end %>
+
+<%= govuk_table do |table|
+  table.with_caption(size: 'm', text: 'Invitations')
+  table.with_head do |head|
+    head.with_row do |row|
+      row.with_cell(text: 'Invitee')
+      row.with_cell(text: 'Created')
+      row.with_cell(text: 'Status')
+      row.with_cell(text: 'Actions')
+    end
+  end
+  table.with_body do |body|
+    @invitations.each do |invitation|
+      body.with_row do |row|
+        row.with_cell(header: true, text: invitation.invitee_email)
+        row.with_cell(text: created_on(invitation))
+        row.with_cell(text: invitation_status(invitation))
+        row.with_cell(text: invitation_actions_for(invitation))
+      end
+    end
+  end
+end %>
+
+<%= govuk_button_link_to 'Invite new member', new_invitation_path %>

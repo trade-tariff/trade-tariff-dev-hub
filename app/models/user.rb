@@ -51,4 +51,6 @@ class User < ApplicationRecord
       end
     end
   end
+
+  delegate :admin?, to: :organisation
 end

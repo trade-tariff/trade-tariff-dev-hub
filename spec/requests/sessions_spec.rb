@@ -1,8 +1,6 @@
 RSpec.describe "Sessions", type: :request do
   include_context "with authenticated user"
 
-  let(:organisation) { create(:organisation) }
-
   describe "GET /auth/redirect" do
     let(:extra_session) { {} }
 
@@ -54,8 +52,6 @@ RSpec.describe "Sessions", type: :request do
   end
 
   describe "GET /auth/logout" do
-    include_context "with authenticated user"
-
     it "destroys the Session" do
       expect { get logout_path }.to change(Session, :count).by(-1)
     end

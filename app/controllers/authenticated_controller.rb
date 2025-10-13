@@ -44,9 +44,7 @@ protected
   end
 
   def check_roles!
-    unless allowed?
-      redirect_to root_path, alert: "Your user <strong>#{current_user&.email_address}</strong> does not have the required permissions to access this section"
-    end
+    disallowed_redirect! unless allowed?
   end
 
   def allowed_roles
@@ -59,6 +57,10 @@ protected
 
   def refresh_session!
     redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if user.nil?
+  end
+
+  def disallowed_redirect!
+    redirect_to root_path, alert: "Your user <strong>#{current_user&.email_address}</strong> does not have the required permissions to access this section"
   end
 
   helper_method :current_user, :organisation, :user_session

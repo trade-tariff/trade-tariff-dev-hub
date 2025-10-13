@@ -10,10 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_02_145846) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_13_084519) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
+
+  # Custom types defined in this database.
+  # Note that some types may not work with other database engines. Be careful if changing database.
+  create_enum "invitation_status", ["pending", "accepted", "declined", "expired", "revoked"]
 
   create_table "api_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "organisation_id", null: false
@@ -27,6 +31,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_02_145846) do
     t.datetime "updated_at", null: false
     t.index ["api_key_id", "organisation_id"], name: "index_api_keys_on_api_key_id_and_organisation_id", unique: true
     t.index ["organisation_id"], name: "index_api_keys_on_organisation_id"
+  end
+
+  create_table "invitations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "invitee_email", null: false
+    t.uuid "user_id", null: false
+    t.uuid "organisation_id", null: false
+    t.enum "status", default: "pending", null: false, enum_type: "invitation_status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["invitee_email"], name: "index_invitations_on_invitee_email", unique: true
+    t.index ["organisation_id"], name: "index_invitations_on_organisation_id"
+    t.index ["user_id"], name: "index_invitations_on_user_id"
   end
 
   create_table "organisations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -90,6 +106,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_02_145846) do
   end
 
   add_foreign_key "api_keys", "organisations"
+  add_foreign_key "invitations", "organisations"
+  add_foreign_key "invitations", "users"
   add_foreign_key "organisations_roles", "organisations"
   add_foreign_key "organisations_roles", "roles"
   add_foreign_key "sessions", "users"
