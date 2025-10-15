@@ -1,6 +1,6 @@
 class CreateInvitations < ActiveRecord::Migration[8.0]
   def change
-    create_enum :invitation_status, ["pending" , "accepted" , "declined", "expired", "revoked"]
+    create_enum :invitation_status, ["pending", "accepted", "declined", "expired", "revoked"]
     create_table :invitations, id: :uuid do |t|
       t.string :invitee_email, null: false
       t.references :user, null: false, foreign_key: true, type: :uuid

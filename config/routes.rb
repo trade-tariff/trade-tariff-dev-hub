@@ -11,10 +11,8 @@ Rails.application.routes.draw do
   resources :users, only: %i[destroy]
   get 'users/:id/remove', to: 'users#remove', as: :remove_user
 
-  resources :invitations, only: %i[new create destroy] do
+  resources :invitations, only: %i[new create destroy edit update] do
     member do
-      get :revoke, to: 'invitations#revoke', as: :revoke
-      delete :revoke
       get :resend, to: 'invitations#resend', as: :resend
     end
   end

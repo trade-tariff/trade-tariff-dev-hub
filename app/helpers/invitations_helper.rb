@@ -18,7 +18,7 @@ module InvitationsHelper
 
     if invitation.pending?
       actions << govuk_link_to("Resend", resend_invitation_path(invitation), no_visited_state: true)
-      actions << govuk_link_to("Revoke", revoke_invitation_path(invitation), no_visited_state: true)
+      actions << govuk_link_to("Revoke", edit_invitation_path(invitation), no_visited_state: true)
     end
 
     if invitation.expired?

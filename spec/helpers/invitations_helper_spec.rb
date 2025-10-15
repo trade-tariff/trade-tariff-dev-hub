@@ -51,7 +51,7 @@ RSpec.describe InvitationsHelper, type: :helper do
       it { is_expected.to include("Resend") }
       it { is_expected.to include("Revoke") }
       it { is_expected.to include(resend_invitation_path(invitation)) }
-      it { is_expected.to include(revoke_invitation_path(invitation)) }
+      it { is_expected.to include(edit_invitation_path(invitation)) }
     end
 
     context "when status is expired" do

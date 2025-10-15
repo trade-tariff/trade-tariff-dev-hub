@@ -52,17 +52,17 @@ RSpec.describe "Invitations", type: :request do
     let!(:invitation) { create(:invitation, organisation: current_user.organisation, user: current_user) }
 
     it "renders the revoke confirmation page", :aggregate_failures do
-      get revoke_invitation_path(invitation)
+      get edit_invitation_path(invitation)
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Your invitation will be revoked")
     end
   end
 
-  describe "DELETE /invitations/:id" do
+  describe "PATCH /invitations/:id" do
     let!(:invitation) { create(:invitation, organisation: current_user.organisation, user: current_user) }
 
     it "revokes the invitation and redirects with a success notice", :aggregate_failures do
-      delete invitation_path(invitation)
+      patch invitation_path(invitation)
       expect(response).to redirect_to(organisation_path(current_user.organisation))
       follow_redirect!
       expect(response.body).to include("Invitation to #{invitation.invitee_email} has been revoked.")
@@ -70,7 +70,7 @@ RSpec.describe "Invitations", type: :request do
     end
 
     it "does not delete the invitation record" do
-      expect { delete invitation_path(invitation) }
+      expect { patch invitation_path(invitation) }
         .not_to change(Invitation, :count)
     end
 
@@ -80,7 +80,7 @@ RSpec.describe "Invitations", type: :request do
       end
 
       it "redirects with an alert message", :aggregate_failures do
-        delete invitation_path(invitation)
+        patch invitation_path(invitation)
         expect(response).to redirect_to(organisation_path(current_user.organisation))
         follow_redirect!
         expect(response.body).to include("There was a problem revoking the invitation")
