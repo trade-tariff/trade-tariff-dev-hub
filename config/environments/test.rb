@@ -39,4 +39,13 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # Disable authentication in test environment
+  ENV["IDENTITY_AUTHENTICATION_ENABLED"] = "false"
+
+  # Set other required environment variables for tests
+  ENV["IDENTITY_BASE_URL"] = "http://localhost:3005"
+  ENV["IDENTITY_CONSUMER"] = "portal"
+  ENV["IDENTITY_ENCRYPTION_SECRET"] = "test-secret"
+  ENV["IDENTITY_COGNITO_JWKS_URL"] = "http://localhost:3005/.well-known/jwks.json"
 end
