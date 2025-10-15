@@ -2,6 +2,10 @@ require_relative "boot"
 
 require_relative '../app/lib/trade_tariff_dev_hub'
 
+# Fix for annotate gem compatibility with newer Ruby versions
+Fixnum = Integer unless defined?(Fixnum)
+Bignum = Integer unless defined?(Bignum)
+
 require "rails"
 # Pick the frameworks you want:
 require "active_model/railtie"
@@ -35,7 +39,7 @@ module TradeTariffDevHub
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "London"
+    config.time_zone = "London"
     # config.eager_load_paths << Rails.root.join("extras")
 
     config.middleware.insert_before 0, Rack::Cors do

@@ -14,9 +14,22 @@
 #
 
 class Role < ApplicationRecord
+  ADMIN_ROLE_NAME = "admin".freeze
+  SERVICE_ROLE_NAMES = %w[ott:full fpo:full spimm:full].freeze
+
   validates :name, presence: true, uniqueness: true
   validates :description, presence: true
 
   has_and_belongs_to_many :organisations
   has_paper_trail
+
+  scope :service_roles, -> { where(name: SERVICE_ROLE_NAMES) }
+
+  def self.assignable_names
+    SERVICE_ROLE_NAMES
+  end
+
+  def admin?
+    name == ADMIN_ROLE_NAME
+  end
 end

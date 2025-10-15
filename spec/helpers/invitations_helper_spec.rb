@@ -28,11 +28,6 @@ RSpec.describe InvitationsHelper, type: :helper do
 
     let(:invitation) { create(:invitation, invitee_email: "foo@baz.com", status:) }
 
-    shared_examples_for "no actions" do |status|
-      let(:status) { status }
-      it { is_expected.to be_empty }
-    end
-
     context "when status is pending" do
       let(:status) { "pending" }
 
@@ -42,7 +37,21 @@ RSpec.describe InvitationsHelper, type: :helper do
       it { is_expected.to include(edit_invitation_path(invitation)) }
     end
 
-    it_behaves_like "no actions", "accepted"
-    it_behaves_like "no actions", "revoked"
+    context "when status is accepted" do
+      let(:status) { "accepted" }
+
+      it { is_expected.to include("Revoke") }
+      it { is_expected.to include(edit_invitation_path(invitation)) }
+      it { is_expected.not_to include("Resend") }
+    end
+
+    context "when status is revoked" do
+      let(:status) { "revoked" }
+
+      it { is_expected.to include("Delete") }
+      it { is_expected.to include(invitation_path(invitation)) }
+      it { is_expected.not_to include("Resend") }
+      it { is_expected.not_to include("Revoke") }
+    end
   end
 end

@@ -9,6 +9,8 @@ protected
 
   def require_authentication
     return unless TradeTariffDevHub.identity_authentication_enabled?
+    return if Rails.env.development? # Skip session check in dev, let current_user handle it
+
     return if user_session.present? && !user_session.renew?
 
     if user_session.present?
@@ -24,14 +26,23 @@ protected
   end
 
   def organisation
-    @organisation ||= current_user.organisation
+    @organisation ||= if Rails.env.development?
+                        # In development, use current_user's organisation directly
+                        current_user&.organisation
+                      elsif user_session&.assumed_organisation_id.present?
+                        user_session.assumed_organisation
+                      else
+                        current_user&.organisation
+                      end
   end
 
   def current_user
     @current_user ||= if Rails.env.development?
-                        User.dummy_user!
+                        # Allow switching between users in development via session
+                        session[:dev_user_email] ||= "dev@transformuk.com"
+                        User.find_by(email_address: session[:dev_user_email]) || User.dummy_user!
                       else
-                        user_session.user
+                        user_session&.user
                       end
   end
 
@@ -40,7 +51,7 @@ protected
   end
 
   def user_id
-    current_user.id
+    current_user&.id
   end
 
   def check_roles!
@@ -52,6 +63,10 @@ protected
   end
 
   def allowed?
+    # Admins have access to everything
+    return true if organisation&.admin?
+
+    # Otherwise check the specific roles required
     allowed_roles.none? || allowed_roles.any? { |role| organisation&.has_role?(role) }
   end
 
