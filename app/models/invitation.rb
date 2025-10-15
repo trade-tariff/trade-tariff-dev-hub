@@ -1,3 +1,22 @@
+# == Schema Information
+#
+# Table name: invitations
+#
+#  id              :uuid             not null, primary key
+#  invitee_email   :string           not null
+#  user_id         :uuid             not null
+#  organisation_id :uuid             not null
+#  status          :enum             default("pending"), not null
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#
+# Indexes
+#
+#  index_invitations_on_invitee_email    (invitee_email)
+#  index_invitations_on_organisation_id  (organisation_id)
+#  index_invitations_on_user_id          (user_id)
+#
+
 class Invitation < ApplicationRecord
   has_paper_trail
 
