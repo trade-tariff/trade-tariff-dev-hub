@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :invitation do
-    invitee_email { "foo@bar.com" }
+    sequence(:invitee_email) { |n| "invitee#{n}@example.com" }
     user
     organisation { user.organisation }
     status { "pending" }

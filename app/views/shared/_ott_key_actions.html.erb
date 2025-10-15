@@ -1,0 +1,5 @@
+<% if key.active? %>
+  <%= link_to 'Revoke', revoke_ott_key_path(key), method: :patch, class: 'govuk-link', data: { confirm: 'Are you sure you want to revoke this OTT key? This action cannot be undone.' } %>
+<% else %>
+  <%= link_to 'Delete', delete_ott_key_path(key), method: :delete, class: 'govuk-link govuk-link--warning', data: { confirm: 'Are you sure you want to permanently delete this OTT key? This action cannot be undone.' } %>
+<% end %>

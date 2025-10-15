@@ -6,7 +6,7 @@
 #  organisation_id :uuid             not null
 #  api_key_id      :string           not null
 #  api_gateway_id  :string           not null
-#  enabled         :boolean
+#  enabled         :boolean          default("true")
 #  secret          :string           not null
 #  usage_plan_id   :string           not null
 #  description     :string           not null
@@ -24,7 +24,24 @@ class ApiKey < ApplicationRecord
 
   belongs_to :organisation
 
+  scope :active, -> { where(enabled: true) }
+
+  validate :limit_keys_per_organisation
+
   def delete_completely!
     DeleteApiKey.new.call(self)
+  end
+
+private
+
+  def limit_keys_per_organisation
+    return if organisation.nil?
+
+    existing_count = organisation.api_keys.count
+    existing_count -= 1 if persisted? # Don't count self if updating
+
+    if existing_count >= 3
+      errors.add(:base, "Organisation can have a maximum of 3 API keys")
+    end
   end
 end
