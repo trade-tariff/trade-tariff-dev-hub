@@ -20,6 +20,7 @@ class Organisation < ApplicationRecord
   has_many :users, dependent: :destroy
   has_many :invitations, dependent: :destroy
   has_many :api_keys, dependent: :destroy
+  has_many :ott_keys, dependent: :destroy
   has_and_belongs_to_many :roles
 
   validates :organisation_name, presence: true
@@ -73,5 +74,23 @@ class Organisation < ApplicationRecord
 
     roles.delete(role)
     save!
+  end
+
+  def can_access_fpo_keys?
+    fpo_access?
+  end
+
+  def can_access_ott_keys?
+    ott_access?
+  end
+
+private
+
+  def fpo_access?
+    has_role?("fpo:full")
+  end
+
+  def ott_access?
+    has_role?("ott:full")
   end
 end

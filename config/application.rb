@@ -35,7 +35,7 @@ module TradeTariffDevHub
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "London"
+    config.time_zone = "London"
     # config.eager_load_paths << Rails.root.join("extras")
 
     config.middleware.insert_before 0, Rack::Cors do

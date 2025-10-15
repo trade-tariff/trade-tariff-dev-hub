@@ -1,0 +1,26 @@
+<h1 class="govuk-heading-l">Delete OTT API key</h1>
+
+<%= govuk_warning_text(text: "Are you sure you want to delete this OTT API key? This action cannot be undone and the key will be permanently removed.") %>
+
+<%= govuk_summary_list do |summary_list|
+  summary_list.with_row do |row|
+    row.with_key(text: "Client ID")
+    row.with_value(text: @ott_key.client_id)
+  end
+  summary_list.with_row do |row|
+    row.with_key(text: "Description")
+    row.with_value(text: @ott_key.description)
+  end
+  summary_list.with_row do |row|
+    row.with_key(text: "Scopes")
+    row.with_value(text: @ott_key.scopes.join(', '))
+  end
+end %>
+
+<%= govuk_form_with url: delete_ott_key_path(@ott_key), method: :delete, local: true do |form|
+  form.govuk_submit "Delete OTT API key", warning: true
+end %>
+
+<div class="govuk-button-group">
+  <%= govuk_link_to('Cancel', ott_keys_path) %>
+</div>

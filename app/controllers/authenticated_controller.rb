@@ -19,6 +19,13 @@ protected
     redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
   end
 
+  def set_paper_trail_whodunnit
+    Rails.logger.info "set_paper_trail_whodunnit: identity authentication enabled: #{TradeTariffDevHub.identity_authentication_enabled?}"
+    return unless TradeTariffDevHub.identity_authentication_enabled?
+
+    PaperTrail.request.whodunnit = current_user&.id
+  end
+
   def user_session
     @user_session ||= Session.find_by(token: session[:token])
   end
