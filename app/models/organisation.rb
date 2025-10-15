@@ -3,6 +3,7 @@ class Organisation < ApplicationRecord
 
   has_many :users, dependent: :destroy
   has_many :api_keys, dependent: :destroy
+  has_many :ott_keys, dependent: :destroy
   has_and_belongs_to_many :roles
 
   enum :status, {
@@ -51,5 +52,13 @@ class Organisation < ApplicationRecord
       roles << role
       save!
     end
+  end
+
+  def can_access_fpo_keys?
+    fpo_access?
+  end
+
+  def can_access_ott_keys?
+    ott_access?
   end
 end

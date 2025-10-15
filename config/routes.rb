@@ -27,6 +27,18 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :ott_keys, only: %i[index new create] do
+    member do
+      get :revoke, to: 'ott_keys#update', as: :revoke
+      patch :revoke
+
+      if TradeTariffDevHub.deletion_enabled?
+        get :delete, to: 'ott_keys#update', as: :delete
+        delete :delete
+      end
+    end
+  end
+
   namespace :user_verification do
     resources :steps, only: %i[show update index] do
       collection do
