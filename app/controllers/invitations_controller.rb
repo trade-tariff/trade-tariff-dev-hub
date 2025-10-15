@@ -17,16 +17,25 @@ class InvitationsController < AuthenticatedController
     end
   end
 
-  def revoke
+  def edit
     @invitation = Invitation.find_by(id: params[:id], organisation:)
+
+    render :revoke
   end
 
-  def destroy
+  def update
     @invitation = Invitation.find_by(id: params[:id], organisation:)
 
-    @invitation.revoked!
+    if @invitation.nil?
+      return redirect_to organisation_path(organisation), alert: "Invitation not found."
+    end
 
-    redirect_to organisation_path(organisation), notice: "Invitation to #{@invitation.invitee_email} has been revoked."
+    if @invitation.pending?
+      @invitation.revoked!
+      redirect_to organisation_path(organisation), notice: "Invitation to #{@invitation.invitee_email} has been revoked."
+    else
+      redirect_to organisation_path(organisation), alert: "Invitation to #{@invitation.invitee_email} cannot be revoked as it is #{@invitation.status}."
+    end
   rescue StandardError
     redirect_to organisation_path(organisation), alert: "There was a problem revoking the invitation to #{@invitation&.invitee_email}."
   end
@@ -45,7 +54,7 @@ private
   end
 
   def allowed?
-    current_user.organisation == organisation
+    current_user.organisation == organisation || current_user.admin?
   end
 
   def organisation
