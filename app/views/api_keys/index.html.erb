@@ -17,7 +17,7 @@
       body.with_row do |row|
         row.with_cell(header: true, text: mask_api_key(api_key))
         row.with_cell(text: api_key.description)
-        row.with_cell(text: creation_date(api_key))
+        row.with_cell(text: created_on(api_key))
         row.with_cell(text: api_key_status(api_key))
 
         if api_key.enabled

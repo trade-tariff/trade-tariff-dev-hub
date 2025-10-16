@@ -35,6 +35,30 @@ if Rails.env.development?
   organisation.assign_role!("fpo:full")
   organisation.assign_role!("ott:full")
 
+  Invitation.find_or_create_by!(
+    invitee_email: "wilfred.salience@esquire.com",
+    organisation: organisation,
+    user: user,
+  )
+  Invitation.find_or_create_by!(
+    invitee_email: "jeremy.bentham@philos101.com",
+    organisation: organisation,
+    user: user,
+    status: "accepted",
+  )
+  Invitation.find_or_create_by!(
+    invitee_email: "isaac.asimov@foundation.hist",
+    organisation: organisation,
+    user: user,
+    status: "expired",
+  )
+
+  User.find_or_create_by!(
+    email_address: "jeremy.bentham@econ101.com",
+    organisation: organisation,
+    user_id: "jeremy-bentham",
+  )
+
   if localstack_running
     CreateApiKey.new.call("local-development", "development API key")
     CreateApiKey.new.call("local-development", "staging API key")

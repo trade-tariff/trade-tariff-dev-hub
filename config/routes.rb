@@ -7,6 +7,16 @@ Rails.application.routes.draw do
   get '/auth/failure', to: 'sessions#failure'
   get '/auth/logout', to: 'sessions#destroy', as: :logout
 
+  resources :organisations, only: %i[index show edit update]
+  resources :users, only: %i[destroy]
+  get 'users/:id/remove', to: 'users#remove', as: :remove_user
+
+  resources :invitations, only: %i[new create destroy edit update] do
+    member do
+      get :resend, to: 'invitations#resend', as: :resend
+    end
+  end
+
   resources :api_keys, only: %i[index new create] do
     member do
       get :revoke, to: 'api_keys#update', as: :revoke

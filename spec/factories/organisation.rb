@@ -9,5 +9,9 @@ FactoryBot.define do
     trait :fpo do
       roles { [Role.find_by(name: "fpo:full")] }
     end
+
+    trait :admin do
+      roles { [Role.find_by(name: "admin")] }
+    end
   end
 end

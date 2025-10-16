@@ -1,1 +1,14 @@
 en:
+  activerecord:
+    errors:
+      models:
+        invitation:
+          attributes:
+            invitee_email:
+              invalid_format: Enter a properly formatted email address
+              blank: Enter an email address
+              taken: This email address has already been invited to an organisation
+        organisation:
+          attributes:
+            organisation_name:
+              blank: Enter an organisation name
