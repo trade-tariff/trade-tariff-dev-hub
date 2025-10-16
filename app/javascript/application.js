@@ -1,8 +1,8 @@
 // Configure your import map in config/importmap.rb. Read more: https://github.com/rails/importmap-rails
-import 'govuk-frontend'
+import { initAll } from 'govuk-frontend'
 
 document.addEventListener('DOMContentLoaded', () => {
-  GOVUKFrontend.initAll();
+  initAll();
 
   const button = document.getElementById('copy-to-clipboard')
   const target = document.getElementById('api-key-secret')

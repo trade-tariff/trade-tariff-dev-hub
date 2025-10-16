@@ -10,10 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_18_072903) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_13_084519) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
+
+  # Custom types defined in this database.
+  # Note that some types may not work with other database engines. Be careful if changing database.
+  create_enum "invitation_status", ["pending", "accepted", "declined", "expired", "revoked"]
 
   create_table "api_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "organisation_id", null: false
@@ -29,17 +33,28 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_18_072903) do
     t.index ["organisation_id"], name: "index_api_keys_on_organisation_id"
   end
 
+  create_table "invitations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "invitee_email", null: false
+    t.uuid "user_id", null: false
+    t.uuid "organisation_id", null: false
+    t.enum "status", default: "pending", null: false, enum_type: "invitation_status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["invitee_email"], name: "index_invitations_on_invitee_email", unique: true
+    t.index ["organisation_id"], name: "index_invitations_on_organisation_id"
+    t.index ["user_id"], name: "index_invitations_on_user_id"
+  end
+
   create_table "organisations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "organisation_id", null: false
+    t.string "organisation_id"
     t.string "application_reference"
     t.string "description"
     t.string "eori_number"
     t.string "organisation_name"
-    t.integer "status"
     t.string "uk_acs_reference"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["organisation_id"], name: "index_organisations_on_organisation_id", unique: true
+    t.integer "status"
   end
 
   create_table "organisations_roles", id: false, force: :cascade do |t|
@@ -61,10 +76,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_18_072903) do
   create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "token", null: false
     t.uuid "user_id", null: false
-    t.datetime "expires_at", null: false
-    t.jsonb "raw_info", null: false
+    t.jsonb "raw_info"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "expires_at"
+    t.text "id_token", null: false
     t.index ["token"], name: "index_sessions_on_token", unique: true
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
@@ -75,8 +91,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_18_072903) do
     t.string "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["organisation_id"], name: "index_users_on_organisation_id"
-    t.index ["user_id", "organisation_id"], name: "index_users_on_user_id_and_organisation_id", unique: true
   end
 
   create_table "versions", force: :cascade do |t|
@@ -90,6 +106,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_18_072903) do
   end
 
   add_foreign_key "api_keys", "organisations"
+  add_foreign_key "invitations", "organisations"
+  add_foreign_key "invitations", "users"
   add_foreign_key "organisations_roles", "organisations"
   add_foreign_key "organisations_roles", "roles"
   add_foreign_key "sessions", "users"

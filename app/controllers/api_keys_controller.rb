@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ApiKeysController < AuthenticatedController
   before_action :set_api_key, only: %i[update revoke delete]
 
@@ -35,6 +37,10 @@ private
 
   def set_api_key
     @api_key = ApiKey.where(id: params[:id], organisation_id:).first
+  end
+
+  def allowed_roles
+    ["fpo:full"]
   end
 
   delegate :deletion_enabled?, to: TradeTariffDevHub

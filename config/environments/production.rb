@@ -39,7 +39,6 @@ Rails.application.configure do
   config.lograge.custom_options = lambda do |_event|
     { domain: ENV['GOVUK_APP_DOMAIN'] }
   end
-  config.lograge.ignore_actions = ['rails/health#show']
 
 
   # Change to "debug" to log everything (including potentially personally-identifiable information!)

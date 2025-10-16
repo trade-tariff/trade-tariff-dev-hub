@@ -1,0 +1,41 @@
+name: Deploy to development full
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy-full-stack:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.labels.*.name, 'needs-full-deployment')
+    uses: trade-tariff/trade-tariff-tools/.github/workflows/deploy-multi-ecs.yml@main
+    with:
+      environment: development
+      apps: |
+        [
+          {
+            "name": "tariff-dev-hub",
+            "service-names": ["dev-hub"]
+          },
+          {
+            "name": "tariff-identity",
+            "repo": "trade-tariff/identity",
+            "service-names": ["identity"]
+          }
+        ]
+      test-flavour: fpo
+    secrets:
+      ssh-key: ${{ secrets.PRIVATE_SSH_KEY }}
+      slack-webhook: ${{ secrets.SLACK_WEBHOOK }}
+      basic-password: ${{ secrets.BASIC_PASSWORD }}

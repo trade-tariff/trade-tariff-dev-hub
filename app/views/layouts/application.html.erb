@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html class="govuk-template app-html-class">
+<html class="govuk-template--rebranded app-html-class">
   <head>
     <title><%= content_for(:title) || "UK Trade Tariff Developer Portal" %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta charset="utf-8">
-    <meta name="theme-color" content="blue">
+    <meta name="theme-color" content="#1d70b8">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -22,10 +22,9 @@
 
   <%= govuk_header(homepage_url: ENV.fetch("GOVUK_APP_DOMAIN", "http://localhost:3000"), service_name: "UK Trade Tariff Developer Portal", service_url: "#") do |header|
     if respond_to?(:current_user) && current_user.present?
-      header.with_navigation_item(text: "FPO Keys", href: api_keys_path, active: true)
-      header.with_navigation_item(text: "Update Profile", href: update_profile_url, active: false)
-      header.with_navigation_item(text: "Manage Team", href: manage_team_url, active: false) if user_session.organisation_account?
-      header.with_navigation_item(text: "Sign Out", href: logout_path, active: false)
+      navigation_item_for(header, "FPO Keys", api_keys_path)
+      navigation_item_for(header, "Manage organisation", organisation_path(current_user.organisation))
+      navigation_item_for(header, "Sign Out", logout_path)
     end
   end %>
 

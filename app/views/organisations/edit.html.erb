@@ -1,0 +1,12 @@
+<%= govuk_form_for @organisation do |f| %>
+  <h1 class="govuk-heading-l">Updating organisation name</h1>
+  <%= f.govuk_text_field :organisation_name,
+    width: 'two-thirds',
+    label: nil,
+    hint: { text: "Supply a changed organisation name." } %>
+
+  <div class="govuk-button-group">
+    <%= f.govuk_submit "Continue" %>
+    <%= govuk_link_to('Cancel', organisation_path(organisation)) %>
+  </div>
+<% end %>
