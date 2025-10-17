@@ -1,0 +1,8 @@
+<%= form_with url: ott_keys_path, method: :post do |f| %>
+  <h1 class="govuk-heading-l">Enter a description for this OTT API key</h1>
+  <%= f.govuk_text_field :ott_key_description, width: 'two-thirds', label: nil, hint: { text: "Use a description you will recognise in the future so that you know which system or developer is using this OTT API key. Do not reuse the same description across OTT API keys." } %>
+  <div class="govuk-button-group">
+    <%= f.govuk_submit "Continue" %>
+    <%= govuk_link_to('Cancel', ott_keys_path) %>
+  </div>
+<% end %>

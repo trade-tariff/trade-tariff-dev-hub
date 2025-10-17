@@ -72,6 +72,8 @@ RSpec.describe RefreshData do
             "organisation_name" => "org-name",
             "status" => "authorised",
             "uk_acs_reference" => "uk-acs-ref",
+            "fpo_access" => false,
+            "ott_access" => false,
             "created_at" => "2022-01-01T00:00:00.000Z",
             "updated_at" => be_present,
           }),
