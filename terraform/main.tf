@@ -1,5 +1,5 @@
 module "service" {
-  source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v1.18.1"
+  source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v1.18.2"
 
   region = var.region
 
@@ -38,4 +38,6 @@ module "service" {
   ]
 
   service_environment_config = local.secret_env_vars
+
+  sns_topic_arns = [data.aws_sns_topic.slack_topic.arn]
 }
