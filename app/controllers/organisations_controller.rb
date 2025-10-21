@@ -4,7 +4,7 @@ class OrganisationsController < AuthenticatedController
   def show
     @organisation = organisation
     @users = @organisation.users
-    @invitations = @organisation.invitations
+    @invitations = @organisation.invitations.reject(&:accepted?)
   end
 
   def edit

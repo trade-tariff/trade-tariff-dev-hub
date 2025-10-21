@@ -6,7 +6,7 @@ RSpec.describe Invitation, type: :model do
 
     it "defines a validating enum" do
       expect(invitation).to define_enum_for(:status)
-        .with_values(pending: "pending", accepted: "accepted", declined: "declined", expired: "expired", revoked: "revoked")
+        .with_values(pending: "pending", accepted: "accepted", revoked: "revoked")
         .with_default("pending")
         .backed_by_column_of_type(:enum)
     end
@@ -32,6 +32,23 @@ RSpec.describe Invitation, type: :model do
       invitation.invitee_email = "foo@bar.com"
       expect(invitation).not_to be_valid
       expect(invitation.errors[:invitee_email]).to include("This email address has already been invited to an organisation")
+    end
+
+    context "when an invitation exists with the same email but is revoked" do
+      it "allows creating a new invitation" do
+        create(:invitation, invitee_email: "foo@bar.com", status: "revoked")
+        invitation.invitee_email = "foo@bar.com"
+        expect(invitation).to be_valid
+      end
+    end
+
+    context "when validating an updated record" do
+      it "does not validate uniqueness of invitee_email" do
+        existing_invitation = create(:invitation, invitee_email: "foo@bar.com", status: "pending")
+        existing_invitation.status = "accepted"
+        expect(existing_invitation).to be_valid
+        existing_invitation.save!
+      end
     end
   end
 end

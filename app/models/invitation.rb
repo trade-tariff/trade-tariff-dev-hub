@@ -5,13 +5,10 @@ class Invitation < ApplicationRecord
   belongs_to :user
 
   validate :validate_invitee_email
-  validates :invitee_email, uniqueness: { case_sensitive: false }
 
   enum :status, {
-    pending: "pending",
     accepted: "accepted",
-    declined: "declined",
-    expired: "expired",
+    pending: "pending",
     revoked: "revoked",
   }, default: "pending"
 
@@ -21,5 +18,16 @@ class Invitation < ApplicationRecord
     else
       errors.add(:invitee_email, :invalid_format) unless invitee_email.match?(URI::MailTo::EMAIL_REGEXP)
     end
+
+    return unless new_record?
+
+    errors.add(:invitee_email, :taken) if active_invitation.present?
+  end
+
+  def active_invitation
+    @active_invitation ||= Invitation.order(updated_at: :desc)
+      .where.not(status: "revoked")
+      .where("LOWER(invitee_email) = ?", invitee_email.downcase)
+      .first
   end
 end

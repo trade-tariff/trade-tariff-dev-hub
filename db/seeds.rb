@@ -36,21 +36,22 @@ if Rails.env.development?
   organisation.assign_role!("ott:full")
 
   Invitation.find_or_create_by!(
-    invitee_email: "wilfred.salience@esquire.com",
-    organisation: organisation,
-    user: user,
-  )
-  Invitation.find_or_create_by!(
     invitee_email: "jeremy.bentham@philos101.com",
     organisation: organisation,
     user: user,
     status: "accepted",
   )
   Invitation.find_or_create_by!(
+    invitee_email: "wilfred.salience@esquire.com",
+    organisation: organisation,
+    user: user,
+    status: "pending",
+  )
+  Invitation.find_or_create_by!(
     invitee_email: "isaac.asimov@foundation.hist",
     organisation: organisation,
     user: user,
-    status: "expired",
+    status: "revoked",
   )
 
   User.find_or_create_by!(
@@ -64,7 +65,7 @@ if Rails.env.development?
     CreateApiKey.new.call("local-development", "staging API key")
     CreateApiKey.new.call("local-development", "production API key")
   else
-    ApiKey.create(
+    ApiKey.find_or_create_by!(
       organisation_id: organisation.id,
       description: "development API key",
       api_key_id: "development-api-key",
@@ -72,7 +73,7 @@ if Rails.env.development?
       secret: "foo",
       usage_plan_id: "usage-plan-id",
     )
-    ApiKey.create(
+    ApiKey.find_or_create_by!(
       organisation_id: organisation.id,
       description: "staging API key",
       api_key_id: "staging-api-key",
@@ -80,7 +81,7 @@ if Rails.env.development?
       secret: "foo",
       usage_plan_id: "usage-plan-id",
     )
-    ApiKey.create(
+    ApiKey.find_or_create_by!(
       organisation_id: organisation.id,
       description: "production API key",
       api_key_id: "production-api-key",

@@ -2,8 +2,6 @@ module InvitationsHelper
   STATUS_TAG_COLOURS = {
     "Accepted" => "green",
     "Pending" => "blue",
-    "Expired" => "grey",
-    "Declined" => "red",
     "Revoked" => "grey",
   }.freeze
 
@@ -19,10 +17,6 @@ module InvitationsHelper
     if invitation.pending?
       actions << govuk_link_to("Resend", resend_invitation_path(invitation), no_visited_state: true)
       actions << govuk_link_to("Revoke", edit_invitation_path(invitation), no_visited_state: true)
-    end
-
-    if invitation.expired?
-      actions << govuk_link_to("Resend", resend_invitation_path(invitation), no_visited_state: true)
     end
 
     safe_join(actions, tag.br)

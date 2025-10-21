@@ -17,7 +17,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_13_084519) do
 
   # Custom types defined in this database.
   # Note that some types may not work with other database engines. Be careful if changing database.
-  create_enum "invitation_status", ["pending", "accepted", "declined", "expired", "revoked"]
+  create_enum "invitation_status", ["accepted", "pending", "revoked"]
 
   create_table "api_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "organisation_id", null: false
@@ -40,7 +40,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_13_084519) do
     t.enum "status", default: "pending", null: false, enum_type: "invitation_status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["invitee_email"], name: "index_invitations_on_invitee_email", unique: true
+    t.index ["invitee_email"], name: "index_invitations_on_invitee_email"
     t.index ["organisation_id"], name: "index_invitations_on_organisation_id"
     t.index ["user_id"], name: "index_invitations_on_user_id"
   end
