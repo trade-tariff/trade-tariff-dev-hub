@@ -23,7 +23,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_13_084519) do
     t.uuid "organisation_id", null: false
     t.string "api_key_id", null: false
     t.string "api_gateway_id", null: false
-    t.boolean "enabled", default: true
+    t.boolean "enabled"
     t.string "secret", null: false
     t.string "usage_plan_id", null: false
     t.string "description", null: false
@@ -51,10 +51,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_13_084519) do
     t.string "description"
     t.string "eori_number"
     t.string "organisation_name"
+    t.integer "status"
     t.string "uk_acs_reference"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "status"
   end
 
   create_table "organisations_roles", id: false, force: :cascade do |t|
@@ -76,10 +76,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_13_084519) do
   create_table "sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "token", null: false
     t.uuid "user_id", null: false
+    t.datetime "expires_at"
     t.jsonb "raw_info"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.datetime "expires_at"
     t.text "id_token", null: false
     t.index ["token"], name: "index_sessions_on_token", unique: true
     t.index ["user_id"], name: "index_sessions_on_user_id"
