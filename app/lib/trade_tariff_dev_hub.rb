@@ -88,7 +88,15 @@ module TradeTariffDevHub
     end
 
     def base_domain
-      @base_domain ||= ENV["GOVUK_APP_DOMAIN"].sub("hub.", "")
+      @base_domain ||= begin
+        domain = ENV["GOVUK_APP_DOMAIN"]
+
+        unless /(http(s?):).*/.match(domain)
+          domain = "https://#{domain}"
+        end
+
+        URI.parse(domain).host.sub("hub.", "")
+      end
     end
   end
 end
