@@ -27,12 +27,17 @@ class Organisation < ApplicationRecord
   class << self
     def find_or_associate_implicit_organisation_to(user)
       if user.organisation.blank?
-        invitation = Invitation.find_by(invitee_email: user.email_address)
+        invitation = Invitation.find_by(
+          invitee_email: user.email_address,
+          status: :pending,
+        )
 
         if invitation.present?
-          user.organisation = invitation.organisation
-          invitation.accepted!
-          user.save!
+          User.transaction do
+            user.organisation = invitation.organisation
+            invitation.accepted!
+            user.save!
+          end
         else
           new(organisation_name: user.email_address).tap do |organisation|
             organisation.description = "Default implicit organisation for initial user #{user.email_address}"

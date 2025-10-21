@@ -23,7 +23,7 @@
     </p>
 
     <p class="govuk-body">
-      They are designed to support developers, product managers, and compliance specialists building tools and services around UK trade.
+      This service allows you to manage your API keys and overall access to the available APIs including:
     </p>
 
     <h3 class="govuk-heading-m">Available APIs</h3>
@@ -39,6 +39,8 @@
         <%= tag.strong("Fast Parcel Operator (FPO) API") %> – Identify likely commodity codes from product descriptions to support rapid customs processing.
       <% end %>
     <% end %>
+
+    <%= govuk_start_button(text: "Start now", href: api_keys_path) %>
 
     <h3 class="govuk-heading-m">Who this service is for</h3>
     <p class="govuk-body">
@@ -57,10 +59,10 @@
       provide consistent and authoritative data from HMRC’s Online Trade Tariff.
     </p>
 
-    <h3 class="govuk-heading-m">Get started</h3>
+    <h3 class="govuk-heading-m">Getting started</h3>
 
     <p class="govuk-body">
-      Create an account to generate, view and manage your API keys. Once signed in, you can:
+      With an account you can generate, view and manage your API keys.
     </p>
 
     <%= govuk_list [
@@ -68,13 +70,11 @@
       "View interactive documentation and changelogs",
       "Manage credentials and rate limits",
       "Update your user profile and organisation details",
-      "Invite colleagues to join your organisation for shared access and
-management",
       ], type: :bullet
     %>
 
-    <p class="govuk-body">Registration is free and ensures you receive higher limits, proactive updates, and a smoother developer experience.</p>
+    <p class="govuk-body">You can set up an organisation account using a single shared company profile.</p>
 
-    <%= govuk_start_button(text: "Start now", href: api_keys_path) %>
+    <p class="govuk-body">Additional users can be invited or removed from the organisation account.</p>
   </div>
 </div>

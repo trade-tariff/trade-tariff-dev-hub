@@ -34,7 +34,7 @@ module TradeTariffDevHub
     end
 
     def application_support_email
-      @application_support_email ||= ENV["APPLICATION_SUPPORT_EMAIL"]
+      @application_support_email ||= ENV["APPLICATION_SUPPORT_EMAIL"] || "dev@example.com"
     end
 
     def cors_host

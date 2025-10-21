@@ -8,6 +8,8 @@ en:
               invalid_format: Enter a properly formatted email address
               blank: Enter an email address
               taken: This email address has already been invited to an organisation
+              already_member: This email address is already associated with a member of your organisation
+              member_elsewhere: This email address is already associated with a member of another organisation
         organisation:
           attributes:
             organisation_name:
