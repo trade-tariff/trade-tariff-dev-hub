@@ -56,12 +56,4 @@ private
   def allowed?
     current_user.organisation == organisation || current_user.admin?
   end
-
-  def organisation
-    if current_user.admin?
-      @organisation ||= Organisation.find_by(id: params[:id])
-    else
-      super
-    end
-  end
 end

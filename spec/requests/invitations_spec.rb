@@ -13,6 +13,22 @@ RSpec.describe "Invitations", type: :request do
       expect(response.body).to include('action="/invitations"')
       expect(response.body).to include('method="post"')
     end
+
+    context "when the organisation user is an admin" do
+      let(:current_user) { create(:user, organisation: create(:organisation, :admin)) }
+
+      it "renders the new invitation form", :aggregate_failures do
+        get new_invitation_path
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Enter the email address")
+      end
+
+      it "includes the correct action URL", :aggregate_failures do
+        get new_invitation_path
+        expect(response.body).to include('action="/invitations"')
+        expect(response.body).to include('method="post"')
+      end
+    end
   end
 
   describe "POST /invitations" do
