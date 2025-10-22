@@ -2,6 +2,11 @@
 
 <p class="govuk-body">Manage your organisation memberships and invitations.</p>
 
+<%= govuk_notification_banner(title_text: "Important") do |nb| %>
+  <%- nb.with_heading(text: "Invitation notifications are under maintenance.") %>
+  <p>Please communicate invitations to the relevant people once created. Feel free to contact our <%= mail_to TradeTariffDevHub.application_support_email, "support email" %></p>
+<% end %>
+
 <%= govuk_summary_list do |summary_list| %>
   <%- summary_list.with_row do |row| %>
     <% row.with_key(text: 'Organisation name') %>

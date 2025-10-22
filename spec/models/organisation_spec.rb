@@ -92,6 +92,36 @@ RSpec.describe Organisation, type: :model do
         expect { find_or_associate_implicit_organisation_to }.not_to change(described_class, :count)
       end
     end
+
+    context "when the user does not have an organisation but an invitation exists with a non-pending status" do
+      subject(:find_or_associate_implicit_organisation_to) { described_class.find_or_associate_implicit_organisation_to(user) }
+
+      let!(:user) { build(:user, organisation: nil, email_address: "foo@bar.com") }
+      let(:existing_user) { create(:user, email_address: "baz@bar.com") }
+
+      before do
+        create(
+          :invitation,
+          invitee_email: user.email_address,
+          organisation: existing_user.organisation,
+          status: :revoked,
+          user: existing_user,
+        )
+      end
+
+      it "accepts the invitation" do
+        expect { find_or_associate_implicit_organisation_to }.not_to(change { Invitation.accepted.count })
+      end
+
+      it "associates the existing organisation to the new user", :aggregate_failures do
+        expect { find_or_associate_implicit_organisation_to }.to change(described_class, :count)
+        expect(user.organisation).not_to eq(existing_user.organisation)
+      end
+
+      it "creates a new organisation" do
+        expect { find_or_associate_implicit_organisation_to }.to change(described_class, :count)
+      end
+    end
   end
 
   describe "#admin?" do

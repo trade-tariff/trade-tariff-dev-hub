@@ -50,5 +50,25 @@ RSpec.describe Invitation, type: :model do
         existing_invitation.save!
       end
     end
+
+    context "when the invitee_email belongs to an existing user associated with a different organisation" do
+      it "adds an error indicating the user is a member elsewhere", :aggregate_failures do
+        organisation = create(:organisation)
+        create(:user, email_address: "foo@bar.com", organisation: organisation)
+        invitation.invitee_email = "foo@bar.com"
+        expect(invitation).not_to be_valid
+        expect(invitation.errors[:invitee_email]).to include("This email address is already associated with a member of another organisation")
+      end
+    end
+
+    context "when the invitee_email belongs to an existing user associated with the current organisation" do
+      it "adds an error indicating the user is already a member", :aggregate_failures do
+        user = create(:user, email_address: "foo@bar.com")
+        invitation.invitee_email = "foo@bar.com"
+        invitation.organisation = user.organisation
+        expect(invitation).not_to be_valid
+        expect(invitation.errors[:invitee_email]).to include("This email address is already associated with a member of your organisation")
+      end
+    end
   end
 end

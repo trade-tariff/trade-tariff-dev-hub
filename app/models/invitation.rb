@@ -19,9 +19,17 @@ class Invitation < ApplicationRecord
       errors.add(:invitee_email, :invalid_format) unless invitee_email.match?(URI::MailTo::EMAIL_REGEXP)
     end
 
-    return unless new_record?
+    if new_record? && active_invitation.present?
+      errors.add(:invitee_email, :taken)
+    end
 
-    errors.add(:invitee_email, :taken) if active_invitation.present?
+    if active_membership.present? && active_membership.organisation_id == organisation_id
+      errors.add(:invitee_email, :already_member)
+    end
+
+    if active_membership.present? && active_membership.organisation_id != organisation_id
+      errors.add(:invitee_email, :member_elsewhere)
+    end
   end
 
   def active_invitation
@@ -29,5 +37,9 @@ class Invitation < ApplicationRecord
       .where.not(status: "revoked")
       .where("LOWER(invitee_email) = ?", invitee_email.downcase)
       .first
+  end
+
+  def active_membership
+    @active_membership ||= User.where("LOWER(email_address) = ?", invitee_email.downcase).first
   end
 end
