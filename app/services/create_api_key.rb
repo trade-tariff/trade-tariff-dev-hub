@@ -71,8 +71,8 @@ private
   end
 
   def find_or_create_usage_plan(api_key)
-    find_usage_plan(api_key.organisation.organisation_id) ||
-      create_usage_plan(api_key.organisation.organisation_id)
+    find_usage_plan(api_key.organisation.id) ||
+      create_usage_plan(api_key.organisation.id)
   end
 
   def find_usage_plan(organisation_id)
