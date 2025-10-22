@@ -4,7 +4,7 @@
 
 <%= govuk_notification_banner(title_text: "Important") do |nb| %>
   <%- nb.with_heading(text: "Invitation notifications are under maintenance.") %>
-  <p>Please communicate invitations to the relevant people once created. Feel free to contact our <%= mail_to TradeTariffDevHub.application_support_email, "support email" %></p>
+  <p>Please communicate invitations to the relevant people once created. Once invited a user will automatically be associated with your organisation when they try to login with their email. Feel free to contact our <%= mail_to TradeTariffDevHub.application_support_email, "support email" %></p>
 <% end %>
 
 <%= govuk_summary_list do |summary_list| %>
