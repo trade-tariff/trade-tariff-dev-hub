@@ -15,8 +15,8 @@ class SessionsController < ApplicationController
     redirect_to root_path, alert: "Authentication failed. Please try again."
   end
 
-  def failure
-    Rails.logger.error("Authentication failure: #{params[:message]}")
+  def invalid
+    Rails.logger.error("Authentication failure #{params[:message]}")
     redirect_to root_path, alert: "Authentication failed. Please try again."
   end
 

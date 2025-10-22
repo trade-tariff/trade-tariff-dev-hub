@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   root "homepage#index"
 
   get '/auth/redirect', to: 'sessions#handle_redirect'
-  get '/auth/failure', to: 'sessions#failure'
+  get '/auth/invalid', to: 'sessions#invalid'
   get '/auth/logout', to: 'sessions#destroy', as: :logout
 
   resources :organisations, only: %i[index show edit update]

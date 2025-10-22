@@ -77,4 +77,12 @@ RSpec.describe "Sessions", type: :request do
       expect { get logout_path }.to change { cookies[:refresh_token] }.from("some-refresh-token").to("")
     end
   end
+
+  describe "GET /auth/invalid" do
+    it "redirects to the root path", :aggregate_failures do
+      get auth_invalid_path
+      expect(response).to redirect_to(root_path)
+      expect(flash[:alert]).to eq("Authentication failed. Please try again.")
+    end
+  end
 end
