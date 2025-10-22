@@ -2,7 +2,7 @@ RSpec.describe CreateApiKey do
   subject(:create_api_key) { described_class.new(api_gateway_client) }
 
   let(:api_gateway_client) { Aws::APIGateway::Client.new(stub_responses: true) }
-  let(:organisation) { create(:organisation, organisation_id: "org-123") }
+  let(:organisation) { create(:organisation) }
   let(:description) { "Test API Key" }
 
   describe "#call" do
@@ -18,7 +18,7 @@ RSpec.describe CreateApiKey do
       api_gateway_client.stub_responses(
         :get_usage_plans,
         items: [
-          { id: "usage-plan-id-456", name: "org-123" },
+          { id: "usage-plan-id-456", name: organisation.id },
         ],
         position: nil,
       )
