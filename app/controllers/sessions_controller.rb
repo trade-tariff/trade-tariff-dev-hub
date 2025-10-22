@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 class SessionsController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: :handle_redirect
-
   def handle_redirect
+    return redirect_to api_keys_path if already_authenticated?
+
+    return redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if user.nil?
+
     create_user_session!
     session[:token] = session_token
 
@@ -13,18 +15,19 @@ class SessionsController < ApplicationController
     redirect_to root_path, alert: "Authentication failed. Please try again."
   end
 
-  def failure
-    Rails.logger.error("Authentication failure: #{request.env['omniauth.error']}")
+  def invalid
+    Rails.logger.error("Authentication failure #{params[:message]}")
     redirect_to root_path, alert: "Authentication failed. Please try again."
   end
 
   def destroy
     user_session&.destroy!
 
-    session[:user_profile] = nil
     session[:token] = nil
+    cookies.delete(:id_token, domain: TradeTariffDevHub.identity_cookie_domain)
+    cookies.delete(:refresh_token, domain: TradeTariffDevHub.identity_cookie_domain)
 
-    redirect_to "/auth/openid_connect/logout"
+    redirect_to root_path, notice: "You have been logged out."
   end
 
 private
@@ -33,13 +36,8 @@ private
     Session.create!(
       user: user,
       token: session_token,
-      expires_at: Time.zone.at(raw_info.exp.to_i),
-      raw_info: raw_info.as_json,
+      id_token: id_token,
     )
-  end
-
-  def raw_info
-    @raw_info ||= request.env["omniauth.auth"].extra.raw_info
   end
 
   def session_token
@@ -47,10 +45,22 @@ private
   end
 
   def user
-    @user ||= User.from_profile!(raw_info)
+    @user ||= User.from_passwordless_payload!(decoded_id_token) if decoded_id_token
+  end
+
+  def decoded_id_token
+    @decoded_id_token ||= VerifyToken.new(id_token).call
+  end
+
+  def id_token
+    @id_token ||= cookies[:id_token]
   end
 
   def user_session
     Session.find_by(token: session[:token])
+  end
+
+  def already_authenticated?
+    user_session.present? && !user_session.renew?
   end
 end

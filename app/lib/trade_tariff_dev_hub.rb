@@ -1,7 +1,7 @@
 module TradeTariffDevHub
   class << self
-    def scp_enabled?
-      ENV.fetch("SCP_ENABLED", "true") == "true"
+    def identity_authentication_enabled?
+      @identity_authentication_enabled ||= ENV.fetch("IDENTITY_AUTHENTICATION_ENABLED", "true") == "true"
     end
 
     def deletion_enabled?
@@ -29,28 +29,12 @@ module TradeTariffDevHub
       )
     end
 
-    def eori_lookup_url
-      ENV.fetch("EORI_LOOKUP_URL", "https://test-api.service.hmrc.gov.uk/customs/eori/lookup/check-multiple-eori")
-    end
-
     def govuk_notifier_api_key
       @govuk_notifier_api_key ||= ENV["GOVUK_NOTIFY_API_KEY"]
     end
 
     def application_support_email
-      @application_support_email ||= ENV["APPLICATION_SUPPORT_EMAIL"]
-    end
-
-    def govuk_notifier_registration_template_id
-      ENV["REGISTRATION_TEMPLATE_ID"]
-    end
-
-    def govuk_notifier_application_template_id
-      ENV["SUPPORT_TEMPLATE_ID"]
-    end
-
-    def send_emails?
-      ENV.fetch("SEND_EMAILS", "true") == "true"
+      @application_support_email ||= ENV["APPLICATION_SUPPORT_EMAIL"] || "dev@example.com"
     end
 
     def cors_host
@@ -93,6 +77,26 @@ module TradeTariffDevHub
       URI(identity_cognito_jwks_url).tap { |uri|
         uri.path = "/#{uri.path.split('/').find(&:present?)}"
       }.to_s
+    end
+
+    def identity_cookie_domain
+      @identity_cookie_domain ||= if Rails.env.production?
+                                    return ".#{base_domain}"
+                                  else
+                                    :all
+                                  end
+    end
+
+    def base_domain
+      @base_domain ||= begin
+        domain = ENV["GOVUK_APP_DOMAIN"]
+
+        unless /(http(s?):).*/.match(domain)
+          domain = "https://#{domain}"
+        end
+
+        URI.parse(domain).host.sub("hub.", "")
+      end
     end
   end
 end

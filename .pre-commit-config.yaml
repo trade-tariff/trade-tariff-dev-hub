@@ -19,11 +19,6 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
 
-  - repo: https://github.com/trufflesecurity/trufflehog
-    rev: v3.90.11
-    hooks:
-      - id: trufflehog
-
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.45.0
     hooks:
@@ -45,3 +40,12 @@ repos:
     rev: v1.7.8
     hooks:
       - id: actionlint-docker
+
+  - repo: local
+    hooks:
+      - id: trufflehog
+        name: TruffleHog
+        description: Detect secrets in your repo
+        entry: bash -c '.github/bin/trufflehog'
+        language: system
+        stages: ["pre-commit", "pre-push"]

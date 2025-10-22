@@ -1,35 +1,8 @@
 RSpec.describe "Sessions", type: :request do
   include_context "with authenticated user"
 
-  let(:organisation) { create(:organisation, status: :unregistered) }
-
   describe "GET /auth/redirect" do
-    before do
-      # rubocop:disable RSpec/AnyInstance
-      allow_any_instance_of(ActionDispatch::Request).to receive(:env).and_wrap_original do |original_method, *args|
-        env = original_method.call(*args)
-
-        env["omniauth.auth"] = omniauth_auth_hash
-        env
-      end
-      # rubocop:enable RSpec/AnyInstance
-    end
-
-    let(:omniauth_auth_hash) do
-      OmniAuth::AuthHash.new(
-        "extra" => {
-          "raw_info" => {
-            "bas:groupId" => organisation_id,
-            "email" => current_user.email_address,
-            "sub" => user_id,
-            "exp" => 1.hour.from_now.to_i,
-          },
-        },
-      )
-    end
-
-    let(:user_id) { current_user.user_id }
-    let(:organisation_id) { current_user.organisation.organisation_id }
+    let(:extra_session) { {} }
 
     it "creates a Session" do
       expect { get auth_redirect_path }.to change(Session, :count).by(1)
@@ -40,7 +13,7 @@ RSpec.describe "Sessions", type: :request do
       expect(response).to redirect_to(api_keys_path)
     end
 
-    it "sets the session", :aggregate_failures do
+    it "sets the session token" do
       get auth_redirect_path
       expect(session[:token]).to be_a_uuid
     end
@@ -54,8 +27,7 @@ RSpec.describe "Sessions", type: :request do
     end
 
     context "when the user does not exist" do
-      let(:user_id) { "non-existent-user" }
-      let(:organisation_id) { "non-existent-organisation" }
+      let(:email_address) { "non-existing@bar.com" }
 
       it "creates a new user" do
         expect { get auth_redirect_path }.to change(User, :count).by(1)
@@ -65,59 +37,52 @@ RSpec.describe "Sessions", type: :request do
         expect { get auth_redirect_path }.to change(Organisation, :count).by(1)
       end
     end
-  end
 
-  describe "GET /auth/failure" do
-    before do
-      # rubocop:disable RSpec/AnyInstance
-      allow_any_instance_of(ActionDispatch::Request).to receive(:env).and_wrap_original do |original_method, *args|
-        env = original_method.call(*args)
-        env["omniauth.error"] = omniauth_auth_hash
-        env
+    context "when the session token is already set" do
+      let(:extra_session) { { token: "existing-token" } }
+
+      before do
+        create(:session, token: "existing-token", user: current_user)
       end
-      # rubocop:enable RSpec/AnyInstance
-    end
 
-    let(:omniauth_auth_hash) do
-      OmniAuth::AuthHash.new(
-        "error" => "invalid_request",
-        "error_description" => "The request is invalid",
-        "error_reason" => "invalid_request",
-        "error_uri" => "https://example.com/error",
-      )
-    end
-
-    it "redirects the user to the root path" do
-      get auth_failure_path
-
-      expect(response).to redirect_to(root_path)
-    end
-
-    it "logs the error" do
-      allow(Rails.logger).to receive(:error)
-
-      get auth_failure_path
-
-      expect(Rails.logger).to have_received(:error).with("Authentication failure: #{omniauth_auth_hash}")
+      it "does not create a new Session" do
+        expect { get auth_redirect_path }.not_to change(Session, :count)
+      end
     end
   end
 
-  describe "GET /auth/destroy" do
-    include_context "with authenticated user"
-
+  describe "GET /auth/logout" do
     it "destroys the Session" do
       expect { get logout_path }.to change(Session, :count).by(-1)
     end
 
-    it "clears the session", :aggregate_failures do
+    it "clears the session" do
       get logout_path
       expect(session[:token]).to be_nil
     end
 
-    it "redirects to the provider logout path" do
+    it "redirects to the root path" do
       get logout_path
 
-      expect(response).to redirect_to("/auth/openid_connect/logout")
+      expect(response).to redirect_to(root_path)
+    end
+
+    it "deletes the id_token cookie" do
+      cookies[:id_token] = "some-id-token"
+      expect { get logout_path }.to change { cookies[:id_token] }.from("some-id-token").to("")
+    end
+
+    it "deletes the refresh_token cookie" do
+      cookies[:refresh_token] = "some-refresh-token"
+      expect { get logout_path }.to change { cookies[:refresh_token] }.from("some-refresh-token").to("")
+    end
+  end
+
+  describe "GET /auth/invalid" do
+    it "redirects to the root path", :aggregate_failures do
+      get auth_invalid_path
+      expect(response).to redirect_to(root_path)
+      expect(flash[:alert]).to eq("Authentication failed. Please try again.")
     end
   end
 end

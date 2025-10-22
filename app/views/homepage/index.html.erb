@@ -1,35 +1,80 @@
 <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-      <h1 class="govuk-heading-xl">UK Trade Tariff Developer Portal</h1>
-      <p class="govuk-body">This service allows you to create API keys to access the FPO Commodity Code Identification Tool API</p>
+  <%= govuk_notification_banner(title_text: "Important") do |nb| %>
+    <%- nb.with_heading(text: "Developer Portal has moved to passwordless sign-in.") %>
+    <p>You can now access this service using a secure one-time link sent to your email—no password required.</p>
+    <p>It's faster and easier to use.</p>
+  <% end %>
 
-      <%= carrier_scheme_inset_text %>
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">UK Trade Tariff Developer Portal</h1>
 
-      <p class="govuk-body">You can use this service to:</p>
-      <%= govuk_list [
-        "create an API key for yourself",
-        "create an API key for someone else in your organisation",
-        "revoke an API key",
-        "view active API keys",
-      ], type: :bullet %>
+    <p class="govuk-body">
+      Welcome to the official GOV.UK Developer Portal for HMRC Trade Tariff APIs.
+    </p>
 
-      <p class="govuk-body">
-          You'll need a Government Gateway account to use this service. If you do not have a Government Gateway account, you can create one.
-      </p>
+    <p class="govuk-body">
+      This is your central entry point for exploring, testing, and integrating UK tariff data directly from HMRC.
+    </p>
 
-      <p class="govuk-body">If it is your first time registering, you'll also need:</p>
-      <%= govuk_list [
-        "the name of your organisation",
-        "the EORI number of your organisation",
-        "the UK Authorised Carrier Scheme reference number of your organisation",
-        "an email address for essential updates",
-      ], type: :bullet %>
+    <h3 class="govuk-heading-m">What you can do</h3>
 
-      <%= govuk_start_button(text: "Start now", href: api_keys_path) %>
+    <p class="govuk-body">
+      The Trade Tariff APIs provide structured, reliable access to official tariff information — including commodity codes, duty rates, VAT, quotas, and trade measures.
+    </p>
 
-      <h2 class="govuk-heading-m">If you need help</h2>
-      <p class="govuk-body">
-          If you have any further queries relating to the developer portal contact: <%= govuk_link_to "hmrc-trade-tariff-support-g@digital.hmrc.gov.uk", "mailto:hmrc-trade-tariff-support-g@digital.hmrc.gov.uk" %>
-      </p>
-    </div>
+    <p class="govuk-body">
+      This service allows you to manage your API keys and overall access to the available APIs including:
+    </p>
+
+    <h3 class="govuk-heading-m">Available APIs</h3>
+
+    <%= govuk_list type: :bullet  do %>
+      <%= tag.li do %>
+        <%= tag.strong("Categorisation API") %> – Check whether goods qualify for simplified (Green Lane) or standard (Red Lane) processes under the Windsor Framework.
+      <% end %>
+      <%= tag.li do %>
+        <%= tag.strong("Commodity Code API") %> – Retrieve detailed information on commodity codes, including duties, VAT, and restrictions.
+      <% end %>
+      <%= tag.li do %>
+        <%= tag.strong("Fast Parcel Operator (FPO) API") %> – Identify likely commodity codes from product descriptions to support rapid customs processing.
+      <% end %>
+    <% end %>
+
+    <%= govuk_start_button(text: "Start now", href: api_keys_path) %>
+
+    <h3 class="govuk-heading-m">Who this service is for</h3>
+    <p class="govuk-body">
+      Anyone who needs access to UK Trade Tariff data — including:
+    </p>
+
+    <%= govuk_list [
+      "Software developers building customs or logistics integrations.",
+      "Product managers overseeing compliance systems.",
+      "Trade and customs specialists seeking accurate, up-to-date information.",
+      ], type: :bullet
+    %>
+
+    <p class="govuk-body">
+      Whether you are a large enterprise or an independent trader, the APIs
+      provide consistent and authoritative data from HMRC’s Online Trade Tariff.
+    </p>
+
+    <h3 class="govuk-heading-m">Getting started</h3>
+
+    <p class="govuk-body">
+      With an account you can generate, view and manage your API keys.
+    </p>
+
+    <%= govuk_list [
+      "Test APIs in a secure sandbox environment",
+      "View interactive documentation and changelogs",
+      "Manage credentials and rate limits",
+      "Update your user profile and organisation details",
+      ], type: :bullet
+    %>
+
+    <p class="govuk-body">You can set up an organisation account using a single shared company profile.</p>
+
+    <p class="govuk-body">Additional users can be invited or removed from the organisation account.</p>
+  </div>
 </div>

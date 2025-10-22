@@ -2,29 +2,21 @@
 
 class AuthenticatedController < ApplicationController
   before_action :require_authentication,
-                :require_registration,
-                :set_paper_trail_whodunnit
+                :set_paper_trail_whodunnit,
+                :check_roles!
 
 protected
 
   def require_authentication
-    return unless TradeTariffDevHub.scp_enabled?
+    return unless TradeTariffDevHub.identity_authentication_enabled?
+    return if user_session.present? && !user_session.renew?
 
-    return if user_session.present? && !user_session.expired?
-
-    if user_session.present? && user_session.expired?
-      redirect_to logout_path
-    else
-      redirect_to "/auth/openid_connect"
+    if user_session.present?
+      user_session&.destroy!
+      session[:token] = nil
     end
-  end
 
-  def require_registration
-    return unless TradeTariffDevHub.scp_enabled?
-
-    redirect_to user_verification_steps_path if organisation.unregistered?
-    redirect_to completed_user_verification_steps_path if organisation.pending?
-    redirect_to rejected_user_verification_steps_path if organisation.rejected?
+    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
   end
 
   def user_session
@@ -36,7 +28,11 @@ protected
   end
 
   def current_user
-    @current_user ||= user_session.user
+    @current_user ||= if Rails.env.development?
+                        User.dummy_user!
+                      else
+                        user_session.user
+                      end
   end
 
   def organisation_id
@@ -45,6 +41,26 @@ protected
 
   def user_id
     current_user.id
+  end
+
+  def check_roles!
+    disallowed_redirect! unless allowed?
+  end
+
+  def allowed_roles
+    ["ott:full"]
+  end
+
+  def allowed?
+    allowed_roles.none? || allowed_roles.any? { |role| organisation&.has_role?(role) }
+  end
+
+  def refresh_session!
+    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if user.nil?
+  end
+
+  def disallowed_redirect!
+    redirect_to root_path, alert: "Your user <strong>#{current_user&.email_address}</strong> does not have the required permissions to access this section"
   end
 
   helper_method :current_user, :organisation, :user_session
