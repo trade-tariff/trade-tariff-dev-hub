@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_13_084519) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_15_161501) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -23,7 +23,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_13_084519) do
     t.uuid "organisation_id", null: false
     t.string "api_key_id", null: false
     t.string "api_gateway_id", null: false
-    t.boolean "enabled"
+    t.boolean "enabled", default: true
     t.string "secret", null: false
     t.string "usage_plan_id", null: false
     t.string "description", null: false
@@ -55,6 +55,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_13_084519) do
     t.string "uk_acs_reference"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "fpo_access", default: false, null: false
+    t.boolean "ott_access", default: false, null: false
   end
 
   create_table "organisations_roles", id: false, force: :cascade do |t|
@@ -63,6 +65,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_13_084519) do
     t.index ["organisation_id", "role_id"], name: "index_organisations_roles_on_organisation_id_and_role_id", unique: true
     t.index ["organisation_id"], name: "index_organisations_roles_on_organisation_id"
     t.index ["role_id"], name: "index_organisations_roles_on_role_id"
+  end
+
+  create_table "ott_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "client_id", null: false
+    t.string "secret", null: false
+    t.jsonb "scopes", default: []
+    t.uuid "organisation_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "enabled"
+    t.text "description"
+    t.index ["client_id"], name: "index_ott_keys_on_client_id", unique: true
+    t.index ["organisation_id"], name: "index_ott_keys_on_organisation_id"
   end
 
   create_table "roles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -110,6 +125,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_13_084519) do
   add_foreign_key "invitations", "users"
   add_foreign_key "organisations_roles", "organisations"
   add_foreign_key "organisations_roles", "roles"
+  add_foreign_key "ott_keys", "organisations"
   add_foreign_key "sessions", "users"
   add_foreign_key "users", "organisations"
 end
