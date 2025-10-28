@@ -1,3 +1,4 @@
+# Create roles
 [
   {
     name: 'admin',
@@ -16,7 +17,9 @@
     description: 'Full access to SPIMM (Simplified Process for Internal Market Movements) API keys.'
   }
 ].each do |role_attrs|
-  Role.find_or_create_by(role_attrs)
+  Role.find_or_create_by(name: role_attrs[:name]) do |role|
+    role.description = role_attrs[:description]
+  end
 end
 
 if Rails.env.development?
@@ -99,4 +102,30 @@ if Rails.env.development?
     api_key.enabled = false
     api_key.save!
   end
+
+  # Create OTT keys for testing
+  OttKey.find_or_create_by!(
+    organisation_id: organisation.id,
+    description: "development OTT key",
+    client_id: "OTTDEVELOPMENT000001",
+    secret: "dev-ott-secret-key-1234567890abcdef",
+    scopes: %w[read write],
+    enabled: true,
+  )
+  OttKey.find_or_create_by!(
+    organisation_id: organisation.id,
+    description: "staging OTT key",
+    client_id: "OTTSTAGING00000001",
+    secret: "staging-ott-secret-key-1234567890abcdef",
+    scopes: %w[read],
+    enabled: true,
+  )
+  OttKey.find_or_create_by!(
+    organisation_id: organisation.id,
+    description: "production OTT key",
+    client_id: "OTTPRODUCTION00000001",
+    secret: "prod-ott-secret-key-1234567890abcdef",
+    scopes: %w[read write],
+    enabled: false,
+  )
 end
