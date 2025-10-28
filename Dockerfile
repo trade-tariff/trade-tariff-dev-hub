@@ -1,4 +1,4 @@
-ARG RUBY_VERSION=3.4.6
+ARG RUBY_VERSION=3.4.7
 ARG ALPINE_VERSION=3.22
 
 # Build compilation image

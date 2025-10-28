@@ -9,7 +9,7 @@ permissions:
   id-token: write
 
 env:
-  TERRAFORM_VERSION: 1.12.2
+  TERRAFORM_VERSION: 1.13.4
   PYTHON_VERSION: 3
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:17
+        image: postgres:18
         env:
           POSTGRES_USER: postgres
           POSTGRES_DB: tariff_dev_hub_test
