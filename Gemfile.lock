@@ -193,6 +193,7 @@ GEM
       timeout
     net-smtp (0.5.1)
       net-protocol
+    newrelic_rpm (9.22.0)
     nio4r (2.7.4)
     nokogiri (1.18.10-aarch64-linux-gnu)
       racc (~> 1.4)
@@ -418,6 +419,7 @@ DEPENDENCIES
   jwt
   lograge
   logstash-event
+  newrelic_rpm
   paper_trail
   pg
   propshaft
