@@ -42,4 +42,12 @@ class Invitation < ApplicationRecord
   def active_membership
     @active_membership ||= User.where("LOWER(email_address) = ?", invitee_email.downcase).first
   end
+
+  def send_email
+    notification = Notification.build_for_invitation(self)
+
+    return true if Rails.env.development?
+
+    SendNotification.new(notification).call
+  end
 end

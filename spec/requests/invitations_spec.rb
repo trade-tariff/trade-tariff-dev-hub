@@ -35,6 +35,17 @@ RSpec.describe "Invitations", type: :request do
     context "with valid parameters" do
       let(:params) { { invitation: { invitee_email: "foo@bar.com" } } }
 
+      before do
+        stub_request(:post, "#{TradeTariffDevHub.uk_backend_url}/notifications")
+          .to_return(
+            status: 202,
+            body: '{"data":{"id": "beff2bec-b82a-4196-b393-d733394a4ec0","type":"notification"}}',
+            headers: { "Content-Type" => "application/json" },
+          )
+
+        allow(SendNotification).to receive(:new).and_call_original
+      end
+
       it "creates a new invitation" do
         expect { post invitations_path, params: }
           .to change { Invitation.where(invitee_email: "foo@bar.com").count }.by(1)
@@ -45,6 +56,11 @@ RSpec.describe "Invitations", type: :request do
         expect(response).to redirect_to(organisation_path(current_user.organisation))
         follow_redirect!
         expect(response.body).to include("Invitation sent to foo@bar.com")
+      end
+
+      it "sends an invitation email" do
+        post invitations_path, params: params
+        expect(SendNotification).to have_received(:new).with(instance_of(Notification))
       end
     end
 
@@ -107,12 +123,28 @@ RSpec.describe "Invitations", type: :request do
   describe "GET /invitations/:id/resend" do
     let!(:invitation) { create(:invitation, organisation: current_user.organisation, user: current_user, status: "revoked") }
 
+    before do
+      stub_request(:post, "#{TradeTariffDevHub.uk_backend_url}/notifications")
+        .to_return(
+          status: 202,
+          body: '{"data":{"id": "beff2bec-b82a-4196-b393-d733394a4ec0","type":"notification"}}',
+          headers: { "Content-Type" => "application/json" },
+        )
+
+      allow(SendNotification).to receive(:new).and_call_original
+    end
+
     it "resends the invitation and redirects with a success notice", :aggregate_failures do
       get resend_invitation_path(invitation)
       expect(response).to redirect_to(organisation_path(current_user.organisation))
       follow_redirect!
       expect(response.body).to include("Invitation resent to #{invitation.invitee_email}")
       expect(invitation.reload.status).to eq("pending")
+    end
+
+    it "sends an invitation email" do
+      get resend_invitation_path(invitation)
+      expect(SendNotification).to have_received(:new).with(instance_of(Notification))
     end
   end
 end

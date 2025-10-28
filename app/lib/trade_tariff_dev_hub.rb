@@ -1,5 +1,12 @@
 module TradeTariffDevHub
   class << self
+    def govuk_app_domain
+      @govuk_app_domain ||= ENV.fetch(
+        "GOVUK_APP_DOMAIN",
+        "https://localhost:3004",
+      )
+    end
+
     def identity_authentication_enabled?
       @identity_authentication_enabled ||= ENV.fetch("IDENTITY_AUTHENTICATION_ENABLED", "true") == "true"
     end
@@ -97,6 +104,18 @@ module TradeTariffDevHub
 
         URI.parse(domain).host.sub("hub.", "")
       end
+    end
+
+    def revision
+      @revision ||= `cat REVISION 2>/dev/null || echo 'development'`.strip
+    end
+
+    def uk_backend_url
+      @uk_backend_url ||= ENV["UK_BACKEND_URL"]
+    end
+
+    def uk_backend_bearer_token
+      @uk_backend_bearer_token ||= ENV["UK_BACKEND_BEARER_TOKEN"]
     end
   end
 end

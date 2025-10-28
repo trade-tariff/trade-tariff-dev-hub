@@ -71,4 +71,17 @@ RSpec.describe Invitation, type: :model do
       end
     end
   end
+
+  describe "#send_email" do
+    subject(:invitation) { create(:invitation) }
+
+    before do
+      allow(SendNotification).to receive(:new).and_return(instance_double(SendNotification, call: true))
+    end
+
+    it "builds and sends an invitation notification" do
+      invitation.send_email
+      expect(SendNotification).to have_received(:new).with(instance_of(Notification))
+    end
+  end
 end

@@ -32,6 +32,11 @@ jobs:
             "name": "tariff-identity",
             "repo": "trade-tariff/identity",
             "service-names": ["identity"]
+          },
+          {
+            "name": "tariff-backend",
+            "repo": "trade-tariff/trade-tariff-backend",
+            "service-names": ["backend-uk", "worker-uk"]
           }
         ]
       test-flavour: fpo

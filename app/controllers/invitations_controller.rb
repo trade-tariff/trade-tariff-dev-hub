@@ -11,7 +11,13 @@ class InvitationsController < AuthenticatedController
     )
 
     if @invitation.save
-      redirect_to organisation_path(organisation), notice: "Invitation sent to #{@invitation.invitee_email}"
+      if @invitation.send_email
+        Rails.logger.debug "Invitation email sent to #{@invitation.invitee_email}"
+        redirect_to organisation_path(organisation), notice: "Invitation sent to #{@invitation.invitee_email}"
+      else
+        Rails.logger.error "Failed to send invitation email to #{@invitation.invitee_email}"
+        redirect_to organisation_path(organisation), alert: "Failed to send email to #{@invitation.invitee_email}. Please try again later."
+      end
     else
       render :new
     end
@@ -40,11 +46,16 @@ class InvitationsController < AuthenticatedController
     redirect_to organisation_path(organisation), alert: "There was a problem revoking the invitation to #{@invitation&.invitee_email}."
   end
 
-  # TODO: implement resend action
   def resend
     @invitation = Invitation.find_by(id: params[:id], organisation:)
     @invitation.pending!
-    redirect_to organisation_path(organisation), notice: "Invitation resent to #{@invitation.invitee_email}"
+    if @invitation.send_email
+      Rails.logger.debug "Invitation email resent to #{@invitation.invitee_email}"
+      redirect_to organisation_path(organisation), notice: "Invitation resent to #{@invitation.invitee_email}"
+    else
+      Rails.logger.error "Failed to resend invitation email to #{@invitation.invitee_email}"
+      redirect_to organisation_path(organisation), alert: "Failed to resend email to #{@invitation.invitee_email}"
+    end
   end
 
 private
