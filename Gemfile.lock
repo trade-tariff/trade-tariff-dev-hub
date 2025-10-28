@@ -156,6 +156,8 @@ GEM
       reline (>= 0.4.2)
     jmespath (1.6.2)
     json (2.15.1)
+    jsonapi-serializer (2.2.0)
+      activesupport (>= 4.2)
     jwt (3.1.2)
       base64
     language_server-protocol (3.17.0.5)
@@ -307,6 +309,7 @@ GEM
     rspec-expectations (3.13.5)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
+    rspec-json_expectations (2.2.0)
     rspec-mocks (3.13.6)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
@@ -411,6 +414,7 @@ DEPENDENCIES
   govuk-components
   govuk_design_system_formbuilder
   importmap-rails
+  jsonapi-serializer
   jwt
   lograge
   logstash-event
@@ -422,6 +426,7 @@ DEPENDENCIES
   rack-cors
   rails
   rails-controller-testing
+  rspec-json_expectations
   rspec-rails
   rubocop-govuk
   ruby-lsp-rails

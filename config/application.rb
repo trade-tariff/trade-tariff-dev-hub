@@ -46,5 +46,7 @@ module TradeTariffDevHub
                  methods: %i[get options]
       end
     end
+
+    config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
   end
 end
