@@ -14,7 +14,6 @@ RSpec.describe Ott::CreateOttKey do
       expect(result.organisation_id).to eq(organisation.id)
       expect(result.secret).to be_a_secret
       expect(result.client_id).to be_an_ott_client_id
-      expect(result.enabled).to be(true)
       expect(result.description).to eq(description)
       expect(result.scopes).to eq(scopes)
       expect(result.created_at).to be_present

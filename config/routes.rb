@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   get "healthcheckz" => "rails/health#show", as: :rails_health_check
 
   root "homepage#index"
+  post 'switch_user', to: 'homepage#switch_user'
 
   get '/auth/redirect', to: 'sessions#handle_redirect'
   get '/auth/invalid', to: 'sessions#invalid'
@@ -49,6 +50,11 @@ Rails.application.routes.draw do
       end
     end
   end
+
+  namespace :admin do
+    resources :organisations, only: [:index, :show], path: 'organisations'
+  end
+
   get :privacy, to: "pages#privacy"
   get :cookies, to: "pages#cookies"
 
