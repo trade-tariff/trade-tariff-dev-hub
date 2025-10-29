@@ -28,7 +28,7 @@
       if organisation&.ott_access?
         header.with_navigation_item(text: "OTT Keys", href: ott_keys_path, active: current_page?(ott_keys_path))
       end
-      header.with_navigation_item(text: "Manage organisation", href: organisation_path(current_user.organisation), active: false)
+      header.with_navigation_item(text: "Manage organisation", href: organisation_path(current_user.organisation))
       header.with_navigation_item(text: "Sign Out", href: logout_path, active: false)
     end
   end %>

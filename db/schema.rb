@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_15_161501) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_15_153858) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -72,10 +72,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_15_161501) do
     t.string "secret", null: false
     t.jsonb "scopes", default: []
     t.uuid "organisation_id", null: false
+    t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "enabled"
-    t.text "description"
     t.index ["client_id"], name: "index_ott_keys_on_client_id", unique: true
     t.index ["organisation_id"], name: "index_ott_keys_on_organisation_id"
   end

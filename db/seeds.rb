@@ -110,7 +110,6 @@ if Rails.env.development?
     client_id: "OTTDEVELOPMENT000001",
     secret: "dev-ott-secret-key-1234567890abcdef",
     scopes: %w[read write],
-    enabled: true,
   )
   OttKey.find_or_create_by!(
     organisation_id: organisation.id,
@@ -118,7 +117,6 @@ if Rails.env.development?
     client_id: "OTTSTAGING00000001",
     secret: "staging-ott-secret-key-1234567890abcdef",
     scopes: %w[read],
-    enabled: true,
   )
   OttKey.find_or_create_by!(
     organisation_id: organisation.id,
@@ -126,6 +124,5 @@ if Rails.env.development?
     client_id: "OTTPRODUCTION00000001",
     secret: "prod-ott-secret-key-1234567890abcdef",
     scopes: %w[read write],
-    enabled: false,
   )
 end
