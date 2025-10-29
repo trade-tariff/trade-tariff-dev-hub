@@ -7,10 +7,9 @@
 #  secret          :string           not null
 #  scopes          :jsonb            default("[]")
 #  organisation_id :uuid             not null
+#  description     :text
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
-#  enabled         :boolean
-#  description     :text
 #
 # Indexes
 #

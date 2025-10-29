@@ -40,7 +40,7 @@ private
   end
 
   def allowed_roles
-    ["ott:full"]
+    %w[admin]
   end
 
   delegate :deletion_enabled?, to: TradeTariffDevHub
