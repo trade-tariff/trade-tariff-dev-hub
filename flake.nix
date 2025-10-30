@@ -34,7 +34,7 @@
           bundle exec rubocop --autocorrect-all --force-exclusion $changed_files Gemfile
         '';
 
-        postgresql = pkgs.postgresql_17;
+        postgresql = pkgs.postgresql_18;
         psychBuildFlags = with pkgs; [
           "--with-libyaml-include=${libyaml.dev}/include"
           "--with-libyaml-lib=${libyaml.out}/lib"
