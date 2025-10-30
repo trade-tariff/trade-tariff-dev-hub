@@ -38,6 +38,11 @@ class Invitation < ApplicationRecord
       errors.add(:invitee_email, :invalid_format) unless invitee_email.match?(URI::MailTo::EMAIL_REGEXP)
     end
 
+    # Restrict @transformuk.com emails to admin organisations only
+    if invitee_email&.end_with?("@transformuk.com") && !organisation.admin?
+      errors.add(:invitee_email, :admin_only)
+    end
+
     if new_record? && active_invitation.present?
       errors.add(:invitee_email, :taken)
     end

@@ -8,13 +8,7 @@ class OttKeysController < AuthenticatedController
   def new; end
 
   def update
-    if @ott_key.enabled
-      render "revoke"
-    elsif deletion_enabled?
-      render "delete"
-    else
-      raise NotImplementedError, "OTT key deletion is not implemented"
-    end
+    render "revoke"
   end
 
   def create

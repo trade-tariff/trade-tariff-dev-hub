@@ -14,6 +14,8 @@ gem "propshaft"
 gem "puma"
 gem "rack-cors"
 
+gem "pagy"
+
 # GovUK
 gem "govuk-components"
 gem "govuk_design_system_formbuilder"

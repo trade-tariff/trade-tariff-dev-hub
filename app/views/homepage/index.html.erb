@@ -1,4 +1,19 @@
 <div class="govuk-grid-row">
+  <% if Rails.env.development? %>
+    <%= govuk_notification_banner(title_text: "Development") do |nb| %>
+      <%- nb.with_heading(text: "User Switcher") %>
+      <p>Current user: <strong><%= current_user&.email_address %></strong></p>
+      <%= form_with url: switch_user_path, method: :post, local: true, class: "govuk-form-group" do |f| %>
+        <%= f.hidden_field :email, value: "dummy@user.com", id: "user_dummy" %>
+        <%= f.submit "Switch to Dummy User", class: "govuk-button govuk-button--secondary govuk-!-margin-right-2" %>
+      <% end %>
+      <%= form_with url: switch_user_path, method: :post, local: true, class: "govuk-form-group" do |f| %>
+        <%= f.hidden_field :email, value: "dev@transformuk.com", id: "user_admin" %>
+        <%= f.submit "Switch to Admin User", class: "govuk-button govuk-button--secondary" %>
+      <% end %>
+    <% end %>
+  <% end %>
+
   <%= govuk_notification_banner(title_text: "Important") do |nb| %>
     <%- nb.with_heading(text: "Developer Portal has moved to passwordless sign-in.") %>
     <p>You can now access this service using a secure one-time link sent to your email—no password required.</p>
@@ -40,7 +55,7 @@
       <% end %>
     <% end %>
 
-    <%= govuk_start_button(text: "Start now", href: api_keys_path) %>
+    <%= govuk_start_button(text: "Start now", href: organisation&.admin? ? admin_organisations_path : api_keys_path) %>
 
     <h3 class="govuk-heading-m">Who this service is for</h3>
     <p class="govuk-body">

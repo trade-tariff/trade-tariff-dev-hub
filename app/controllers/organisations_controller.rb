@@ -22,7 +22,7 @@ class OrganisationsController < AuthenticatedController
 private
 
   def allowed?
-    current_user.organisation == organisation || current_user.admin?
+    current_user.organisation == organisation
   end
 
   def disallowed_redirect!

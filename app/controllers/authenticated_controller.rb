@@ -29,7 +29,9 @@ protected
 
   def current_user
     @current_user ||= if Rails.env.development?
-                        User.dummy_user!
+                        # Allow switching between users in development via session
+                        session[:dev_user_email] ||= "dev@transformuk.com"
+                        User.find_by(email_address: session[:dev_user_email]) || User.dummy_user!
                       else
                         user_session.user
                       end
@@ -52,6 +54,10 @@ protected
   end
 
   def allowed?
+    # Admins have access to everything
+    return true if organisation&.admin?
+
+    # Otherwise check the specific roles required
     allowed_roles.none? || allowed_roles.any? { |role| organisation&.has_role?(role) }
   end
 

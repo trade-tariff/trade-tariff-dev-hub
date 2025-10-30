@@ -5,8 +5,8 @@ module OttKeysHelper
     "#{ott_key.client_id[0..3]}****#{ott_key.client_id[-4..]}"
   end
 
-  def ott_key_status(ott_key)
-    ott_key.enabled? ? "Active" : "Revoked"
+  def ott_key_status(_ott_key)
+    "Active"
   end
 
   def creation_date(ott_key)

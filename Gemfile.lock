@@ -414,6 +414,7 @@ DEPENDENCIES
   jwt
   lograge
   logstash-event
+  pagy
   paper_trail
   pg
   propshaft

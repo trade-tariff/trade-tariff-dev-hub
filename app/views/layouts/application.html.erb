@@ -22,6 +22,9 @@
 
   <%= govuk_header(homepage_url: ENV.fetch("GOVUK_APP_DOMAIN", "http://localhost:3000"), service_name: "UK Trade Tariff Developer Portal", service_url: "#") do |header|
     if respond_to?(:current_user) && current_user.present?
+      if organisation&.admin?
+        header.with_navigation_item(text: "All Organisations", href: admin_organisations_path, active: current_page?(admin_organisations_path))
+      end
       if organisation&.fpo_access?
         header.with_navigation_item(text: "FPO Keys", href: api_keys_path, active: current_page?(api_keys_path))
       end
