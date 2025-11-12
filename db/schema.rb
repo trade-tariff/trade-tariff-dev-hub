@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_13_084519) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_11_153015) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -31,6 +31,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_13_084519) do
     t.datetime "updated_at", null: false
     t.index ["api_key_id", "organisation_id"], name: "index_api_keys_on_api_key_id_and_organisation_id", unique: true
     t.index ["organisation_id"], name: "index_api_keys_on_organisation_id"
+  end
+
+  create_table "client_rate_limit_tiers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "name", null: false
+    t.integer "refill_rate", null: false
+    t.integer "refill_interval", default: 60, null: false
+    t.integer "refill_max", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_client_rate_limit_tiers_on_name", unique: true
   end
 
   create_table "invitations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
