@@ -8,10 +8,10 @@
 #  description           :string
 #  eori_number           :string
 #  organisation_name     :string
+#  status                :integer
 #  uk_acs_reference      :string
 #  created_at            :datetime         not null
 #  updated_at            :datetime         not null
-#  status                :integer
 #
 
 class Organisation < ApplicationRecord
@@ -20,6 +20,7 @@ class Organisation < ApplicationRecord
   has_many :users, dependent: :destroy
   has_many :invitations, dependent: :destroy
   has_many :api_keys, dependent: :destroy
+  has_many :ott_keys, dependent: :destroy
   has_and_belongs_to_many :roles
 
   validates :organisation_name, presence: true
@@ -59,6 +60,18 @@ class Organisation < ApplicationRecord
     roles.exists?(name: role_name)
   end
 
+  def remove_role_block_reason(role_name)
+    if role_name.start_with?("ott") && ott_keys.active.exists?
+      :ott_keys
+    elsif role_name.start_with?("fpo") && api_keys.active.exists?
+      :active_api_keys
+    end
+  end
+
+  def can_remove_role?(role_name)
+    remove_role_block_reason(role_name).nil?
+  end
+
   def assign_role!(role_name)
     role = Role.find_by!(name: role_name)
 
@@ -73,5 +86,13 @@ class Organisation < ApplicationRecord
 
     roles.delete(role)
     save!
+  end
+
+  def fpo_access?
+    has_role?("fpo:full")
+  end
+
+  def ott_access?
+    has_role?("ott:full")
   end
 end

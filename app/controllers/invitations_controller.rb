@@ -48,13 +48,30 @@ class InvitationsController < AuthenticatedController
 
   def resend
     @invitation = Invitation.find_by(id: params[:id], organisation:)
-    @invitation.pending!
-    if @invitation.send_email
+    if @invitation.nil?
+      redirect_to organisation_path(organisation), alert: "Invitation not found."
+    elsif !@invitation.pending?
+      redirect_to organisation_path(organisation), alert: "Only pending invitations can be resent."
+    elsif @invitation.send_email
       Rails.logger.debug "Invitation email resent to #{@invitation.invitee_email}"
       redirect_to organisation_path(organisation), notice: "Invitation resent to #{@invitation.invitee_email}"
     else
       Rails.logger.error "Failed to resend invitation email to #{@invitation.invitee_email}"
       redirect_to organisation_path(organisation), alert: "Failed to resend email to #{@invitation.invitee_email}"
+    end
+  end
+
+  def destroy
+    @invitation = Invitation.find_by(id: params[:id], organisation:)
+
+    if @invitation.nil?
+      redirect_to organisation_path(organisation), alert: "Invitation not found."
+    elsif @invitation.revoked?
+      invitee = @invitation.invitee_email
+      @invitation.destroy!
+      redirect_to organisation_path(organisation), notice: "Invitation for #{invitee} has been deleted."
+    else
+      redirect_to organisation_path(organisation), alert: "Only revoked invitations can be deleted."
     end
   end
 

@@ -2,65 +2,58 @@
 
 <p class="govuk-body">Manage your organisation memberships and invitations.</p>
 
-<%= govuk_summary_list do |summary_list| %>
-  <%- summary_list.with_row do |row| %>
-    <% row.with_key(text: 'Organisation name') %>
-    <% row.with_value(text: @organisation.organisation_name) %>
-    <% row.with_action(text: 'Change', href: edit_organisation_path(@organisation)) %>
-  <%- end %>
+<%= render 'shared/organisation_details', organisation: @organisation %>
 
-  <%- summary_list.with_row do |row| %>
-    <% row.with_key(text: 'Created on') %>
-    <% row.with_value(text: created_on(@organisation)) %>
-  <%- end %>
+<%= govuk_table do |table| %>
+  <% table.with_caption(size: 'm', text: 'Members') %>
+  <% table.with_head do |head| %>
+    <% head.with_row do |row| %>
+      <% row.with_cell(text: 'Email address') %>
+      <% row.with_cell(text: 'Created') %>
+      <% row.with_cell(text: 'Actions') %>
+    <% end %>
+  <% end %>
+  <% table.with_body do |body| %>
+    <% @users.each do |user| %>
+      <% body.with_row do |row| %>
+        <% row.with_cell(header: true, text: user.email_address) %>
+        <% row.with_cell(text: created_on(user)) %>
+        <% row.with_cell do %>
+          <% if user == current_user %>
+            You
+          <% else %>
+            <%= govuk_link_to 'Remove', remove_user_path(user) %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
 <% end %>
 
-<%= govuk_table do |table|
-  table.with_caption(size: 'm', text: 'Members')
-  table.with_head do |head|
-    head.with_row do |row|
-      row.with_cell(text: 'Email address')
-      row.with_cell(text: 'Created')
-      row.with_cell(text: 'Actions')
-    end
-  end
-  table.with_body do |body|
-    @users.each do |user|
-      body.with_row do |row|
-        row.with_cell(header: true, text: user.email_address)
-        row.with_cell(text: created_on(user))
-        row.with_cell do
-          if user == current_user
-            'You'
-          else
-            govuk_link_to 'Remove', remove_user_path(user)
-          end
-        end
-      end
-    end
-  end
-end %>
+<%= render 'shared/invitations_table', invitations: @invitations, caption: { size: 'm', text: 'Invitations' } %>
 
-<%= govuk_table do |table|
-  table.with_caption(size: 'm', text: 'Invitations')
-  table.with_head do |head|
-    head.with_row do |row|
-      row.with_cell(text: 'Invitee')
-      row.with_cell(text: 'Created')
-      row.with_cell(text: 'Status')
-      row.with_cell(text: 'Actions')
-    end
-  end
-  table.with_body do |body|
-    @invitations.each do |invitation|
-      body.with_row do |row|
-        row.with_cell(header: true, text: invitation.invitee_email)
-        row.with_cell(text: created_on(invitation))
-        row.with_cell(text: invitation_status(invitation))
-        row.with_cell(text: invitation_actions_for(invitation))
-      end
-    end
-  end
-end %>
+<% if @api_keys.present? %>
+  <h2 class="govuk-heading-m">FPO API Keys (<%= @api_keys.count %>)</h2>
+  <%= render 'shared/keys_table',
+             keys: @api_keys,
+             headers: { description: 'Description', identifier: 'API Key ID' },
+             identifier_callable: ->(key) { key.api_key_id },
+             secret_prefix: 'api-key',
+             status_text_callable: ->(key) { key.enabled? ? 'Active' : 'Revoked' },
+             status_colour_callable: ->(key) { key.enabled? ? :active : :revoked },
+             actions_callable: ->(key) { render('shared/api_key_actions', key:) } %>
+<% end %>
+
+<% if @ott_keys.present? %>
+  <h2 class="govuk-heading-m">OTT Keys (<%= @ott_keys.count %>)</h2>
+  <%= render 'shared/keys_table',
+             keys: @ott_keys,
+             headers: { description: 'Description', identifier: 'Client ID' },
+             identifier_callable: ->(key) { key.client_id },
+             secret_prefix: 'ott-key',
+             status_text_callable: ->(key) { key.active? ? 'Active' : 'Revoked' },
+             status_colour_callable: ->(key) { key.active? ? :active : :revoked },
+             actions_callable: ->(key) { render('shared/ott_key_actions', key:) } %>
+<% end %>
 
 <%= govuk_button_link_to 'Invite new member', new_invitation_path %>

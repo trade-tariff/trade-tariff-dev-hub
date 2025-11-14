@@ -121,7 +121,7 @@ RSpec.describe "Invitations", type: :request do
   end
 
   describe "GET /invitations/:id/resend" do
-    let!(:invitation) { create(:invitation, organisation: current_user.organisation, user: current_user, status: "revoked") }
+    let!(:invitation) { create(:invitation, organisation: current_user.organisation, user: current_user, status: "pending") }
 
     before do
       stub_request(:post, "#{TradeTariffDevHub.uk_backend_url}/notifications")

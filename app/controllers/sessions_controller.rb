@@ -2,14 +2,25 @@
 
 class SessionsController < ApplicationController
   def handle_redirect
-    return redirect_to api_keys_path if already_authenticated?
+    if already_authenticated?
+      # User is already authenticated, check if admin and redirect accordingly
+      return redirect_to admin_organisations_path if user_session&.user&.admin?
+
+      return redirect_to api_keys_path
+    end
 
     return redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if user.nil?
 
     create_user_session!
     session[:token] = session_token
 
-    redirect_to api_keys_path
+    # After creating session, check if user is admin and redirect accordingly
+    # Use the user variable directly since we just created the session
+    if user&.admin?
+      redirect_to admin_organisations_path
+    else
+      redirect_to api_keys_path
+    end
   rescue StandardError => e
     Rails.logger.error("Authentication error: #{e.message}")
     redirect_to root_path, alert: "Authentication failed. Please try again."
