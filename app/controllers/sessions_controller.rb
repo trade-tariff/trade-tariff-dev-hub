@@ -8,10 +8,15 @@ class SessionsController < ApplicationController
 
     return redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if user.nil?
 
-    create_user_session!
-    session[:token] = session_token
-
-    redirect_to api_keys_path
+    if params[:state] == session[:state]
+      create_user_session!
+      session[:token] = session_token
+      session.delete(:state)
+      redirect_to api_keys_path
+    else
+      Rails.logger.error("Invalid state parameter.")
+      redirect_to root_path, alert: "Authentication failed. Please try again."
+    end
   rescue StandardError => e
     Rails.logger.error("Authentication error: #{e.message}")
     redirect_to root_path, alert: "Authentication failed. Please try again."
