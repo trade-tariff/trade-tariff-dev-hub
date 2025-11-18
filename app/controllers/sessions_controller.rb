@@ -22,6 +22,11 @@ class SessionsController < ApplicationController
       return redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
     end
 
+    if !params[:state] || params[:state] != session[:state]
+      Rails.logger.error("Invalid state parameter.")
+      return redirect_to root_path, alert: "Authentication failed. Please try again."
+    end
+
     user = User.from_passwordless_payload!(result.payload)
     unless user
       Rails.logger.warn("[Auth] User not found for payload sub: #{result.payload&.dig('sub')}")
@@ -32,6 +37,7 @@ class SessionsController < ApplicationController
     Rails.logger.info("[Auth] Successfully authenticated user: #{user.email_address}")
     create_user_session!(user, result.payload)
     session[:token] = session_token
+    session.delete(:state)
 
     redirect_to organisation_path(user.organisation)
   rescue Organisation::InvitationRequiredError => e

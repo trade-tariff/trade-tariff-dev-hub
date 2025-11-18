@@ -37,7 +37,8 @@ protected
       # Clear session if it exists but authentication check failed
       # (authenticated? handles cookie matching, so if it returned false, session is invalid)
       clear_authentication! if user_session.present?
-      redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
+      session[:state] = state_parameter
+      redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true, state: session[:state]
     end
   end
 
@@ -125,6 +126,10 @@ protected
       clear_authentication!
       redirect_to root_path, alert: "This service is not yet open to the public. If you have any questions please contact us on hmrc-trade-tariff-support-g@digital.hmrc.gov.uk"
     end
+  end
+
+  def state_parameter
+    SecureRandom.hex(16)
   end
 
   helper_method :current_user, :organisation, :user_session
