@@ -33,7 +33,9 @@ protected
       session[:token] = nil
     end
 
-    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
+    session[:state] = state_parameter
+
+    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true, state: session[:state]
   end
 
   def user_session
@@ -93,6 +95,10 @@ protected
 
   def disallowed_redirect!
     redirect_to root_path, alert: "Your user <strong>#{current_user&.email_address}</strong> does not have the required permissions to access this section"
+  end
+
+  def state_parameter
+    SecureRandom.hex(16)
   end
 
   helper_method :current_user, :organisation, :user_session
