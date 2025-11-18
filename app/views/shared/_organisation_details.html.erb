@@ -1,0 +1,15 @@
+<section class="govuk-!-margin-bottom-6">
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-2">Organisation details</h2>
+
+  <%= govuk_summary_list do |summary_list| %>
+    <% summary_list.with_row do |row| %>
+      <% row.with_key(text: 'Organisation name') %>
+      <% row.with_value(text: organisation.organisation_name) %>
+    <% end %>
+
+    <% summary_list.with_row do |row| %>
+      <% row.with_key(text: 'Created on') %>
+      <% row.with_value(text: created_on(organisation)) %>
+    <% end %>
+  <% end %>
+</section>

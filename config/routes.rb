@@ -11,9 +11,11 @@ Rails.application.routes.draw do
   resources :users, only: %i[destroy]
   get 'users/:id/remove', to: 'users#remove', as: :remove_user
 
-  resources :invitations, only: %i[new create destroy edit update] do
+  resources :invitations, only: %i[new create edit update] do
     member do
       get :resend, to: 'invitations#resend', as: :resend
+      get :delete, to: 'invitations#update', as: :delete
+      delete :delete
     end
   end
 
@@ -26,6 +28,31 @@ Rails.application.routes.draw do
         get :delete, to: 'api_keys#update', as: :delete
         delete :delete
       end
+    end
+  end
+
+  resources :ott_keys, only: %i[index new create] do
+    member do
+      get :revoke, to: 'ott_keys#update', as: :revoke
+      patch :revoke
+      get :delete, to: 'ott_keys#update', as: :delete
+      delete :delete
+    end
+  end
+
+  namespace :user_verification do
+    resources :steps, only: %i[show update index] do
+      collection do
+        get :completed
+        get :rejected
+      end
+    end
+  end
+
+  namespace :admin do
+    resources :organisations, only: [:index, :show], path: 'organisations' do
+      post :roles, to: 'organisation_roles#create'
+      delete :roles, to: 'organisation_roles#destroy'
     end
   end
 

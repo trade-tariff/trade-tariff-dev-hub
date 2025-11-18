@@ -11,8 +11,8 @@ class CreateApiKey
   STAGE_NAME = ENV["REST_STAGE_NAME"]
   TAGS = { customer: "fpo" }.freeze
 
-  def initialize(api_gateway_client = Aws::APIGateway::Client.new)
-    @api_gateway_client = api_gateway_client
+  def initialize(api_gateway_client = nil)
+    @api_gateway_client = api_gateway_client || Aws::APIGateway::Client.new
   end
 
   def call(organisation_id, description = nil)
@@ -32,11 +32,10 @@ class CreateApiKey
       if api_key.api_gateway_id
         begin
           api_gateway_client.delete_api_key(api_key_id: api_gateway_id)
-          Rails.logger.info("Deleted API key #{api_key.api_gateway_id} from AWS due to error")
         rescue StandardError => delete_error
           Rails.logger.error("Failed to delete API key #{api_key.api_gateway_id} from AWS: #{delete_error.message}")
         end
-        api_key.destroy! if api_key.persisted? # Shouldn't happen, but just in case
+        api_key.destroy! if api_key.persisted?
       end
 
       raise

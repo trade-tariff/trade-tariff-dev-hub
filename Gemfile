@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 ruby file: ".ruby-version"
 
-gem "rails"
+gem "rails", "~> 8.0.3"
 
 gem "aws-sdk-apigateway"
 gem "faraday"
@@ -15,6 +15,8 @@ gem "pg"
 gem "propshaft"
 gem "puma"
 gem "rack-cors"
+
+gem "pagy"
 
 # GovUK
 gem "govuk-components"

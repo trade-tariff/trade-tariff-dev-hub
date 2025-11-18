@@ -2,7 +2,9 @@
 
 class SessionsController < ApplicationController
   def handle_redirect
-    return redirect_to api_keys_path if already_authenticated?
+    if already_authenticated?
+      return redirect_to api_keys_path
+    end
 
     return redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if user.nil?
 

@@ -21,11 +21,7 @@
   </head>
 
   <%= govuk_header(homepage_url: ENV.fetch("GOVUK_APP_DOMAIN", "http://localhost:3000"), service_name: "UK Trade Tariff Developer Portal", service_url: "#") do |header|
-    if respond_to?(:current_user) && current_user.present?
-      navigation_item_for(header, "FPO Keys", api_keys_path)
-      navigation_item_for(header, "Manage organisation", organisation_path(current_user.organisation))
-      navigation_item_for(header, "Sign Out", logout_path)
-    end
+    render partial: 'layouts/navigation', locals: { header: header }
   end %>
 
   <body class="govuk-template__body app-body-class">

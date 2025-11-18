@@ -1,0 +1,20 @@
+<% if respond_to?(:current_user) && current_user.present? %>
+  <% is_admin = organisation&.admin? %>
+
+  <% if is_admin %>
+    <%= header.with_navigation_item(text: "All Organisations", href: admin_organisations_path, active: current_page?(admin_organisations_path)) %>
+  <% end %>
+
+  <%# Service role navigation (visible to admins AND users with those roles) %>
+  <% if is_admin || organisation&.has_role?("fpo:full") %>
+    <%= header.with_navigation_item(text: "FPO Keys", href: api_keys_path, active: current_page?(api_keys_path)) %>
+  <% end %>
+
+  <% if is_admin || organisation&.has_role?("ott:full") %>
+    <%= header.with_navigation_item(text: "OTT Keys", href: ott_keys_path, active: current_page?(ott_keys_path)) %>
+  <% end %>
+
+  <%# Common navigation (everyone sees these) %>
+  <%= header.with_navigation_item(text: "Manage organisation", href: organisation_path(current_user.organisation)) %>
+  <%= header.with_navigation_item(text: "Sign Out", href: logout_path, active: false) %>
+<% end %>

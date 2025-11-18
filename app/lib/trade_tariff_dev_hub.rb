@@ -117,5 +117,9 @@ module TradeTariffDevHub
     def uk_backend_bearer_token
       @uk_backend_bearer_token ||= ENV["UK_BACKEND_BEARER_TOKEN"]
     end
+
+    def admin_domain
+      @admin_domain ||= ENV.fetch("ADMIN_DOMAIN", "transformuk.com")
+    end
   end
 end
