@@ -8,12 +8,12 @@ class AuthenticatedController < ApplicationController
 
 private
 
-def add_nr_custom_attributes
-  NewRelic::Agent.add_custom_attributes(
-    org_id: organisation.id,
-    client_id: current_user.id
-  )
-end
+  def add_nr_custom_attributes
+    NewRelic::Agent.add_custom_attributes(
+      org_id: organisation&.id,
+      client_id: current_user&.id,
+    )
+  end
 
 protected
 
