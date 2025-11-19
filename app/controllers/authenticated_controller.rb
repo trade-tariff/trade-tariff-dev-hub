@@ -20,7 +20,7 @@ protected
 
     session[:state] = state_parameter
 
-    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true, state: session[:state]
+    redirect_to "#{TradeTariffDevHub.identity_consumer_url}?state=#{state_parameter}", allow_other_host: true
   end
 
   def user_session
@@ -81,7 +81,7 @@ protected
   end
 
   def state_parameter
-    SecureRandom.hex(16)
+    @state_parameter ||= SecureRandom.hex(16)
   end
 
   helper_method :current_user, :organisation, :user_session
