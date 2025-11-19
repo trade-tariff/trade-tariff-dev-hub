@@ -24,6 +24,7 @@ class SessionsController < ApplicationController
     user_session&.destroy!
 
     session[:token] = nil
+
     cookies.delete(:id_token, domain: TradeTariffDevHub.identity_cookie_domain)
     cookies.delete(:refresh_token, domain: TradeTariffDevHub.identity_cookie_domain)
 
