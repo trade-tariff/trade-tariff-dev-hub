@@ -4,6 +4,16 @@ class AuthenticatedController < ApplicationController
   before_action :require_authentication,
                 :set_paper_trail_whodunnit,
                 :check_roles!
+  before_action :add_nr_custom_attributes
+
+private
+
+def add_nr_custom_attributes
+  NewRelic::Agent.add_custom_attributes(
+    org_id: organisation.id,
+    client_id: current_user.id
+  )
+end
 
 protected
 
