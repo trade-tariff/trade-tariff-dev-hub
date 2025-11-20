@@ -7,6 +7,12 @@ Rails.application.routes.draw do
   get '/auth/invalid', to: 'sessions#invalid'
   get '/auth/logout', to: 'sessions#destroy', as: :logout
 
+  if TradeTariffDevHub.dev_bypass_auth_enabled?
+    get '/dev/login', to: 'dev_auth#new', as: :dev_login
+    post '/dev/login', to: 'dev_auth#create'
+    delete '/dev/logout', to: 'dev_auth#destroy', as: :dev_logout
+  end
+
   resources :organisations, only: %i[index show edit update]
   resources :users, only: %i[destroy]
   get 'users/:id/remove', to: 'users#remove', as: :remove_user
