@@ -37,8 +37,7 @@ protected
       # Clear session if it exists but authentication check failed
       # (authenticated? handles cookie matching, so if it returned false, session is invalid)
       clear_authentication! if user_session.present?
-      session[:state] = state_parameter
-      redirect_to "#{TradeTariffDevHub.identity_consumer_url}?state=#{state_parameter}", allow_other_host: true
+      redirect_to TradeTariffDevHub.stateful_identity_consumer_url(session), allow_other_host: true
     end
   end
 
@@ -103,10 +102,6 @@ protected
     allowed_roles.none? || allowed_roles.any? { |role| organisation&.has_role?(role) }
   end
 
-  def refresh_session!
-    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if user.nil?
-  end
-
   def disallowed_redirect!
     redirect_to root_path, alert: "Your user <strong>#{current_user&.email_address}</strong> does not have the required permissions to access this section"
   end
@@ -126,10 +121,6 @@ protected
       clear_authentication!
       redirect_to root_path, alert: "This service is not yet open to the public. If you have any questions please contact us on hmrc-trade-tariff-support-g@digital.hmrc.gov.uk"
     end
-  end
-
-  def state_parameter
-    @state_parameter ||= SecureRandom.hex(16)
   end
 
   helper_method :current_user, :organisation, :user_session
