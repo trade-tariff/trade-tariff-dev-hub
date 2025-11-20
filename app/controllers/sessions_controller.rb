@@ -6,7 +6,9 @@ class SessionsController < ApplicationController
       return redirect_to api_keys_path
     end
 
-    return redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if user.nil?
+    if user.nil?
+      redirect_to TradeTariffDevHub.stateful_identity_consumer_url(session), allow_other_host: true
+    end
 
     if params[:state] == session[:state]
       create_user_session!
