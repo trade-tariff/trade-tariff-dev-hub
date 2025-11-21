@@ -65,6 +65,8 @@ private
   end
 
   def allowed_roles
-    %w[admin]
+    # Admins have access (checked in AuthenticatedController#allowed?)
+    # Regular users need ott:full role
+    ["ott:full"]
   end
 end

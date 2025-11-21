@@ -121,5 +121,17 @@ module TradeTariffDevHub
     def admin_domain
       @admin_domain ||= ENV.fetch("ADMIN_DOMAIN", "transformuk.com")
     end
+
+    def dev_bypass_auth_enabled?
+      ENV.fetch("DEV_BYPASS_AUTH", "false") == "true"
+    end
+
+    def dev_bypass_user_password
+      ENV.fetch("DEV_BYPASS_USER_PASSWORD", "dev")
+    end
+
+    def dev_bypass_admin_password
+      ENV.fetch("DEV_BYPASS_ADMIN_PASSWORD", "admin")
+    end
   end
 end

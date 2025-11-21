@@ -26,6 +26,7 @@ class SessionsController < ApplicationController
     user_session&.destroy!
 
     session[:token] = nil
+    session[:dev_bypass] = nil # Always clear dev bypass if present
     cookies.delete(:id_token, domain: TradeTariffDevHub.identity_cookie_domain)
     cookies.delete(:refresh_token, domain: TradeTariffDevHub.identity_cookie_domain)
 
