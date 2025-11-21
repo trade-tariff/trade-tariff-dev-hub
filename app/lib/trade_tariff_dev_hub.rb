@@ -52,11 +52,9 @@ module TradeTariffDevHub
       ENV.fetch("GOVUK_APP_DOMAIN", "*").sub(/https?:\/\//, "")
     end
 
-    def stateful_identity_consumer_url(session)
-      state = generate_auth_state!
-      session[:state] = state
+    def stateful_identity_consumer_url(state)
       uri = URI.parse(TradeTariffDevHub.identity_consumer_url)
-      uri.query = URI.encode_www_form(["state", state])
+      uri.query = URI.encode_www_form({ "state" => state })
       uri.to_s
     end
 

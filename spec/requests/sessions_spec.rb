@@ -4,29 +4,49 @@ RSpec.describe "Sessions", type: :request do
   describe "GET /auth/redirect" do
     let(:extra_session) { {} }
 
-    it "creates a Session" do
-      expect { get auth_redirect_path }.to change(Session, :count).by(1)
+    context "when state parameter is not provided" do
+      it "redirects to the root path", :aggregate_failures do
+        get auth_redirect_path
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to eq("Authentication failed. Please try again.")
+      end
     end
 
-    it "redirects the user to their organisation page" do
-      get auth_redirect_path
-      expect(response).to redirect_to(organisation_path(current_user.organisation))
-    end
+    context "when state parameter is provided" do
+      let(:extra_session) { { state: "abcdef0123456789" } }
+      let(:params) { { state: "abcdef0123456789" } }
 
-    it "sets the session token" do
-      get auth_redirect_path
-      expect(session[:token]).to be_a_uuid
-    end
+      it "redirects the user to their organisation page" do
+        get auth_redirect_path, params: params
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
+      end
 
-    it "does not create a new user implicitly for existing user" do
-      expect { get auth_redirect_path }.not_to change(User, :count)
-    end
+      it "creates a Session" do
+        expect { get auth_redirect_path, params: params }.to change(Session, :count).by(1)
+      end
 
-    it "does not create an organisation implicitly for existing organisation" do
-      expect { get auth_redirect_path }.not_to change(Organisation, :count)
+      it "redirects the user to see their api keys" do
+        get auth_redirect_path, params: params
+        expect(response).to redirect_to(api_keys_path)
+      end
+
+      it "sets the session token" do
+        get auth_redirect_path, params: params
+        expect(session[:token]).to be_a_uuid
+      end
+
+      it "does not create a new user implicitly for existing user" do
+        expect { get auth_redirect_path }.not_to change(User, :count)
+      end
+
+      it "does not create an organisation implicitly for existing organisation" do
+        expect { get auth_redirect_path }.not_to change(Organisation, :count)
+      end
     end
 
     context "when the user does not exist and has no invitation" do
+      let(:extra_session) { { state: "abcdef0123456789" } }
+      let(:params) { { state: "abcdef0123456789" } }
       let(:email_address) { "non-existing@bar.com" }
 
       it "does not create a new user" do
@@ -68,7 +88,8 @@ RSpec.describe "Sessions", type: :request do
     end
 
     context "when the session token is already set" do
-      let(:extra_session) { { token: "existing-token" } }
+      let(:extra_session) { { state: "abcdef0123456789", token: "existing-token" } }
+      let(:params) { { state: "abcdef0123456789" } }
 
       before do
         create(:session, token: "existing-token", user: current_user)
