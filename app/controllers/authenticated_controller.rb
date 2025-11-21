@@ -18,7 +18,8 @@ protected
       session[:token] = nil
     end
 
-    redirect_to TradeTariffDevHub.stateful_identity_consumer_url(session), allow_other_host: true
+    session[:state] = TradeTariffDevHub.generate_auth_state!
+    redirect_to TradeTariffDevHub.stateful_identity_consumer_url(session[:state]), allow_other_host: true
   end
 
   def user_session
