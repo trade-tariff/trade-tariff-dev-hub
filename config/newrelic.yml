@@ -20,6 +20,7 @@ common: &default_settings
     enabled: true
     ignore_transactions:
       - "Rails::HealthController#show"
+      - "Controller/rails/health/show"
 
   ignore_url_regexes:
     - "^/healthcheckz"
