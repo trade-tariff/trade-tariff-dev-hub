@@ -28,7 +28,8 @@ protected
       session[:token] = nil
     end
 
-    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
+    session[:state] = TradeTariffDevHub.generate_auth_state!
+    redirect_to TradeTariffDevHub.stateful_identity_consumer_url(session[:state]), allow_other_host: true
   end
 
   def user_session
@@ -78,10 +79,6 @@ protected
 
     # Otherwise check the specific roles required
     allowed_roles.none? || allowed_roles.any? { |role| organisation&.has_role?(role) }
-  end
-
-  def refresh_session!
-    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if user.nil?
   end
 
   def disallowed_redirect!
