@@ -44,16 +44,16 @@
              actions_callable: ->(key) { render('shared/api_key_actions', key:) } %>
 <% end %>
 
-<% if @ott_keys.present? %>
-  <h2 class="govuk-heading-m">OTT Keys (<%= @ott_keys.count %>)</h2>
+<% if @trade_tariff_keys.present? %>
+  <h2 class="govuk-heading-m">Trade Tariff Keys (<%= @trade_tariff_keys.count %>)</h2>
   <%= render 'shared/keys_table',
-             keys: @ott_keys,
+             keys: @trade_tariff_keys,
              headers: { description: 'Description', identifier: 'Client ID' },
              identifier_callable: ->(key) { key.client_id },
-             secret_prefix: 'ott-key',
+             secret_prefix: 'trade-tariff-key',
              status_text_callable: ->(key) { key.active? ? 'Active' : 'Revoked' },
              status_colour_callable: ->(key) { key.active? ? :active : :revoked },
-             actions_callable: ->(key) { render('shared/ott_key_actions', key:) } %>
+             actions_callable: ->(key) { render('shared/trade_tariff_key_actions', key:) } %>
 <% end %>
 
 <%= govuk_button_link_to 'Invite new member', new_invitation_path %>

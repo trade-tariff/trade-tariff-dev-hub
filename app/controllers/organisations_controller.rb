@@ -2,9 +2,11 @@ class OrganisationsController < AuthenticatedController
   def index; end
 
   def show
-    @organisation = organisation
+    @organisation = Organisation.includes(:users, :invitations, :api_keys, :trade_tariff_keys).find(organisation.id)
     @users = @organisation.users
     @invitations = @organisation.invitations.reject(&:accepted?)
+    @api_keys = @organisation.api_keys if @organisation.has_role?("fpo:full")
+    @trade_tariff_keys = @organisation.trade_tariff_keys if @organisation.has_role?("trade_tariff:full")
   end
 
   def edit

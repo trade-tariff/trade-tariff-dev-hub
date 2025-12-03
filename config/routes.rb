@@ -33,11 +33,11 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :ott_keys, only: %i[index new create] do
+  resources :trade_tariff_keys, only: %i[index new create] do
     member do
-      get :revoke, to: 'ott_keys#update', as: :revoke
+      get :revoke, to: 'trade_tariff_keys#update', as: :revoke
       patch :revoke
-      get :delete, to: 'ott_keys#update', as: :delete
+      get :delete, to: 'trade_tariff_keys#update', as: :delete
       delete :delete
     end
   end

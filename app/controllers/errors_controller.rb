@@ -14,9 +14,9 @@ class ErrorsController < ApplicationController
                Please contact support for assistance or try a different request.".html_safe
 
     respond_to do |format|
-      format.html { render "error", status: :unprocessable_entity, locals: { header: "Unprocessable entity", message: } }
-      format.json { render json: { error: "Unprocessable entity" }, status: :unprocessable_entity }
-      format.all { render status: :unprocessable_entity, plain: "Unprocessable entity" }
+      format.html { render "error", status: :unprocessable_content, locals: { header: "Unprocessable entity", message: } }
+      format.json { render json: { error: "Unprocessable entity" }, status: :unprocessable_content }
+      format.all { render status: :unprocessable_content, plain: "Unprocessable entity" }
     end
   end
 

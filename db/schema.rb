@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_11_153015) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_24_165650) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -75,19 +75,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_11_153015) do
     t.index ["role_id"], name: "index_organisations_roles_on_role_id"
   end
 
-  create_table "ott_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "client_id", null: false
-    t.string "secret", null: false
-    t.jsonb "scopes", default: []
-    t.uuid "organisation_id", null: false
-    t.text "description"
-    t.boolean "enabled", default: true, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_ott_keys_on_client_id", unique: true
-    t.index ["organisation_id"], name: "index_ott_keys_on_organisation_id"
-  end
-
   create_table "roles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
     t.string "description", null: false
@@ -108,6 +95,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_11_153015) do
     t.index ["assumed_organisation_id"], name: "index_sessions_on_assumed_organisation_id"
     t.index ["token"], name: "index_sessions_on_token", unique: true
     t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "trade_tariff_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "client_id", null: false
+    t.string "secret", null: false
+    t.jsonb "scopes", default: []
+    t.uuid "organisation_id", null: false
+    t.text "description"
+    t.boolean "enabled", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_trade_tariff_keys_on_client_id", unique: true
+    t.index ["organisation_id"], name: "index_trade_tariff_keys_on_organisation_id"
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -135,8 +135,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_11_153015) do
   add_foreign_key "invitations", "users"
   add_foreign_key "organisations_roles", "organisations"
   add_foreign_key "organisations_roles", "roles"
-  add_foreign_key "ott_keys", "organisations"
   add_foreign_key "sessions", "organisations", column: "assumed_organisation_id"
   add_foreign_key "sessions", "users"
+  add_foreign_key "trade_tariff_keys", "organisations"
   add_foreign_key "users", "organisations"
 end

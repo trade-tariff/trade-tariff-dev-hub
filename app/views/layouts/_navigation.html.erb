@@ -1,17 +1,20 @@
 <% if respond_to?(:current_user) && current_user.present? %>
-  <% is_admin = organisation&.admin? %>
+  <%# Check if user's actual organisation is admin, not the viewed/assumed organisation %>
+  <% is_admin = current_user&.organisation&.admin? %>
+  <% viewed_org = organisation %>
 
   <% if is_admin %>
     <%= header.with_navigation_item(text: "All Organisations", href: admin_organisations_path, active: current_page?(admin_organisations_path)) %>
   <% end %>
 
   <%# Service role navigation (visible to admins AND users with those roles) %>
-  <% if is_admin || organisation&.has_role?("fpo:full") %>
+  <%# Use viewed_org for role checks (if viewing as another org, check that org's roles) %>
+  <% if is_admin || viewed_org&.has_role?("fpo:full") %>
     <%= header.with_navigation_item(text: "FPO Keys", href: api_keys_path, active: current_page?(api_keys_path)) %>
   <% end %>
 
-  <% if is_admin || organisation&.has_role?("ott:full") %>
-    <%= header.with_navigation_item(text: "OTT Keys", href: ott_keys_path, active: current_page?(ott_keys_path)) %>
+  <% if is_admin || viewed_org&.has_role?("trade_tariff:full") %>
+    <%= header.with_navigation_item(text: "Trade Tariff Keys", href: trade_tariff_keys_path, active: current_page?(trade_tariff_keys_path)) %>
   <% end %>
 
   <%# Common navigation (everyone sees these) %>

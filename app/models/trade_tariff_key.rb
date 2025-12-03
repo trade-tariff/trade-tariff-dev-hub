@@ -1,6 +1,6 @@
 # == Schema Information
 #
-# Table name: ott_keys
+# Table name: trade_tariff_keys
 #
 #  id              :uuid             not null, primary key
 #  client_id       :string           not null
@@ -14,11 +14,11 @@
 #
 # Indexes
 #
-#  index_ott_keys_on_client_id        (client_id) UNIQUE
-#  index_ott_keys_on_organisation_id  (organisation_id)
+#  index_trade_tariff_keys_on_client_id        (client_id) UNIQUE
+#  index_trade_tariff_keys_on_organisation_id  (organisation_id)
 #
 
-class OttKey < ApplicationRecord
+class TradeTariffKey < ApplicationRecord
   has_paper_trail
 
   belongs_to :organisation
@@ -32,7 +32,7 @@ class OttKey < ApplicationRecord
   validate :limit_keys_per_organisation
 
   def delete_completely!
-    Ott::DeleteOttKey.new.call(self)
+    TradeTariff::DeleteTradeTariffKey.new.call(self)
   end
 
   def revoke!
@@ -52,11 +52,11 @@ private
   def limit_keys_per_organisation
     return if organisation.nil?
 
-    existing_count = organisation.ott_keys.count
+    existing_count = organisation.trade_tariff_keys.count
     existing_count -= 1 if persisted? # Don't count self if updating
 
     if existing_count >= 3
-      errors.add(:base, "Organisation can have a maximum of 3 OTT keys")
+      errors.add(:base, "Organisation can have a maximum of 3 Trade Tariff keys")
     end
   end
 end

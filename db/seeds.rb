@@ -9,8 +9,8 @@
     description: 'Full access to FPO (Fast Parcel Operator) API keys'
   },
   {
-    name: 'ott:full',
-    description: 'Full access to Online Trade Tariff public API keys',
+    name: 'trade_tariff:full',
+    description: 'Full access to Trade Tariff public API keys',
   },
   {
     name: 'spimm:full',
@@ -61,7 +61,7 @@ if Rails.env.development?
   user = User.dummy_user!
   organisation = user.organisation
   organisation.assign_role!("fpo:full")
-  organisation.assign_role!("ott:full")
+  organisation.assign_role!("trade_tariff:full")
 
   Invitation.find_or_create_by!(
     invitee_email: "jeremy.bentham@philos101.com",
@@ -128,26 +128,26 @@ if Rails.env.development?
     api_key.save!
   end
 
-  # Create OTT keys for testing
-  OttKey.find_or_create_by!(
+  # Create Trade Tariff keys for testing
+  TradeTariffKey.find_or_create_by!(
     organisation_id: organisation.id,
-    description: "development OTT key",
-    client_id: "OTTDEVELOPMENT000001",
-    secret: "dev-ott-secret-key-1234567890abcdef",
+    description: "development Trade Tariff key",
+    client_id: "TTDEVELOPMENT0000001",
+    secret: "dev-trade-tariff-secret-key-1234567890abcdef",
     scopes: %w[read write],
   )
-  OttKey.find_or_create_by!(
+  TradeTariffKey.find_or_create_by!(
     organisation_id: organisation.id,
-    description: "staging OTT key",
-    client_id: "OTTSTAGING00000001",
-    secret: "staging-ott-secret-key-1234567890abcdef",
+    description: "staging Trade Tariff key",
+    client_id: "TTSTAGING0000000001",
+    secret: "staging-trade-tariff-secret-key-1234567890abcdef",
     scopes: %w[read],
   )
-  OttKey.find_or_create_by!(
+  TradeTariffKey.find_or_create_by!(
     organisation_id: organisation.id,
-    description: "production OTT key",
-    client_id: "OTTPRODUCTION00000001",
-    secret: "prod-ott-secret-key-1234567890abcdef",
+    description: "production Trade Tariff key",
+    client_id: "TTPRODUCTION00000001",
+    secret: "prod-trade-tariff-secret-key-1234567890abcdef",
     scopes: %w[read write],
   )
 
@@ -187,27 +187,27 @@ if Rails.env.development?
   )
 
   # Create dummy organisations for admin testing
-  # Organisation 1: OTT Only
-  ott_only_org = Organisation.find_or_create_by!(organisation_name: "Acme Logistics Ltd") do |org|
+  # Organisation 1: Trade Tariff Only
+  trade_tariff_only_org = Organisation.find_or_create_by!(organisation_name: "Acme Logistics Ltd") do |org|
     org.description = "Transport and logistics company"
   end
-  ott_only_org.assign_role!("ott:full")
+  trade_tariff_only_org.assign_role!("trade_tariff:full")
 
-  # Create 3 users for OTT only org
+  # Create 3 users for Trade Tariff only org
   alice = User.find_or_create_by!(email_address: "alice.white@acmelogistics.example.com") do |u|
-    u.organisation = ott_only_org
+    u.organisation = trade_tariff_only_org
     u.user_id = "alice-white-acme"
     u.save!
   end
 
   User.find_or_create_by!(email_address: "bob.smith@acmelogistics.example.com") do |u|
-    u.organisation = ott_only_org
+    u.organisation = trade_tariff_only_org
     u.user_id = "bob-smith-acme"
     u.save!
   end
 
   User.find_or_create_by!(email_address: "carol.jones@acmelogistics.example.com") do |u|
-    u.organisation = ott_only_org
+    u.organisation = trade_tariff_only_org
     u.user_id = "carol-jones-acme"
     u.save!
   end
@@ -215,35 +215,35 @@ if Rails.env.development?
   # Create invitations for OTT only org
   Invitation.find_or_create_by!(
     invitee_email: "john.doe@acmelogistics.example.com",
-    organisation: ott_only_org,
+    organisation: trade_tariff_only_org,
     user: alice,
     status: "pending"
   )
 
   Invitation.find_or_create_by!(
     invitee_email: "jane.smith@acmelogistics.example.com",
-    organisation: ott_only_org,
+    organisation: trade_tariff_only_org,
     user: alice,
     status: "revoked"
   )
 
-  # Create OTT keys for OTT only org
-  OttKey.find_or_create_by!(
-    organisation_id: ott_only_org.id,
-    client_id: "OTTACME00000000001",
-    secret: "acme-ott-secret-key-abcdefghijklmnop"
+  # Create Trade Tariff keys for Trade Tariff only org
+  TradeTariffKey.find_or_create_by!(
+    organisation_id: trade_tariff_only_org.id,
+    client_id: "TTACME000000000001",
+    secret: "acme-trade-tariff-secret-key-abcdefghijklmnop"
   ) do |key|
     key.scopes = %w[read write]
-    key.description = "Acme Production OTT Key"
+    key.description = "Acme Production Trade Tariff Key"
   end
 
-  OttKey.find_or_create_by!(
-    organisation_id: ott_only_org.id,
-    client_id: "OTTACME00000000002",
-    secret: "acme-ott-test-secret-abcdefghijklm"
+  TradeTariffKey.find_or_create_by!(
+    organisation_id: trade_tariff_only_org.id,
+    client_id: "TTACME000000000002",
+    secret: "acme-trade-tariff-test-secret-abcdefghijklm"
   ) do |key|
     key.scopes = %w[read]
-    key.description = "Acme Test OTT Key"
+    key.description = "Acme Test Trade Tariff Key"
   end
 
   # Organisation 2: FPO Only
@@ -318,11 +318,11 @@ if Rails.env.development?
     end
   end
 
-  # Organisation 3: Both OTT and FPO
+  # Organisation 3: Both Trade Tariff and FPO
   both_org = Organisation.find_or_create_by!(organisation_name: "TechFreight Solutions") do |org|
     org.description = "Integrated freight technology platform"
   end
-  both_org.assign_role!("ott:full")
+  both_org.assign_role!("trade_tariff:full")
   both_org.assign_role!("fpo:full")
 
   # Create 3 users for both org
@@ -366,23 +366,23 @@ if Rails.env.development?
     status: "pending"
   )
 
-  # Create OTT keys for both org
-  OttKey.find_or_create_by!(
+  # Create Trade Tariff keys for both org
+  TradeTariffKey.find_or_create_by!(
     organisation_id: both_org.id,
-    client_id: "OTTTECH00000000001",
-    secret: "tech-ott-secret-key-123456789abcdef"
+    client_id: "TTTECH000000000001",
+    secret: "tech-trade-tariff-secret-key-123456789abcdef"
   ) do |key|
     key.scopes = %w[read write]
-    key.description = "TechFreight Production OTT Key"
+    key.description = "TechFreight Production Trade Tariff Key"
   end
 
-  OttKey.find_or_create_by!(
+  TradeTariffKey.find_or_create_by!(
     organisation_id: both_org.id,
-    client_id: "OTTTECH00000000002",
-    secret: "tech-ott-dev-secret-key-987654321"
+    client_id: "TTTECH000000000002",
+    secret: "tech-trade-tariff-dev-secret-key-987654321"
   ) do |key|
     key.scopes = %w[read]
-    key.description = "TechFreight Development OTT Key"
+    key.description = "TechFreight Development Trade Tariff Key"
   end
 
   # Create API keys for both org

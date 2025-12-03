@@ -69,7 +69,7 @@ protected
   end
 
   def allowed_roles
-    ["ott:full"]
+    ["trade_tariff:full"]
   end
 
   def allowed?
