@@ -44,3 +44,5 @@ jobs:
       ssh-key: ${{ secrets.PRIVATE_SSH_KEY }}
       slack-webhook: ${{ secrets.SLACK_WEBHOOK }}
       basic-password: ${{ secrets.BASIC_PASSWORD }}
+      non_admin_bypass_password: "${{ secrets.NON_ADMIN_BYPASS_PASSWORD }}"
+      admin_bypass_password: "${{ secrets.ADMIN_BYPASS_PASSWORD }}"

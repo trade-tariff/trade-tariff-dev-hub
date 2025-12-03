@@ -26,7 +26,6 @@ RSpec.describe CreateApiKey do
       api_gateway_client.stub_responses(:create_usage_plan_key)
     end
 
-    # rubocop:disable RSpec/ExampleLength
     it "creates and saves an API key with valid responses", :aggregate_failures do
       result = create_api_key.call(organisation.id, description)
 
@@ -40,7 +39,6 @@ RSpec.describe CreateApiKey do
       expect(result.updated_at).to be_present
       expect(result).to be_persisted
     end
-    # rubocop:enable RSpec/ExampleLength
 
     it "does not create a new usage plan if one exists" do
       allow(api_gateway_client).to receive(:create_usage_plan)

@@ -18,22 +18,30 @@ class AuthenticatedController < ApplicationController
 protected
 
   def require_authentication
+    # Check for valid identity service session first (regardless of dev bypass setting)
+    if TradeTariffDevHub.identity_authentication_enabled? && !Rails.env.development?
+      if user_session.present? && !user_session.renew?
+        return # Valid identity session exists, proceed without checking dev bypass
+      end
+
+      if user_session.present?
+        user_session&.destroy!
+        session[:token] = nil
+      end
+
+      # No valid identity session - fall through to check dev bypass or redirect
+    end
+
+    # If dev bypass is enabled and no valid identity session, show dev bypass password page
     if dev_bypass_enabled?
       require_dev_bypass_authentication
       return
     end
 
-    return unless TradeTariffDevHub.identity_authentication_enabled?
-    return if Rails.env.development?
-
-    return if user_session.present? && !user_session.renew?
-
-    if user_session.present?
-      user_session&.destroy!
-      session[:token] = nil
+    # Dev bypass disabled and no valid identity session - redirect to identity service
+    if TradeTariffDevHub.identity_authentication_enabled? && !Rails.env.development?
+      redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
     end
-
-    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
   end
 
   def user_session
@@ -41,20 +49,20 @@ protected
   end
 
   def organisation
-    @organisation ||= if dev_bypass_enabled?
-                        organisation_with_dev_bypass
-                      elsif user_session&.assumed_organisation_id.present?
+    @organisation ||= if user_session&.assumed_organisation_id.present?
                         user_session.assumed_organisation
-                      else
-                        current_user&.organisation
+                      elsif user_session&.user.present?
+                        user_session.user.organisation
+                      elsif dev_bypass_enabled?
+                        organisation_with_dev_bypass
                       end
   end
 
   def current_user
-    @current_user ||= if dev_bypass_enabled?
+    @current_user ||= if user_session&.user.present?
+                        user_session.user
+                      elsif dev_bypass_enabled?
                         current_user_with_dev_bypass
-                      else
-                        user_session&.user
                       end
   end
 
@@ -67,7 +75,8 @@ protected
   end
 
   def check_roles!
-    if dev_bypass_enabled? && dev_bypass_user_type.blank?
+    # Skip role check if using dev bypass without a user type set
+    if dev_bypass_enabled? && dev_bypass_user_type.blank? && user_session.blank?
       return
     end
 

@@ -20,6 +20,7 @@ class User < ApplicationRecord
 
   belongs_to :organisation
   has_many :sessions, dependent: :destroy
+  has_many :role_requests, dependent: :destroy
 
   validates :email_address, presence: true, uniqueness: true
 

@@ -5,6 +5,9 @@ inherit_gem:
 
 plugins: rubocop-rspec
 
+RSpec/ExampleLength:
+  Max: 10
+
 inherit_mode:
   merge:
     - Exclude
