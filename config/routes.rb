@@ -1,13 +1,17 @@
 Rails.application.routes.draw do
-  get '/healthcheck', to: 'healthcheck#check'
-  get '/healthcheckz', to: 'healthcheck#checkz'
-
+  get "healthcheckz" => "rails/health#show", as: :rails_health_check
 
   root "homepage#index"
 
   get '/auth/redirect', to: 'sessions#handle_redirect'
   get '/auth/invalid', to: 'sessions#invalid'
   get '/auth/logout', to: 'sessions#destroy', as: :logout
+
+  if TradeTariffDevHub.dev_bypass_auth_enabled?
+    get '/dev/login', to: 'dev_auth#new', as: :dev_login
+    post '/dev/login', to: 'dev_auth#create'
+    delete '/dev/logout', to: 'dev_auth#destroy', as: :dev_logout
+  end
 
   resources :organisations, only: %i[index show edit update]
   resources :users, only: %i[destroy]

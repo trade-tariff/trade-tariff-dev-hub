@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 class AuthenticatedController < ApplicationController
+  include DevBypassAuthentication
+
   before_action :require_authentication,
                 :set_paper_trail_whodunnit,
-                :check_roles!
-  before_action :add_nr_custom_attributes
-
-private
+                :check_roles!,
+                :add_nr_custom_attributes
 
   def add_nr_custom_attributes
     NewRelic::Agent.add_custom_attributes(
@@ -18,8 +18,13 @@ private
 protected
 
   def require_authentication
+    if dev_bypass_enabled?
+      require_dev_bypass_authentication
+      return
+    end
+
     return unless TradeTariffDevHub.identity_authentication_enabled?
-    return if Rails.env.development? # Skip session check in dev, let current_user handle it
+    return if Rails.env.development?
 
     return if user_session.present? && !user_session.renew?
 
@@ -36,9 +41,8 @@ protected
   end
 
   def organisation
-    @organisation ||= if Rails.env.development?
-                        # In development, use current_user's organisation directly
-                        current_user&.organisation
+    @organisation ||= if dev_bypass_enabled?
+                        organisation_with_dev_bypass
                       elsif user_session&.assumed_organisation_id.present?
                         user_session.assumed_organisation
                       else
@@ -47,17 +51,15 @@ protected
   end
 
   def current_user
-    @current_user ||= if Rails.env.development?
-                        # Allow switching between users in development via session
-                        session[:dev_user_email] ||= "dev@transformuk.com"
-                        User.find_by(email_address: session[:dev_user_email]) || User.dummy_user!
+    @current_user ||= if dev_bypass_enabled?
+                        current_user_with_dev_bypass
                       else
                         user_session&.user
                       end
   end
 
   def organisation_id
-    organisation.id
+    organisation&.id
   end
 
   def user_id
@@ -65,6 +67,13 @@ protected
   end
 
   def check_roles!
+    if dev_bypass_enabled? && dev_bypass_user_type.blank?
+      return
+    end
+
+    return if performed? || response.redirect?
+    return if current_user.nil?
+
     disallowed_redirect! unless allowed?
   end
 
@@ -73,10 +82,8 @@ protected
   end
 
   def allowed?
-    # Admins have access to everything
     return true if organisation&.admin?
 
-    # Otherwise check the specific roles required
     allowed_roles.none? || allowed_roles.any? { |role| organisation&.has_role?(role) }
   end
 

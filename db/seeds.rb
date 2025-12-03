@@ -151,40 +151,53 @@ if Rails.env.development?
     scopes: %w[read write],
   )
 
-  # Create admin organisation for Transform UK
-  admin_organisation = Organisation.find_or_create_by!(organisation_name: "Transform UK") do |org|
-    org.description = "Admin organisation for Transform UK team"
+  # Create Admin Dev Org with admin role
+  admin_dev_org = Organisation.find_or_create_by!(organisation_name: "Admin Dev Org") do |org|
+    org.description = "Admin organisation for development testing"
   end
 
   # Assign admin role to the organisation
-  admin_organisation.assign_role!("admin")
+  admin_dev_org.assign_role!("admin")
 
-  # Create admin user for development
-  admin_user = User.find_or_create_by!(email_address: "dev@transformuk.com") do |user|
-    user.organisation = admin_organisation
-    user.user_id = "dev-admin-user"
+  # Create 1 FPO key for Admin Dev Org
+  if localstack_running
+    CreateApiKey.new.call(admin_dev_org.id, "Admin Dev Org FPO Key")
+  else
+    ApiKey.find_or_create_by!(
+      organisation_id: admin_dev_org.id,
+      description: "Admin Dev Org FPO Key"
+    ) do |key|
+      key.api_key_id = "admin-dev-fpo-key"
+      key.api_gateway_id = "admin-dev-fpo-gateway"
+      key.secret = "admin-dev-fpo-secret-xyz123"
+      key.usage_plan_id = "admin-dev-usage-plan"
+      key.enabled = true
+    end
+  end
+
+  # Create 1 Trade Tariff key for Admin Dev Org
+  TradeTariff::CreateTradeTariffKey.new.call(admin_dev_org.id, "Admin Dev Org Trade Tariff Key")
+
+  # Create regular dev user organisation (not admin)
+  dev_user_org = Organisation.find_or_create_by!(organisation_name: "Dev User Org") do |org|
+    org.description = "Regular user organisation for dev@transformuk.com"
+  end
+
+  # Assign only trade_tariff:full and fpo:full roles (not admin)
+  dev_user_org.assign_role!("trade_tariff:full")
+  dev_user_org.assign_role!("fpo:full")
+
+  # Create dev user and associate with non-admin organisation
+  dev_user = User.find_or_create_by!(email_address: "dev@transformuk.com") do |user|
+    user.organisation = dev_user_org
+    user.user_id = "dev-user-id"
     user.save!
   end
 
-  # Make sure the admin user is associated with the admin organisation
-  unless admin_user.organisation == admin_organisation
-    admin_user.update!(organisation: admin_organisation)
+  # Make sure the dev user is associated with the non-admin organisation
+  unless dev_user.organisation == dev_user_org
+    dev_user.update!(organisation: dev_user_org)
   end
-
-  # Create some test invitations for the admin organisation
-  Invitation.find_or_create_by!(
-    invitee_email: "test-admin@transformuk.com",
-    organisation: admin_organisation,
-    user: admin_user,
-    status: "pending"
-  )
-
-  Invitation.find_or_create_by!(
-    invitee_email: "revoked-admin@transformuk.com",
-    organisation: admin_organisation,
-    user: admin_user,
-    status: "revoked"
-  )
 
   # Create dummy organisations for admin testing
   # Organisation 1: Trade Tariff Only
@@ -212,7 +225,7 @@ if Rails.env.development?
     u.save!
   end
 
-  # Create invitations for OTT only org
+  # Create invitations for Trade Tariff only org
   Invitation.find_or_create_by!(
     invitee_email: "john.doe@acmelogistics.example.com",
     organisation: trade_tariff_only_org,

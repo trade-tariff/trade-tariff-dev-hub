@@ -1,14 +1,19 @@
 class HomepageController < ApplicationController
-  def index; end
+  include DevBypassAuthentication
+
+  def index
+    # Homepage shows normally - redirect happens when user clicks "Start now"
+    # which goes to api_keys_path and triggers AuthenticatedController#require_authentication
+  end
 
 protected
 
   def current_user
-    @current_user ||= if Rails.env.development?
-                        # In development, use the same logic as AuthenticatedController
-                        session[:dev_user_email] ||= "dev@transformuk.com"
-                        User.find_by(email_address: session[:dev_user_email]) || User.dummy_user!
+    @current_user ||= if dev_bypass_enabled?
+                        # Only return user if dev bypass session exists and is valid
+                        current_user_with_dev_bypass
                       else
+                        # Use normal session authentication
                         Session.find_by(token: session[:token])&.user
                       end
   end
