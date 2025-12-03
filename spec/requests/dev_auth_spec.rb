@@ -6,6 +6,7 @@ RSpec.describe "Dev Auth", type: :request do
       dev_bypass_auth_enabled?: true,
       dev_bypass_admin_password: "admin-password",
       dev_bypass_user_password: "user-password",
+      identity_authentication_enabled?: false,
     )
     # Reload routes to ensure dev routes are available
     Rails.application.reload_routes!

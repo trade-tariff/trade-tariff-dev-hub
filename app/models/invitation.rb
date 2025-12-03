@@ -25,6 +25,8 @@ class Invitation < ApplicationRecord
 
   validate :validate_invitee_email
 
+  attribute :status, :string
+
   enum :status, {
     accepted: "accepted",
     pending: "pending",
