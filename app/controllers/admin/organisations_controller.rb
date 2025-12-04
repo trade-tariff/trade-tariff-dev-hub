@@ -15,7 +15,7 @@ class Admin::OrganisationsController < AuthenticatedController
     db_column = @sort_column == "name" ? "organisation_name" : @sort_column
 
     @pagy, @organisations = pagy(
-      Organisation.includes(:users, :api_keys, :ott_keys, :invitations)
+      Organisation.includes(:users, :api_keys, :trade_tariff_keys, :invitations)
                   .order(db_column => @sort_direction.to_sym),
       page: params[:page],
       items: 20,
@@ -24,7 +24,7 @@ class Admin::OrganisationsController < AuthenticatedController
 
   def show
     @organisation = Organisation
-                     .includes(:roles, :users, :api_keys, :ott_keys, :invitations)
+                     .includes(:roles, :users, :api_keys, :trade_tariff_keys, :invitations)
                      .find(params[:id])
     @roles = @organisation.roles.sort_by(&:name)
     @admin_role = @roles.find(&:admin?)
@@ -35,7 +35,7 @@ class Admin::OrganisationsController < AuthenticatedController
                                   .order(:name)
     @users = @organisation.users
     @api_keys = @organisation.api_keys
-    @ott_keys = @organisation.ott_keys
+    @trade_tariff_keys = @organisation.trade_tariff_keys
     @invitations = @organisation.invitations.reject(&:accepted?)
   end
 

@@ -70,9 +70,9 @@ My suggestion is that all role parts should be stored in the `name` column of th
 <service>:<access-level>
 ```
 
-For example a role that has the ability to manage OTT API keys for the public APIs might be called:
+For example a role that has the ability to manage Trade Tariff API keys for the public APIs might be called:
 
-- `ott:full`
+- `trade_tariff:full`
 
 I propose that we also have some flat roles that do not conform to this format for systems administrator type access to the portal. These roles should be few and far between and only used when absolutely necessary. Examples of such roles might be:
 

@@ -20,7 +20,7 @@ class Organisation < ApplicationRecord
   has_many :users, dependent: :destroy
   has_many :invitations, dependent: :destroy
   has_many :api_keys, dependent: :destroy
-  has_many :ott_keys, dependent: :destroy
+  has_many :trade_tariff_keys, dependent: :destroy
   has_and_belongs_to_many :roles
 
   validates :organisation_name, presence: true
@@ -43,7 +43,7 @@ class Organisation < ApplicationRecord
           new(organisation_name: user.email_address).tap do |organisation|
             organisation.description = "Default implicit organisation for initial user #{user.email_address}"
             organisation.save!
-            organisation.assign_role!("ott:full")
+            organisation.assign_role!("trade_tariff:full")
             user.organisation = organisation
             user.save!
           end
@@ -61,8 +61,8 @@ class Organisation < ApplicationRecord
   end
 
   def remove_role_block_reason(role_name)
-    if role_name.start_with?("ott") && ott_keys.active.exists?
-      :ott_keys
+    if role_name.start_with?("trade_tariff") && trade_tariff_keys.active.exists?
+      :trade_tariff_keys
     elsif role_name.start_with?("fpo") && api_keys.active.exists?
       :active_api_keys
     end
@@ -92,7 +92,7 @@ class Organisation < ApplicationRecord
     has_role?("fpo:full")
   end
 
-  def ott_access?
-    has_role?("ott:full")
+  def trade_tariff_access?
+    has_role?("trade_tariff:full")
   end
 end

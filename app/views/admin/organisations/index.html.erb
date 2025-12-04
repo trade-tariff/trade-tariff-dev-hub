@@ -11,7 +11,7 @@
             end
             row.with_cell(text: 'Users')
             row.with_cell(text: 'API Keys')
-            row.with_cell(text: 'OTT Keys')
+            row.with_cell(text: 'Trade Tariff Keys')
             row.with_cell(text: 'Invitations')
             row.with_cell do
               sort_link_for('Created', 'created_at', current_column: @sort_column, current_direction: @sort_direction)
@@ -26,7 +26,7 @@
               row.with_cell(header: true, text: org.organisation_name)
               row.with_cell(text: org.users.count)
               row.with_cell(text: org.api_keys.count)
-              row.with_cell(text: org.ott_keys.count)
+              row.with_cell(text: org.trade_tariff_keys.count)
               row.with_cell(text: org.invitations.pending.count)
               row.with_cell(text: org.created_at.strftime('%d %b %Y'))
               row.with_cell do

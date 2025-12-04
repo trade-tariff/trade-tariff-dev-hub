@@ -4,10 +4,10 @@ RSpec.describe Organisation, type: :model do
   it { expect(PaperTrail.request).to be_enabled_for_model(described_class) }
 
   describe "#has_role?" do
-    subject(:has_role?) { organisation.has_role?("ott:full") }
+    subject(:has_role?) { organisation.has_role?("trade_tariff:full") }
 
     context "when the organisation has the role" do
-      before { organisation.assign_role!("ott:full") }
+      before { organisation.assign_role!("trade_tariff:full") }
 
       it { is_expected.to be true }
     end
@@ -18,7 +18,7 @@ RSpec.describe Organisation, type: :model do
   end
 
   describe "#assign_role!" do
-    subject(:assign_role!) { organisation.assign_role!("ott:full") }
+    subject(:assign_role!) { organisation.assign_role!("trade_tariff:full") }
 
     let(:organisation) { create(:organisation) }
 
@@ -27,7 +27,7 @@ RSpec.describe Organisation, type: :model do
     end
 
     context "when the organisation already has the role" do
-      before { organisation.assign_role!("ott:full") }
+      before { organisation.assign_role!("trade_tariff:full") }
 
       it { expect { assign_role! }.not_to change(organisation.roles, :count) }
     end
@@ -55,7 +55,7 @@ RSpec.describe Organisation, type: :model do
 
       it "assigns the correct roles" do
         find_or_associate_implicit_organisation_to
-        expect(user.organisation.roles.pluck(:name)).to eq(%w[ott:full])
+        expect(user.organisation.roles.pluck(:name)).to eq(%w[trade_tariff:full])
       end
     end
 

@@ -100,15 +100,15 @@
                  status_colour_callable: ->(key) { key.enabled? ? :active : :revoked },
                  actions_callable: ->(key) { render('shared/api_key_actions', key:) } %>
 
-      <h2 class="govuk-heading-m">OTT Keys (<%= @ott_keys.count %>)</h2>
+      <h2 class="govuk-heading-m">Trade Tariff Keys (<%= @trade_tariff_keys.count %>)</h2>
       <%= render 'shared/keys_table',
-                 keys: @ott_keys,
+                 keys: @trade_tariff_keys,
                  headers: { description: 'Description', identifier: 'Client ID' },
                  identifier_callable: ->(key) { key.client_id },
-                 secret_prefix: 'ott-key',
+                 secret_prefix: 'trade-tariff-key',
                  status_text_callable: ->(key) { key.active? ? 'Active' : 'Revoked' },
                  status_colour_callable: ->(key) { key.active? ? :active : :revoked },
-                 actions_callable: ->(key) { render('shared/ott_key_actions', key:) } %>
+                 actions_callable: ->(key) { render('shared/trade_tariff_key_actions', key:) } %>
 
       <h2 class="govuk-heading-m">Invitations (<%= @invitations.count %>)</h2>
       <%= render 'shared/invitations_table', invitations: @invitations %>

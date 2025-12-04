@@ -1,0 +1,27 @@
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Dev Login</h1>
+
+    <%= render "application/flashes" %>
+
+    <%= form_with url: dev_login_path, method: :post, local: true do |f| %>
+      <p class="govuk-body">
+        This is a development-only bypass for testing without the identity service.
+      </p>
+
+      <%= f.govuk_password_field :password,
+          width: 'two-thirds',
+          label: { text: "Enter password" } %>
+
+      <div class="govuk-button-group">
+        <%= f.govuk_submit "Login" %>
+      </div>
+    <% end %>
+
+    <% if TradeTariffDevHub.identity_authentication_enabled? %>
+      <p class="govuk-body govuk-!-margin-top-4">
+        <%= govuk_link_to("Use real identity service", identity_service_url, data: { turbo: false }) %>
+      </p>
+    <% end %>
+  </div>
+</div>
