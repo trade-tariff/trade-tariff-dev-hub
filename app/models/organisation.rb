@@ -21,6 +21,7 @@ class Organisation < ApplicationRecord
   has_many :invitations, dependent: :destroy
   has_many :api_keys, dependent: :destroy
   has_many :trade_tariff_keys, dependent: :destroy
+  has_many :role_requests, dependent: :destroy
   has_and_belongs_to_many :roles
 
   validates :organisation_name, presence: true
@@ -94,5 +95,14 @@ class Organisation < ApplicationRecord
 
   def trade_tariff_access?
     has_role?("trade_tariff:full")
+  end
+
+  def available_service_roles
+    assigned_service_role_ids = roles.service_roles.pluck(:id)
+    Role.service_roles.where.not(id: assigned_service_role_ids).order(:name)
+  end
+
+  def pending_request_for?(role_name)
+    role_requests.pending.exists?(role_name: role_name)
   end
 end
