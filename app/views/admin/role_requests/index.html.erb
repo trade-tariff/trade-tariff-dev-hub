@@ -1,0 +1,42 @@
+<div class="govuk-width-container">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <h1 class="govuk-heading-l">Access Requests</h1>
+
+      <% if @role_requests.any? %>
+        <%= govuk_table do |table|
+          table.with_head do |head|
+            head.with_row do |row|
+              row.with_cell(text: 'Organisation name')
+              row.with_cell(text: 'Requester')
+              row.with_cell(text: 'Role requested')
+              row.with_cell(text: 'Date requested')
+              row.with_cell(text: 'Action')
+            end
+          end
+
+          table.with_body do |body|
+            @role_requests.each do |role_request|
+              body.with_row do |row|
+                row.with_cell(header: true, text: role_request.organisation.organisation_name)
+                row.with_cell(text: role_request.user.email_address)
+                row.with_cell(text: role_request.role_name)
+                row.with_cell(text: role_request.created_at.strftime('%d %b %Y'))
+                row.with_cell do
+                  button_to 'Approve', approve_admin_role_request_path(role_request),
+                            method: :post,
+                            data: { confirm: "Are you sure you want to approve this request and assign #{role_request.role_name} to #{role_request.organisation.organisation_name}?" },
+                            class: 'govuk-button govuk-button--secondary govuk-!-margin-bottom-0'
+                end
+              end
+            end
+          end
+        end %>
+
+        <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+      <% else %>
+        <p class="govuk-body">There are no pending access requests.</p>
+      <% end %>
+    </div>
+  </div>
+</div>

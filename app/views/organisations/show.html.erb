@@ -4,6 +4,57 @@
 
 <%= render 'shared/organisation_details', organisation: @organisation %>
 
+<% unless @organisation.admin? %>
+  <section class="govuk-!-margin-bottom-6">
+    <h2 class="govuk-heading-m govuk-!-margin-bottom-3">Roles and permissions</h2>
+
+    <% if @service_roles.any? %>
+      <h3 class="govuk-heading-s govuk-!-margin-bottom-3">Current roles</h3>
+      <%= govuk_table do |table|
+        table.with_head do |head|
+          head.with_row do |row|
+            row.with_cell(text: 'Role')
+            row.with_cell(text: 'Description')
+          end
+        end
+
+        table.with_body do |body|
+          @service_roles.each do |role|
+            body.with_row do |row|
+              row.with_cell(text: role.name)
+              row.with_cell(text: role.description)
+            end
+          end
+        end
+      end %>
+    <% else %>
+      <p class="govuk-body">No service roles assigned.</p>
+    <% end %>
+
+    <% if @has_available_roles %>
+      <div class="govuk-!-margin-top-4">
+        <% if @available_without_pending.any? %>
+          <%= govuk_button_link_to 'Request access', new_role_request_path %>
+        <% end %>
+
+        <% if @pending_roles.any? %>
+          <div class="govuk-!-margin-top-4">
+            <h3 class="govuk-heading-s">Pending requests</h3>
+            <ul class="govuk-list">
+              <% @pending_roles.each do |role| %>
+                <li>
+                  <strong><%= role.name %></strong> – <%= role.description %>
+                  <span class="govuk-tag govuk-tag--yellow govuk-!-margin-left-2">Request pending</span>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+<% end %>
+
 <%= govuk_table do |table| %>
   <% table.with_caption(size: 'm', text: 'Members') %>
   <% table.with_head do |head| %>
