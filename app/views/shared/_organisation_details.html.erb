@@ -5,6 +5,7 @@
     <% summary_list.with_row do |row| %>
       <% row.with_key(text: 'Organisation name') %>
       <% row.with_value(text: organisation.organisation_name) %>
+      <% row.with_action(text: 'Change', href: edit_organisation_path(@organisation)) %>
     <% end %>
 
     <% summary_list.with_row do |row| %>
