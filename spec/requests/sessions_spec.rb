@@ -8,9 +8,9 @@ RSpec.describe "Sessions", type: :request do
       expect { get auth_redirect_path }.to change(Session, :count).by(1)
     end
 
-    it "redirects the user to see their api keys" do
+    it "redirects the user to their organisation page" do
       get auth_redirect_path
-      expect(response).to redirect_to(api_keys_path)
+      expect(response).to redirect_to(organisation_path(current_user.organisation))
     end
 
     it "sets the session token" do

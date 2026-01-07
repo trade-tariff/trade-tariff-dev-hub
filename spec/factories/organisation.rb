@@ -1,9 +1,9 @@
 FactoryBot.define do
   factory :organisation do
+    sequence(:organisation_name) { |n| "Test Organisation #{n}" }
     application_reference { "MyString" }
     description { "MyString" }
     eori_number { "MyString" }
-    organisation_name { "MyString" }
     uk_acs_reference { "MyString" }
 
     trait :fpo do

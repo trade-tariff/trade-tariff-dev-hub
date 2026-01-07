@@ -10,10 +10,9 @@ RSpec.describe "Organisations", type: :request do
     context "when the user is an admin" do
       let(:current_user) { create(:user, organisation: create(:organisation, :admin)) }
 
-      it "renders the index page", :aggregate_failures do
+      it "redirects to the current user's organisation page" do
         get organisations_path
-        expect(response).to have_http_status(:ok)
-        expect(response.body).to include("Placeholder")
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
       end
     end
   end

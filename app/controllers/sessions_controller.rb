@@ -2,7 +2,10 @@
 
 class SessionsController < ApplicationController
   def handle_redirect
-    return redirect_to api_keys_path if already_authenticated?
+    if already_authenticated?
+      user_organisation = user_session&.user&.organisation
+      return redirect_to organisation_path(user_organisation)
+    end
 
     result = verify_id_token
 
@@ -25,7 +28,7 @@ class SessionsController < ApplicationController
     create_user_session!(user, result.payload)
     session[:token] = session_token
 
-    redirect_to api_keys_path
+    redirect_to organisation_path(user.organisation)
   rescue StandardError => e
     Rails.logger.error("Authentication error: #{e.message}")
     redirect_to root_path, alert: "Authentication failed. Please try again."

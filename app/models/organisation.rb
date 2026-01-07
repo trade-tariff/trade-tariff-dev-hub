@@ -24,7 +24,10 @@ class Organisation < ApplicationRecord
   has_many :role_requests, dependent: :destroy
   has_and_belongs_to_many :roles
 
-  validates :organisation_name, presence: true
+  # rubocop:disable Rails/UniqueValidationWithoutIndex
+  # Uniqueness validation is enforced at application level only
+  validates :organisation_name, presence: true, uniqueness: true
+  # rubocop:enable Rails/UniqueValidationWithoutIndex
 
   class << self
     def find_or_associate_implicit_organisation_to(user)

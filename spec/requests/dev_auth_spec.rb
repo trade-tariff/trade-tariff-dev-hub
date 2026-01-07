@@ -25,9 +25,11 @@ RSpec.describe "Dev Auth", type: :request do
       # First login to establish session
       post dev_login_path, params: { password: "user-password" }
       follow_redirect!
+      # Get the user's organisation
+      user = User.find_by(email_address: "dev@transformuk.com")
       # Then try to access login page again - should redirect
       get dev_login_path
-      expect(response).to redirect_to(api_keys_path)
+      expect(response).to redirect_to(organisation_path(user.organisation))
     end
 
     context "when identity authentication is enabled" do
@@ -55,26 +57,29 @@ RSpec.describe "Dev Auth", type: :request do
   end
 
   describe "POST /dev/login" do
-    it "sets session and redirects to admin path with valid admin password", :aggregate_failures do
+    it "sets session and redirects to organisation page with valid admin password", :aggregate_failures do
       post dev_login_path, params: { password: "admin-password" }
-      expect(response).to redirect_to(admin_organisations_path)
-      # Verify session is set by checking we can access admin page
+      user = User.find_by(email_address: "dev-admin@transformuk.com")
+      expect(response).to redirect_to(organisation_path(user.organisation))
+      # Verify session is set by checking we can access the page
       follow_redirect!
       expect(response).to have_http_status(:ok)
     end
 
-    it "redirects to return_to path if present with valid admin password", :aggregate_failures do
+    it "redirects to organisation page even when return_to is set", :aggregate_failures do
       # Try to access a protected page while not logged in - this sets return_to
       get api_keys_path
       expect(response).to redirect_to(dev_login_path)
-      # Now login - should redirect to return_to (api_keys_path)
+      # Now login - should always redirect to organisation page, ignoring return_to
       post dev_login_path, params: { password: "admin-password" }
-      expect(response).to redirect_to(api_keys_path)
+      user = User.find_by(email_address: "dev-admin@transformuk.com")
+      expect(response).to redirect_to(organisation_path(user.organisation))
     end
 
-    it "sets session and redirects to api keys path with valid user password", :aggregate_failures do
+    it "sets session and redirects to organisation page with valid user password", :aggregate_failures do
       post dev_login_path, params: { password: "user-password" }
-      expect(response).to redirect_to(api_keys_path)
+      user = User.find_by(email_address: "dev@transformuk.com")
+      expect(response).to redirect_to(organisation_path(user.organisation))
       # Verify session is set by checking we can access the page
       follow_redirect!
       expect(response).to have_http_status(:ok)
