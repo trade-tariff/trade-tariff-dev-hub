@@ -1,3 +1,4 @@
+# rubocop:disable RSpec/MultipleMemoizedHelpers
 RSpec.shared_context "with authenticated user" do
   let(:current_user) { create(:user) }
   let(:user_session) { create(:session, user: current_user) }
@@ -10,10 +11,14 @@ RSpec.shared_context "with authenticated user" do
     }
   end
 
+  let(:verify_result) do
+    VerifyToken::Result.new(valid: true, payload: decoded_id_token, reason: nil)
+  end
+
   let(:extra_session) { { token: user_session.token } }
 
   before do |env|
-    allow(VerifyToken).to receive(:new).and_return(instance_double(VerifyToken, call: decoded_id_token))
+    allow(VerifyToken).to receive(:new).and_return(instance_double(VerifyToken, call: verify_result))
 
     if env.metadata[:type] == :request
       env = Rack::MockRequest.env_for("/")
@@ -30,3 +35,4 @@ RSpec.shared_context "with authenticated user" do
     end
   end
 end
+# rubocop:enable RSpec/MultipleMemoizedHelpers

@@ -27,12 +27,12 @@ class Session < ApplicationRecord
   validates :id_token, presence: true
 
   def renew?
-    decoded_id_token.nil?
+    !verify_id_token.valid?
   end
 
 private
 
-  def decoded_id_token
-    @decoded_id_token ||= VerifyToken.new(id_token).call
+  def verify_id_token
+    @verify_id_token ||= VerifyToken.new(id_token).call
   end
 end
