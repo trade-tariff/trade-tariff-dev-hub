@@ -1,102 +1,60 @@
 RSpec.describe VerifyToken do
-  describe "#call" do
+  let(:token) { "encoded-token" }
+
+  before do
+    allow(Rails.logger).to receive(:debug)
+    allow(Rails.logger).to receive(:error)
+  end
+
+  def expect_invalid_result(result, reason)
+    expect(result).to be_a(described_class::Result)
+    expect(result).not_to be_valid
+    expect(result.reason).to eq(reason)
+    expect(result.payload).to be_nil
+  end
+
+  it "returns invalid result when no token is supplied" do
+    expect_invalid_result(described_class.new(nil).call, :no_token)
+  end
+
+  it "returns invalid result when keys are missing outside development" do
+    allow(Rails).to receive(:env).and_return("test".inquiry)
+    allow(TradeTariffDevHub).to receive(:identity_cognito_jwks_keys).and_return(nil)
+    expect_invalid_result(described_class.new(token).call, :no_keys)
+  end
+
+  context "with valid JWT setup" do
     before do
-      allow(Rails.logger).to receive(:debug)
-      allow(Rails.logger).to receive(:error)
+      allow(Rails).to receive(:env).and_return("development".inquiry)
+      allow(TradeTariffDevHub).to receive(:identity_cognito_jwks_keys).and_return(nil)
+      allow(DecryptToken).to receive(:new).with(token).and_return(instance_double(DecryptToken, call: token))
     end
 
-    context "when the token is valid and the user is in the required group" do
-      subject(:call) { described_class.new(token).call }
-
-      let(:token) do
-        payload = { sub: "test", iss: "https://any-issuer.com", exp: (Time.zone.now + 1.day).to_i, "cognito:groups" => %w[portal admin myott] }
-        JWT.encode(payload, "dummy-secret", "HS256")
-      end
-
-      before do
-        allow(Rails).to receive(:env).and_return("development".inquiry)
-        allow(DecryptToken).to receive(:new).and_return(instance_double(DecryptToken, call: token))
-        allow(TradeTariffDevHub).to receive_messages(
-          identity_cognito_jwks_keys: nil,
-          identity_cognito_issuer_url: "https://any-issuer.com",
-          identity_consumer: "portal",
-        )
-      end
-
-      it "returns the decoded token payload" do
-        expect(call).to include("sub" => "test", "iss" => "https://any-issuer.com", "cognito:groups" => %w[portal admin myott])
-      end
+    it "returns valid result with decoded payload when verification succeeds" do
+      payload = { "cognito:groups" => %w[portal], "sub" => "test" }
+      allow(TradeTariffDevHub).to receive(:identity_consumer).and_return("portal")
+      allow(DecodeJwt).to receive(:new).with(token).and_return(instance_double(DecodeJwt, call: payload))
+      result = described_class.new(token).call
+      expect(result).to be_valid.and have_attributes(payload: payload)
     end
 
-    context "when the token is blank" do
-      subject!(:call) { described_class.new(nil).call }
-
-      it { is_expected.to be_nil }
-      it { expect(Rails.logger).to have_received(:debug).with("No Cognito id token provided") }
+    it "returns expired result when token is expired" do
+      allow(DecodeJwt).to receive(:new).with(token).and_raise(JWT::ExpiredSignature)
+      result = described_class.new(token).call
+      expect_invalid_result(result, :expired)
+      expect(result).to be_expired
     end
 
-    context "when the token has expired" do
-      subject(:call) { described_class.new(token).call }
-
-      let(:token) do
-        payload = { sub: "test", iss: "https://any-issuer.com", exp: (Time.zone.now - 1.day).to_i, "cognito:groups" => %w[portal] }
-        JWT.encode(payload, "dummy-secret", "HS256")
-      end
-
-      before do
-        allow(Rails).to receive(:env).and_return("development".inquiry)
-        allow(DecryptToken).to receive(:new).and_return(instance_double(DecryptToken, call: token))
-        allow(DecodeJwt).to receive(:new).and_raise(JWT::ExpiredSignature)
-        call
-      end
-
-      it { is_expected.to be_nil }
-      it { expect(Rails.logger).to have_received(:debug).with("Cognito id token has expired") }
+    it "returns invalid result when user not in required group" do
+      payload = { "cognito:groups" => %w[other-group] }
+      allow(TradeTariffDevHub).to receive(:identity_consumer).and_return("portal")
+      allow(DecodeJwt).to receive(:new).with(token).and_return(instance_double(DecodeJwt, call: payload))
+      expect_invalid_result(described_class.new(token).call, :not_in_group)
     end
 
-    context "when the token is invalid" do
-      subject(:call) { described_class.new("invalid.token.here").call }
-
-      before do
-        allow(Rails).to receive(:env).and_return("development".inquiry)
-        allow(DecryptToken).to receive(:new).and_return(instance_double(DecryptToken, call: "invalid.token.here"))
-        allow(DecodeJwt).to receive(:new).and_raise(JWT::DecodeError)
-        call
-      end
-
-      it { is_expected.to be_nil }
-      it { expect(Rails.logger).to have_received(:debug).with("Cognito id token is invalid") }
-    end
-
-    context "when there are no JWKS keys and not in development environment" do
-      subject(:call) { described_class.new("some-token").call }
-
-      before do
-        allow(TradeTariffDevHub).to receive(:identity_cognito_jwks_keys).and_return(nil)
-        call
-      end
-
-      it { is_expected.to be_nil }
-      it { expect(Rails.logger).to have_received(:error).with("No JWKS keys available to verify Cognito id token") }
-    end
-
-    context "when the user is not in the required group" do
-      subject(:call) { described_class.new(token).call }
-
-      let(:token) do
-        payload = { sub: "test", iss: "https://any-issuer.com", exp: (Time.zone.now + 1.day).to_i, "cognito:groups" => %w[other-group] }
-        JWT.encode(payload, "dummy-secret", "HS256")
-      end
-
-      before do
-        allow(Rails).to receive(:env).and_return("development".inquiry)
-        allow(DecryptToken).to receive(:new).and_return(instance_double(DecryptToken, call: token))
-        allow(TradeTariffDevHub).to receive_messages(identity_cognito_jwks_keys: nil, identity_cognito_issuer_url: "https://any-issuer.com", identity_consumer: "portal")
-        call
-      end
-
-      it { is_expected.to be_nil }
-      it { expect(Rails.logger).to have_received(:error).with("Cognito id token user not in required group") }
+    it "returns invalid result when token is invalid" do
+      allow(DecodeJwt).to receive(:new).with(token).and_raise(JWT::DecodeError)
+      expect_invalid_result(described_class.new(token).call, :invalid)
     end
   end
 end

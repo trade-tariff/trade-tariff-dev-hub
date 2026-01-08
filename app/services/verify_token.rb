@@ -1,18 +1,19 @@
 class VerifyToken
+  Result = Struct.new(:valid, :payload, :reason, keyword_init: true) do
+    def valid?
+      valid
+    end
+
+    def expired?
+      reason == :expired
+    end
+  end
+
   def initialize(token)
     @token = token
   end
 
-  # Verify the token and return the decoded payload if valid
-  #
-  # Invalid tokens return nil and log the reason.
-  #
-  # Possible reasons:
-  # - No token provided
-  # - No keys to verify against (non-development environments)
-  # - Token expired
-  # - Token invalid
-  # - Verified user not in required group
+  # Verify the token and return a Result object.
   def call
     return log_reason(:no_token) if @token.blank?
     return log_reason(:no_keys) unless has_keys?
@@ -21,7 +22,11 @@ class VerifyToken
     decoded = DecodeJwt.new(decrypted).call
     groups = decoded&.fetch("cognito:groups", []) || []
 
-    TradeTariffDevHub.identity_consumer.in?(groups) ? decoded : log_reason(:not_in_group)
+    if TradeTariffDevHub.identity_consumer.in?(groups)
+      Result.new(valid: true, payload: decoded, reason: nil)
+    else
+      log_reason(:not_in_group)
+    end
   rescue JWT::ExpiredSignature
     log_reason(:expired)
   rescue JWT::DecodeError
@@ -52,7 +57,7 @@ private
       Rails.logger.error("An error occurred while verifying Cognito id token: #{error.message}")
     end
 
-    nil
+    Result.new(valid: false, payload: nil, reason: reason)
   end
 
   def has_keys?

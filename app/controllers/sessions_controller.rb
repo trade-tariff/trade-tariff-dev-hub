@@ -2,13 +2,27 @@
 
 class SessionsController < ApplicationController
   def handle_redirect
-    if already_authenticated?
-      return redirect_to api_keys_path
+    return redirect_to api_keys_path if already_authenticated?
+
+    result = verify_id_token
+
+    if result.expired?
+      # Redirect to identity service with cookies intact so it can refresh the token
+      return redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
     end
 
-    return redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if user.nil?
+    unless result.valid?
+      clear_authentication_cookies
+      return redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
+    end
 
-    create_user_session!
+    user = User.from_passwordless_payload!(result.payload)
+    unless user
+      clear_authentication_cookies
+      return redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
+    end
+
+    create_user_session!(user, result.payload)
     session[:token] = session_token
 
     redirect_to api_keys_path
@@ -27,19 +41,19 @@ class SessionsController < ApplicationController
 
     session[:token] = nil
     session[:dev_bypass] = nil # Always clear dev bypass if present
-    cookies.delete(:id_token, domain: TradeTariffDevHub.identity_cookie_domain)
-    cookies.delete(:refresh_token, domain: TradeTariffDevHub.identity_cookie_domain)
+    clear_authentication_cookies
 
     redirect_to root_path, notice: "You have been logged out."
   end
 
 private
 
-  def create_user_session!
+  def create_user_session!(user, payload)
     Session.create!(
       user: user,
       token: session_token,
       id_token: id_token,
+      raw_info: payload,
     )
   end
 
@@ -47,12 +61,8 @@ private
     @session_token ||= SecureRandom.uuid
   end
 
-  def user
-    @user ||= User.from_passwordless_payload!(decoded_id_token) if decoded_id_token
-  end
-
-  def decoded_id_token
-    @decoded_id_token ||= VerifyToken.new(id_token).call
+  def verify_id_token
+    @verify_id_token ||= VerifyToken.new(id_token).call
   end
 
   def id_token
@@ -65,5 +75,10 @@ private
 
   def already_authenticated?
     user_session.present? && !user_session.renew?
+  end
+
+  def clear_authentication_cookies
+    cookies.delete(:id_token, domain: TradeTariffDevHub.identity_cookie_domain)
+    cookies.delete(:refresh_token, domain: TradeTariffDevHub.identity_cookie_domain)
   end
 end

@@ -8,24 +8,21 @@ RSpec.describe Session, type: :model do
   end
 
   describe "#renew?" do
-    before do
-      allow(VerifyToken).to receive(:new).and_return(instance_double(VerifyToken, call: decoded_id_token))
+    it "returns true when the token cannot be verified" do
+      session = build(:session)
+      invalid_result = VerifyToken::Result.new(valid: false, payload: nil, reason: :invalid)
+      allow(VerifyToken).to receive(:new).and_return(instance_double(VerifyToken, call: invalid_result))
+
+      expect(session.renew?).to be(true)
     end
 
-    context "when the decoded_id_token is nil" do
-      subject(:session) { build(:session) }
+    it "returns false when the token is valid" do
+      session = build(:session)
+      payload = { "sub" => "12345", "exp" => 1.day.from_now.to_i }
+      valid_result = VerifyToken::Result.new(valid: true, payload: payload, reason: nil)
+      allow(VerifyToken).to receive(:new).and_return(instance_double(VerifyToken, call: valid_result))
 
-      let(:decoded_id_token) { nil }
-
-      it { is_expected.to be_renew }
-    end
-
-    context "when the decoded_id_token is present" do
-      subject(:session) { build(:session, expires_at: 1.hour.from_now) }
-
-      let(:decoded_id_token) { { "sub" => "12345", "exp" => 1.day.from_now.to_i } }
-
-      it { is_expected.not_to be_renew }
+      expect(session.renew?).to be(false)
     end
   end
 end
