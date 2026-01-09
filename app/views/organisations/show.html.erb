@@ -1,6 +1,12 @@
-<h1 class="govuk-heading-l">Your organisation</h1>
+<% is_admin = current_user&.organisation&.admin? %>
 
-<p class="govuk-body">Manage your organisation memberships and invitations.</p>
+<h1 class="govuk-heading-l">Your organisation account</h1>
+
+<% if is_admin %>
+  <p class="govuk-body">Manage your organisational details and API keys, as well as grant access requests and manage your team members. From this page you can invite new team members to join the UK Trade Tariff Developer Portal, or remove existing members.</p>
+<% else %>
+  <p class="govuk-body">Manage your organisational details and request access to roles as well as invite new and remove existing members.</p>
+<% end %>
 
 <%= render 'shared/organisation_details', organisation: @organisation %>
 

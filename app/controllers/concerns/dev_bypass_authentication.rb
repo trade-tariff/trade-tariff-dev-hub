@@ -42,9 +42,15 @@ protected
     email = user_type == USER_TYPE_ADMIN ? "dev-admin@transformuk.com" : "dev@transformuk.com"
     user = User.find_or_initialize_by(email_address: email)
 
-    org = Organisation.find_or_create_by!(organisation_name: "#{user_type.capitalize} Dev Org") do |o|
-      o.description = "Dev bypass organisation"
-    end
+    # If user already exists and has an organisation, use that organisation
+    # Otherwise, find or create by the default name
+    org = if user.persisted? && user.organisation.present?
+            user.organisation
+          else
+            Organisation.find_or_create_by!(organisation_name: "#{user_type.capitalize} Dev Org") do |o|
+              o.description = "Dev bypass organisation"
+            end
+          end
 
     if user_type == USER_TYPE_ADMIN
       org.assign_role!("admin") unless org.admin?

@@ -102,6 +102,17 @@ RSpec.describe DevBypassAuthentication, type: :controller do
 
         expect(existing_user.organisation.reload.admin?).to be true
       end
+
+      it "uses existing organisation even when name has been changed", :aggregate_failures do
+        original_org_id = existing_user.organisation.id
+        existing_user.organisation.update!(organisation_name: "Admin Dev Org test")
+
+        user = controller.send(:find_or_create_dev_user, DevBypassAuthentication::USER_TYPE_ADMIN)
+
+        expect(user.organisation.id).to eq(original_org_id)
+        expect(user.organisation.organisation_name).to eq("Admin Dev Org test")
+        expect(Organisation.where(organisation_name: "Admin Dev Org").count).to eq(0)
+      end
     end
 
     context "with user type" do
@@ -141,6 +152,17 @@ RSpec.describe DevBypassAuthentication, type: :controller do
 
         expect(existing_user.organisation.reload.has_role?("trade_tariff:full")).to be true
         expect(existing_user.organisation.has_role?("fpo:full")).to be true
+      end
+
+      it "uses existing organisation even when name has been changed", :aggregate_failures do
+        original_org_id = existing_user.organisation.id
+        existing_user.organisation.update!(organisation_name: "User Dev Org test")
+
+        user = controller.send(:find_or_create_dev_user, DevBypassAuthentication::USER_TYPE_USER)
+
+        expect(user.organisation.id).to eq(original_org_id)
+        expect(user.organisation.organisation_name).to eq("User Dev Org test")
+        expect(Organisation.where(organisation_name: "User Dev Org").count).to eq(0)
       end
     end
 

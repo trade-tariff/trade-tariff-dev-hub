@@ -1,10 +1,4 @@
 <div class="govuk-grid-row">
-  <%= govuk_notification_banner(title_text: "Important") do |nb| %>
-    <%- nb.with_heading(text: "Developer Portal has moved to passwordless sign-in.") %>
-    <p>You can now access this service using a secure one-time link sent to your email—no password required.</p>
-    <p>It's faster and easier to use.</p>
-  <% end %>
-
   <div class="govuk-grid-column-two-thirds">
     <h1 class="govuk-heading-l">UK Trade Tariff Developer Portal</h1>
 
@@ -12,18 +6,18 @@
       Welcome to the official GOV.UK Developer Portal for HMRC Trade Tariff APIs.
     </p>
 
-    <p class="govuk-body">
-      This is your central entry point for exploring, testing, and integrating UK tariff data directly from HMRC.
-    </p>
-
     <h3 class="govuk-heading-m">What you can do</h3>
 
     <p class="govuk-body">
-      The Trade Tariff APIs provide structured, reliable access to official tariff information — including commodity codes, duty rates, VAT, quotas, and trade measures.
+      The Trade Tariff APIs offer structured, reliable access to official tariff information, which includes commodity codes, duty rates, VAT, quotas, and trade measures.
     </p>
 
     <p class="govuk-body">
-      This service allows you to manage your API keys and overall access to the available APIs including:
+      The Developer Portal enables you to manage your API keys and to explore, test and integrate UK tariff data directly from HMRC.
+    </p>
+
+    <p class="govuk-body">
+      You can also manage your organisational details, invite new and remove existing members.
     </p>
 
     <h3 class="govuk-heading-m">Available APIs</h3>
@@ -52,23 +46,5 @@
       Whether you are a large enterprise or an independent trader, the APIs
       provide consistent and authoritative data from HMRC’s Online Trade Tariff.
     </p>
-
-    <h3 class="govuk-heading-m">Getting started</h3>
-
-    <p class="govuk-body">
-      With an account you can generate, view and manage your API keys.
-    </p>
-
-    <%= govuk_list [
-      "Test APIs in a secure sandbox environment",
-      "View interactive documentation and changelogs",
-      "Manage credentials and rate limits",
-      "Update your user profile and organisation details",
-      ], type: :bullet
-    %>
-
-    <p class="govuk-body">You can set up an organisation account using a single shared company profile.</p>
-
-    <p class="govuk-body">Additional users can be invited or removed from the organisation account.</p>
   </div>
 </div>

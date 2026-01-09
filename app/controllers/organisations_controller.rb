@@ -1,5 +1,7 @@
 class OrganisationsController < AuthenticatedController
-  def index; end
+  def index
+    redirect_to organisation_path(current_user.organisation)
+  end
 
   def show
     @organisation = Organisation.includes(:users, :invitations, :api_keys, :trade_tariff_keys, :roles, role_requests: []).find(organisation.id)

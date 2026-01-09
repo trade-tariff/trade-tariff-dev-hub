@@ -12,7 +12,8 @@ class DevAuthController < ApplicationController
 
     if user_type
       session[:dev_bypass] = user_type
-      redirect_to session.delete(:return_to) || default_redirect_path(user_type)
+      session.delete(:return_to) # Clear return_to but don't use it
+      redirect_to default_redirect_path(user_type)
     else
       flash[:alert] = "Invalid password"
       render :new, status: :unprocessable_content
@@ -48,14 +49,14 @@ private
   end
 
   def default_redirect_path(user_type = dev_bypass_user_type)
-    case user_type
-    when USER_TYPE_ADMIN
-      admin_organisations_path
-    when USER_TYPE_USER
-      api_keys_path
-    else
-      root_path
-    end
+    # Get or create the user and organisation for dev bypass
+    user = find_or_create_dev_user(user_type) if user_type.present?
+    org = user&.organisation
+
+    return organisation_path(org) if org.present?
+
+    # Fallback to root if organisation not available
+    root_path
   end
 
   def dev_auth_params

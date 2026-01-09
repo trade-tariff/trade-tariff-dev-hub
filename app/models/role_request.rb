@@ -26,6 +26,8 @@ class RoleRequest < ApplicationRecord
   belongs_to :organisation
   belongs_to :user
 
+  attribute :status, :string
+
   validates :role_name, presence: true
   validates :role_name, inclusion: { in: Role.assignable_names, message: "is not a valid assignable role" }
   validate :organisation_does_not_have_role
