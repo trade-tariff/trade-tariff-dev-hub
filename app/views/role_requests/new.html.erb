@@ -1,0 +1,23 @@
+<%= govuk_form_for @role_request do |f| %>
+  <h1 class="govuk-heading-l">Request access</h1>
+
+  <p class="govuk-body">Select a role you would like to request access to for your organisation.</p>
+
+  <div class="govuk-form-group">
+    <%= f.govuk_label :role_name, text: "Role" %>
+    <div class="govuk-hint">Your request will be reviewed by administrators</div>
+    <% role_options = @available_roles.map { |role| ["#{role.name} – #{role.description}", role.name] } %>
+    <%= f.select :role_name, role_options, {}, { class: "govuk-select govuk-!-width-two-thirds" } %>
+  </div>
+
+  <%= f.govuk_text_area :note,
+                        label: { text: "Note (optional)" },
+                        hint: { text: "Provide any additional information about why you need this access" },
+                        rows: 5,
+                        width: 'two-thirds' %>
+
+  <div class="govuk-button-group">
+    <%= f.govuk_submit "Submit request" %>
+    <%= govuk_link_to('Cancel', organisation_path(organisation)) %>
+  </div>
+<% end %>

@@ -25,6 +25,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :role_requests, only: %i[new create]
+
   resources :api_keys, only: %i[index new create] do
     member do
       get :revoke, to: 'api_keys#update', as: :revoke
@@ -59,6 +61,12 @@ Rails.application.routes.draw do
     resources :organisations, only: [:index, :show], path: 'organisations' do
       post :roles, to: 'organisation_roles#create'
       delete :roles, to: 'organisation_roles#destroy'
+    end
+
+    resources :role_requests, only: [:index] do
+      member do
+        post :approve
+      end
     end
   end
 

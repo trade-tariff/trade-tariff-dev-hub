@@ -44,6 +44,10 @@ module TradeTariffDevHub
       @application_support_email ||= ENV["APPLICATION_SUPPORT_EMAIL"] || "dev@example.com"
     end
 
+    def role_request_email
+      @role_request_email ||= ENV["ROLE_REQUEST_EMAIL"]
+    end
+
     def cors_host
       ENV.fetch("GOVUK_APP_DOMAIN", "*").sub(/https?:\/\//, "")
     end

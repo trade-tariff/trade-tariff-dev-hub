@@ -6,7 +6,6 @@ RSpec.describe TradeTariff::CreateTradeTariffKey do
   let(:scopes) { %w[read write] }
 
   describe "#call" do
-    # rubocop:disable RSpec/ExampleLength
     it "creates and saves a Trade Tariff key with valid attributes", :aggregate_failures do
       result = create_trade_tariff_key.call(organisation.id, description, scopes)
 
@@ -20,7 +19,6 @@ RSpec.describe TradeTariff::CreateTradeTariffKey do
       expect(result.updated_at).to be_present
       expect(result).to be_persisted
     end
-    # rubocop:enable RSpec/ExampleLength
 
     it "generates a unique client_id" do
       key1 = create_trade_tariff_key.call(organisation.id, description, scopes)

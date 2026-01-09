@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_24_165650) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_08_211906) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -18,6 +18,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_24_165650) do
   # Custom types defined in this database.
   # Note that some types may not work with other database engines. Be careful if changing database.
   create_enum "invitation_status", ["accepted", "pending", "revoked"]
+  create_enum "role_request_status", ["pending", "approved", "rejected"]
 
   create_table "api_keys", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "organisation_id", null: false
@@ -73,6 +74,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_24_165650) do
     t.index ["organisation_id", "role_id"], name: "index_organisations_roles_on_organisation_id_and_role_id", unique: true
     t.index ["organisation_id"], name: "index_organisations_roles_on_organisation_id"
     t.index ["role_id"], name: "index_organisations_roles_on_role_id"
+  end
+
+  create_table "role_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "organisation_id", null: false
+    t.uuid "user_id", null: false
+    t.string "role_name", null: false
+    t.text "note"
+    t.enum "status", default: "pending", null: false, enum_type: "role_request_status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organisation_id", "role_name", "status"], name: "index_role_requests_on_org_role_status"
+    t.index ["organisation_id"], name: "index_role_requests_on_organisation_id"
+    t.index ["user_id"], name: "index_role_requests_on_user_id"
   end
 
   create_table "roles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -135,6 +149,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_24_165650) do
   add_foreign_key "invitations", "users"
   add_foreign_key "organisations_roles", "organisations"
   add_foreign_key "organisations_roles", "roles"
+  add_foreign_key "role_requests", "organisations"
+  add_foreign_key "role_requests", "users"
   add_foreign_key "sessions", "organisations", column: "assumed_organisation_id"
   add_foreign_key "sessions", "users"
   add_foreign_key "trade_tariff_keys", "organisations"

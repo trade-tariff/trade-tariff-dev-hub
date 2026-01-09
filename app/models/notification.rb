@@ -1,8 +1,12 @@
+# frozen_string_literal: true
+
 class Notification
-  INVITATION_TEMPLATE_ID = "ec674766-30ab-40a1-87e6-c7b43e80ae9b".freeze
-  REFERENCE_CHARS = [("A".."Z"), ("0".."9")].map(&:to_a).flatten.freeze
+  INVITATION_TEMPLATE_ID = "ec674766-30ab-40a1-87e6-c7b43e80ae9b"
+  ROLE_REQUEST_TEMPLATE_ID = "be46e49d-6291-4bfc-a79d-f4fbe5a63641"
+  ROLE_REQUEST_APPROVED_TEMPLATE_ID = "fa6a7e13-af85-4166-9899-48fa865f3c19"
+  REFERENCE_CHARS = [("A".."Z"), ("0".."9")].map(&:to_a).flatten
   REFERENCE_LENGTH = 10
-  REFERENCE_PREFIX = "PORTAL-".freeze
+  REFERENCE_PREFIX = "PORTAL-"
 
   include ActiveModel::Model
 
@@ -33,6 +37,43 @@ class Notification
           support_email: TradeTariffDevHub.application_support_email,
         },
       )
+    end
+
+    def build_for_role_request(role_request)
+      role_description = role_description_for(role_request.role_name)
+      new(
+        email: TradeTariffDevHub.role_request_email,
+        template_id: ROLE_REQUEST_TEMPLATE_ID,
+        personalisation: {
+          organisation_name: role_request.organisation.organisation_name,
+          requester_email: role_request.user.email_address,
+          role_name: role_request.role_name,
+          role_description: role_description,
+          note: role_request.note.presence || "No note provided",
+          admin_url: "#{TradeTariffDevHub.govuk_app_domain}/admin/role_requests",
+        },
+      )
+    end
+
+    def build_for_role_request_approved(role_request)
+      role_description = role_description_for(role_request.role_name)
+      new(
+        email: role_request.user.email_address,
+        template_id: ROLE_REQUEST_APPROVED_TEMPLATE_ID,
+        personalisation: {
+          organisation_name: role_request.organisation.organisation_name,
+          role_name: role_request.role_name,
+          role_description: role_description,
+          organisation_url: "#{TradeTariffDevHub.govuk_app_domain}/organisations/#{role_request.organisation.id}",
+        },
+      )
+    end
+
+  private
+
+    def role_description_for(role_name)
+      role = Role.find_by(name: role_name)
+      role&.description || role_name
     end
   end
 end
