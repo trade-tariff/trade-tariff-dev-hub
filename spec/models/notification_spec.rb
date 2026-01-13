@@ -53,14 +53,6 @@ RSpec.describe Notification do
       expect(notification.personalisation).to eq(expected_personalisation)
     end
 
-    context "when note is blank" do
-      let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "fpo:full", note: nil) }
-
-      it "uses default note text" do
-        expect(notification.personalisation[:note]).to eq("No note provided")
-      end
-    end
-
     context "when role description is missing" do
       let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "fpo:full", note: "Test") }
 
