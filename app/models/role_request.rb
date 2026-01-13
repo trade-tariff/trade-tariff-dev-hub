@@ -30,6 +30,7 @@ class RoleRequest < ApplicationRecord
 
   validates :role_name, presence: true
   validates :role_name, inclusion: { in: Role.assignable_names, message: "is not a valid assignable role" }
+  validates :note, length: { maximum: 200, message: "must be 200 characters or fewer" }
   validate :organisation_does_not_have_role
   validate :no_duplicate_pending_request
 
