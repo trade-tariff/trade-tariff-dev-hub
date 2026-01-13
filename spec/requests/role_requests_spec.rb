@@ -190,5 +190,24 @@ RSpec.describe "Role Requests", type: :request do
         expect(response.body).to include("has already been requested and is pending")
       end
     end
+
+    context "when note exceeds 200 characters" do
+      let(:params) do
+        {
+          role_request: {
+            role_name: "fpo:full",
+            note: "a" * 201,
+          },
+        }
+      end
+
+      it "does not create a role request", :aggregate_failures do
+        expect { post role_requests_path, params: params }
+          .not_to change(RoleRequest, :count)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("must be 200 characters or fewer")
+      end
+    end
   end
 end
