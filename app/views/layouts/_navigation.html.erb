@@ -16,7 +16,7 @@
     <%= header.with_navigation_item(text: "FPO Keys", href: api_keys_path, active: current_page?(api_keys_path)) %>
   <% end %>
 
-  <% if is_admin || viewed_org&.has_role?("trade_tariff:full") %>
+  <% if false %>
     <%= header.with_navigation_item(text: "Trade Tariff Keys", href: trade_tariff_keys_path, active: current_page?(trade_tariff_keys_path)) %>
   <% end %>
 
