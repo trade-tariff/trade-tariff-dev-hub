@@ -42,7 +42,7 @@ class Invitation < ApplicationRecord
 
     # Restrict admin domain emails to admin organisations only
     if invitee_email&.end_with?("@#{TradeTariffDevHub.admin_domain}") && !organisation.admin?
-      errors.add(:invitee_email, :admin_only)
+      errors.add(:invitee_email, :admin_only, domain: TradeTariffDevHub.admin_domain)
     end
 
     if new_record? && active_invitation.present?

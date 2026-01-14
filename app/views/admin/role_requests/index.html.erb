@@ -11,6 +11,7 @@
               row.with_cell(text: 'Requester')
               row.with_cell(text: 'Role requested')
               row.with_cell(text: 'Date requested')
+              row.with_cell(text: 'Notes')
               row.with_cell(text: 'Action')
             end
           end
@@ -22,6 +23,7 @@
                 row.with_cell(text: role_request.user.email_address)
                 row.with_cell(text: role_request.role_name)
                 row.with_cell(text: role_request.created_at.strftime('%d %b %Y'))
+                row.with_cell(text: role_request.note || '')
                 row.with_cell do
                   button_to 'Approve', approve_admin_role_request_path(role_request),
                             method: :post,

@@ -15,4 +15,24 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .catch(err => console.error('Failed to copy:', err))
   })
+
+  // Show/hide FPO-specific content based on role selection
+  const roleSelect = document.getElementById('role_request_role_name')
+  const fpoHintContent = document.getElementById('fpo-hint-content')
+
+  if (roleSelect && fpoHintContent) {
+    const toggleFpoContent = () => {
+      if (roleSelect.value === 'fpo:full') {
+        fpoHintContent.style.display = 'inline'
+      } else {
+        fpoHintContent.style.display = 'none'
+      }
+    }
+
+    // Set initial state
+    toggleFpoContent()
+
+    // Listen for changes
+    roleSelect.addEventListener('change', toggleFpoContent)
+  }
 })

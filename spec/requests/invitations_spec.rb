@@ -78,6 +78,23 @@ RSpec.describe "Invitations", type: :request do
         expect(response.body).to include("Enter a properly formatted email address")
       end
     end
+
+    context "when inviting admin domain email to non-admin organisation" do
+      let(:admin_domain) { TradeTariffDevHub.admin_domain }
+      let(:params) { { invitation: { invitee_email: "user@#{admin_domain}" } } }
+
+      it "does not create a new invitation", :aggregate_failures do
+        expect { post invitations_path, params: params }
+          .not_to change(Invitation, :count)
+      end
+
+      it "re-renders the new template with admin domain error", :aggregate_failures do
+        post invitations_path, params: params
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("#{admin_domain} email addresses can only be invited to admin organisations")
+        expect(response.body).not_to include("<%= ENV.fetch")
+      end
+    end
   end
 
   describe "GET /invitations/:id/revoke" do

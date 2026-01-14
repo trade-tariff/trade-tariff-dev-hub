@@ -70,6 +70,29 @@ RSpec.describe Invitation, type: :model do
         expect(invitation.errors[:invitee_email]).to include("This email address is already associated with a member of your organisation")
       end
     end
+
+    context "when inviting admin domain email to non-admin organisation" do
+      let(:non_admin_org) { create(:organisation) }
+      let(:admin_domain) { TradeTariffDevHub.admin_domain }
+
+      it "adds an error with the correct domain name", :aggregate_failures do
+        invitation.invitee_email = "user@#{admin_domain}"
+        invitation.organisation = non_admin_org
+        expect(invitation).not_to be_valid
+        expect(invitation.errors[:invitee_email]).to include("#{admin_domain} email addresses can only be invited to admin organisations")
+      end
+    end
+
+    context "when inviting admin domain email to admin organisation" do
+      let(:admin_org) { create(:organisation, :admin) }
+      let(:admin_domain) { TradeTariffDevHub.admin_domain }
+
+      it "allows the invitation", :aggregate_failures do
+        invitation.invitee_email = "user@#{admin_domain}"
+        invitation.organisation = admin_org
+        expect(invitation).to be_valid
+      end
+    end
   end
 
   describe "#send_email" do
