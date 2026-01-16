@@ -30,6 +30,11 @@ class Organisation < ApplicationRecord
   # rubocop:enable Rails/UniqueValidationWithoutIndex
 
   class << self
+    def admin_organisation
+      admin_role = Role.find_by(name: "admin")
+      Organisation.joins(:roles).where(roles: { id: admin_role.id }).first
+    end
+
     def find_or_associate_implicit_organisation_to(user)
       if user.organisation.blank?
         invitation = Invitation.find_by(

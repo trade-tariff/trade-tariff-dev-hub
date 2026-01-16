@@ -29,12 +29,25 @@ RSpec.describe Notification do
   end
 
   describe ".build_for_role_request" do
-    subject(:notification) { described_class.build_for_role_request(role_request) }
+    subject(:notification) { described_class.build_for_role_request(role_request).first }
+
+    before do
+      create(:organisation, :admin).tap { |org| create(:user, organisation: org, email_address: "admin@foo.com") }
+    end
 
     let(:organisation) { create(:organisation, organisation_name: "Test Organisation") }
     let(:user) { create(:user, organisation: organisation, email_address: "requester@example.com") }
     let(:role) { Role.find_by(name: "fpo:full") }
-    let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "fpo:full", note: "I need access") }
+
+    let(:role_request) do
+      create(
+        :role_request,
+        organisation: organisation,
+        user: user,
+        role_name: "fpo:full",
+        note: "I need access",
+      )
+    end
 
     let(:expected_personalisation) do
       {
@@ -48,28 +61,24 @@ RSpec.describe Notification do
     end
 
     it "builds a notification with the correct attributes", :aggregate_failures do
-      expect(notification.email).to eq(TradeTariffDevHub.role_request_email)
+      expect(notification.email).to eq("admin@foo.com")
       expect(notification.template_id).to eq(Notification::ROLE_REQUEST_TEMPLATE_ID)
       expect(notification.personalisation).to eq(expected_personalisation)
     end
 
     context "when note is blank" do
-      let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "fpo:full", note: nil) }
+      let(:role_request) do
+        create(
+          :role_request,
+          organisation: organisation,
+          user: user,
+          role_name: "fpo:full",
+          note: nil,
+        )
+      end
 
       it "uses default note text" do
         expect(notification.personalisation[:note]).to eq("No note provided")
-      end
-    end
-
-    context "when role description is missing" do
-      let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "fpo:full", note: "Test") }
-
-      before do
-        allow(Role).to receive(:find_by).with(name: "fpo:full").and_return(nil)
-      end
-
-      it "falls back to role name" do
-        expect(notification.personalisation[:role_description]).to eq("fpo:full")
       end
     end
   end

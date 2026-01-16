@@ -1,6 +1,25 @@
 RSpec.describe User, type: :model do
   it { expect(PaperTrail.request).to be_enabled_for_model(described_class) }
 
+  describe ".admin_emails" do
+    subject(:admin_emails) { described_class.admin_emails }
+
+    context "when an admin organisation exists" do
+      let(:admin_org) { create(:organisation).tap { |org| org.assign_role!("admin") } }
+      let(:other_org) { create(:organisation) }
+
+      before do
+        create(:user, organisation: admin_org, email_address: "foo@bar.com")
+        create(:user, organisation: admin_org, email_address: "bar@baz.com")
+        create(:user, organisation: other_org, email_address: "baz@qux.com")
+      end
+
+      it "returns the email addresses of all users in admin organisations" do
+        expect(admin_emails).to contain_exactly("foo@bar.com", "bar@baz.com")
+      end
+    end
+  end
+
   describe ".from_passwordless_payload!" do
     subject(:from_passwordless_payload!) { described_class.from_passwordless_payload!(decoded_token) }
 
