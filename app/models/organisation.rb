@@ -60,6 +60,10 @@ class Organisation < ApplicationRecord
     has_role?("admin")
   end
 
+  def fpo?
+    has_role?("fpo:full")
+  end
+
   def has_role?(role_name)
     roles.exists?(name: role_name)
   end
