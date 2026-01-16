@@ -18,19 +18,13 @@ class AuthenticatedController < ApplicationController
 protected
 
   def require_authentication
-    # Check for valid identity service session first (regardless of dev bypass setting)
-    if TradeTariffDevHub.identity_authentication_enabled? && !Rails.env.development?
-      if user_session.present? && !user_session.renew?
-        return # Valid identity session exists, proceed without checking dev bypass
-      end
-
-      if user_session.present?
-        user_session&.destroy!
-        session[:token] = nil
-      end
-
-      # No valid identity session - fall through to check dev bypass or redirect
+    # If identity auth is enabled and there's a user session, handle it
+    if TradeTariffDevHub.identity_authentication_enabled? && !Rails.env.development? && user_session.present?
+      handle_user_session
+      return
     end
+
+    # No valid identity session - fall through to check dev bypass or redirect
 
     # If dev bypass is enabled and no valid identity session, show dev bypass password page
     if dev_bypass_enabled?
@@ -102,6 +96,22 @@ protected
 
   def disallowed_redirect!
     redirect_to root_path, alert: "Your user <strong>#{current_user&.email_address}</strong> does not have the required permissions to access this section"
+  end
+
+  # Any organisation that DOES NOT have the fpo:full or admin roles needs to be redirected to the start with a flash
+  # Any expired session needs to be redirected to the identity service to refresh the token
+  # Any non-expired session with the fpo:full role can continue
+  def handle_user_session
+    if organisation&.fpo? || organisation&.admin?
+      return unless user_session.renew?
+
+      redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
+    else
+      # NOTE:  Non-FPO orgs should not have an identity session - destroy it
+      user_session&.destroy!
+      session[:token] = nil
+      redirect_to root_path, alert: "This service is not yet open to the public. If you have any questions please contact us on hmrc-trade-tariff-support-g@digital.hmrc.gov.uk"
+    end
   end
 
   helper_method :current_user, :organisation, :user_session

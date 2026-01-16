@@ -25,7 +25,9 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :role_requests, only: %i[new create]
+  if false
+    resources :role_requests, only: %i[new create]
+  end
 
   resources :api_keys, only: %i[index new create] do
     member do

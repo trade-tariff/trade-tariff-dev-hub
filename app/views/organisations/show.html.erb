@@ -10,7 +10,7 @@
 
 <%= render 'shared/organisation_details', organisation: @organisation %>
 
-<% unless @organisation.admin? %>
+<% if @organisation.admin? %>
   <section class="govuk-!-margin-bottom-6">
     <h2 class="govuk-heading-m govuk-!-margin-bottom-3">Roles and permissions</h2>
 
@@ -101,7 +101,7 @@
              actions_callable: ->(key) { render('shared/api_key_actions', key:) } %>
 <% end %>
 
-<% if @trade_tariff_keys.present? %>
+<% if false %>
   <h2 class="govuk-heading-m">Trade Tariff Keys (<%= @trade_tariff_keys.count %>)</h2>
   <%= render 'shared/keys_table',
              keys: @trade_tariff_keys,
