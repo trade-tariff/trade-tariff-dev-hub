@@ -3,6 +3,7 @@ RSpec.describe "Role Requests", type: :request do
 
   before do
     current_user.organisation.assign_role!("trade_tariff:full")
+    create(:organisation, :admin) { |org| create(:user, organisation: org, email_address: "admin@foo.com") }
   end
 
   describe "GET /role_requests/new" do

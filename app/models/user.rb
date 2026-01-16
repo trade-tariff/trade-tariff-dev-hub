@@ -25,6 +25,16 @@ class User < ApplicationRecord
   validates :email_address, presence: true, uniqueness: true
 
   class << self
+    def admin_emails
+      admin_org = Organisation.admin_organisation
+
+      if admin_org.present?
+        admin_org.users.pluck(:email_address)
+      else
+        []
+      end
+    end
+
     def from_passwordless_payload!(token)
       return dummy_user! if Rails.env.development?
 
