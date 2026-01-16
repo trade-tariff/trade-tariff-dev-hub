@@ -29,7 +29,11 @@ RSpec.describe Notification do
   end
 
   describe ".build_for_role_request" do
-    subject(:notification) { described_class.build_for_role_request(role_request) }
+    subject(:notification) { described_class.build_for_role_request(role_request).first }
+
+    before do
+      create(:organisation, :admin).tap { |org| create(:user, organisation: org, email_address: "admin@foo.com") }
+    end
 
     let(:organisation) { create(:organisation, organisation_name: "Test Organisation") }
     let(:user) { create(:user, organisation: organisation, email_address: "requester@example.com") }
@@ -48,7 +52,7 @@ RSpec.describe Notification do
     end
 
     it "builds a notification with the correct attributes", :aggregate_failures do
-      expect(notification.email).to eq(TradeTariffDevHub.role_request_email)
+      expect(notification.email).to eq("admin@foo.com")
       expect(notification.template_id).to eq(Notification::ROLE_REQUEST_TEMPLATE_ID)
       expect(notification.personalisation).to eq(expected_personalisation)
     end

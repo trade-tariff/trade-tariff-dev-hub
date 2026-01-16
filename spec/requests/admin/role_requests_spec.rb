@@ -32,6 +32,8 @@ RSpec.describe "Admin Role Requests", type: :request do
     let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "trade_tariff:full", status: "pending") }
 
     before do
+      create(:organisation, :admin).tap { |org| create(:user, organisation: org, email_address: "admin@foo.com") }
+
       stub_request(:post, "#{TradeTariffDevHub.uk_backend_url}/notifications")
         .to_return(
           status: 202,

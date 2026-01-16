@@ -41,18 +41,22 @@ class Notification
 
     def build_for_role_request(role_request)
       role_description = role_description_for(role_request.role_name)
-      new(
-        email: TradeTariffDevHub.role_request_email,
-        template_id: ROLE_REQUEST_TEMPLATE_ID,
-        personalisation: {
-          organisation_name: role_request.organisation.organisation_name,
-          requester_email: role_request.user.email_address,
-          role_name: role_request.role_name,
-          role_description: role_description,
-          note: role_request.note.presence || "No note provided",
-          admin_url: "#{TradeTariffDevHub.govuk_app_domain}/admin/role_requests",
-        },
-      )
+
+      # NOTE: We need to fan out to every configured admin email on the system
+      User.admin_emails.map do |admin_email|
+        new(
+          email: admin_email,
+          template_id: ROLE_REQUEST_TEMPLATE_ID,
+          personalisation: {
+            organisation_name: role_request.organisation.organisation_name,
+            requester_email: role_request.user.email_address,
+            role_name: role_request.role_name,
+            role_description: role_description,
+            note: role_request.note.presence || "No note provided",
+            admin_url: "#{TradeTariffDevHub.govuk_app_domain}/admin/role_requests",
+          },
+        )
+      end
     end
 
     def build_for_role_request_approved(role_request)

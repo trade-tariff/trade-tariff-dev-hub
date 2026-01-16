@@ -189,4 +189,20 @@ RSpec.describe Organisation, type: :model do
       end
     end
   end
+
+  describe ".admin_organisation" do
+    context "when an admin organisation exists" do
+      let!(:admin_organisation) { create(:organisation, :admin) }
+
+      it "returns the admin organisation" do
+        expect(described_class.admin_organisation).to eq(admin_organisation)
+      end
+    end
+
+    context "when no admin organisation exists" do
+      it "returns nil" do
+        expect(described_class.admin_organisation).to be_nil
+      end
+    end
+  end
 end
