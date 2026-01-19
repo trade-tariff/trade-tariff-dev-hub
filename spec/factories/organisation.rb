@@ -1,5 +1,8 @@
 FactoryBot.define do
   factory :organisation do
+    # NOTE: Default role is FPO to handle most common path through application. Other roles are currently prohibited until functionality is fully and not partially available
+    fpo
+
     sequence(:organisation_name) { |n| "Test Organisation #{n}" }
     application_reference { "MyString" }
     description { "MyString" }

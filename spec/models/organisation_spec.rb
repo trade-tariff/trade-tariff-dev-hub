@@ -142,26 +142,15 @@ RSpec.describe Organisation, type: :model do
     let(:organisation) { create(:organisation) }
 
     context "when organisation has no service roles" do
-      it "returns all service roles" do
-        expect(organisation.available_service_roles.pluck(:name)).to contain_exactly("fpo:full", "spimm:full", "trade_tariff:full")
-      end
-    end
-
-    context "when organisation has some service roles" do
-      let(:fpo_role) { Role.find_by(name: "fpo:full") }
-
-      before do
-        organisation.roles << fpo_role
-      end
-
-      it "returns only unassigned service roles" do
+      it "returns all service roles that are not taken" do
         expect(organisation.available_service_roles.pluck(:name)).to contain_exactly("spimm:full", "trade_tariff:full")
       end
     end
 
     context "when organisation has all service roles" do
       before do
-        organisation.roles << Role.service_roles
+        organisation.roles << organisation.available_service_roles
+        organisation.save!
       end
 
       it "returns empty relation" do
@@ -176,27 +165,27 @@ RSpec.describe Organisation, type: :model do
 
     context "when a pending request exists for the role" do
       before do
-        create(:role_request, organisation: organisation, user: user, role_name: "fpo:full", status: "pending")
+        create(:role_request, organisation: organisation, user: user, role_name: "trade_tariff:full", status: "pending")
       end
 
       it "returns true" do
-        expect(organisation.pending_request_for?("fpo:full")).to be true
+        expect(organisation.pending_request_for?("trade_tariff:full")).to be true
       end
     end
 
     context "when an approved request exists for the role" do
       before do
-        create(:role_request, organisation: organisation, user: user, role_name: "fpo:full", status: "approved")
+        create(:role_request, organisation: organisation, user: user, role_name: "trade_tariff:full", status: "approved")
       end
 
       it "returns false" do
-        expect(organisation.pending_request_for?("fpo:full")).to be false
+        expect(organisation.pending_request_for?("trade_tariff:full")).to be false
       end
     end
 
     context "when no request exists for the role" do
       it "returns false" do
-        expect(organisation.pending_request_for?("fpo:full")).to be false
+        expect(organisation.pending_request_for?("trade_tariff:full")).to be false
       end
     end
   end

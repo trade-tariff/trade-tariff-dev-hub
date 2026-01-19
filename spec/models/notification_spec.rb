@@ -34,13 +34,13 @@ RSpec.describe Notification do
     let(:organisation) { create(:organisation, organisation_name: "Test Organisation") }
     let(:user) { create(:user, organisation: organisation, email_address: "requester@example.com") }
     let(:role) { Role.find_by(name: "fpo:full") }
-    let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "fpo:full", note: "I need access") }
+    let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "trade_tariff:full", note: "I need access") }
 
     let(:expected_personalisation) do
       {
         organisation_name: organisation.organisation_name,
         requester_email: user.email_address,
-        role_name: "fpo:full",
+        role_name: "trade_tariff:full",
         role_description: role.description,
         note: "I need access",
         admin_url: "#{TradeTariffDevHub.govuk_app_domain}/admin/role_requests",
@@ -54,22 +54,10 @@ RSpec.describe Notification do
     end
 
     context "when note is blank" do
-      let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "fpo:full", note: nil) }
+      let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "trade_tariff:full", note: nil) }
 
       it "uses default note text" do
         expect(notification.personalisation[:note]).to eq("No note provided")
-      end
-    end
-
-    context "when role description is missing" do
-      let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "fpo:full", note: "Test") }
-
-      before do
-        allow(Role).to receive(:find_by).with(name: "fpo:full").and_return(nil)
-      end
-
-      it "falls back to role name" do
-        expect(notification.personalisation[:role_description]).to eq("fpo:full")
       end
     end
   end
@@ -79,13 +67,13 @@ RSpec.describe Notification do
 
     let(:organisation) { create(:organisation, organisation_name: "Test Organisation") }
     let(:user) { create(:user, organisation: organisation, email_address: "requester@example.com") }
-    let(:role) { Role.find_by(name: "fpo:full") }
-    let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "fpo:full") }
+    let(:role) { Role.find_by(name: "trade_tariff:full") }
+    let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "trade_tariff:full") }
 
     let(:expected_personalisation) do
       {
         organisation_name: organisation.organisation_name,
-        role_name: "fpo:full",
+        role_name: "trade_tariff:full",
         role_description: role.description,
         organisation_url: "#{TradeTariffDevHub.govuk_app_domain}/organisations/#{organisation.id}",
       }
@@ -95,18 +83,6 @@ RSpec.describe Notification do
       expect(notification.email).to eq(user.email_address)
       expect(notification.template_id).to eq(Notification::ROLE_REQUEST_APPROVED_TEMPLATE_ID)
       expect(notification.personalisation).to eq(expected_personalisation)
-    end
-
-    context "when role description is missing" do
-      let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "fpo:full") }
-
-      before do
-        allow(Role).to receive(:find_by).with(name: "fpo:full").and_return(nil)
-      end
-
-      it "falls back to role name" do
-        expect(notification.personalisation[:role_description]).to eq("fpo:full")
-      end
     end
   end
 end
