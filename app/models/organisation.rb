@@ -105,8 +105,10 @@ class Organisation < ApplicationRecord
   end
 
   def available_service_roles
-    assigned_service_role_ids = roles.service_roles.pluck(:id)
-    Role.service_roles.where.not(id: assigned_service_role_ids).order(:name)
+    # Only return roles that can be requested through the dev-portal request form.
+    assignable = Role.requestable_service_roles
+    assigned_assignable_ids = roles.merge(assignable).pluck(:id)
+    assignable.where.not(id: assigned_assignable_ids).order(:name)
   end
 
   def pending_request_for?(role_name)

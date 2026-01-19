@@ -29,7 +29,9 @@ class RoleRequest < ApplicationRecord
   attribute :status, :string
 
   validates :role_name, presence: true
-  validates :role_name, inclusion: { in: Role.assignable_names, message: "is not a valid assignable role" }
+  # Only enforce requestable roles on creation. This avoids breaking admin processing
+  # of previously-created requests if the allowed list changes over time.
+  validates :role_name, inclusion: { in: Role.assignable_names, message: "is not a valid assignable role" }, on: :create
   validate :organisation_does_not_have_role
   validate :no_duplicate_pending_request
 

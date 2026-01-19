@@ -143,7 +143,7 @@ RSpec.describe Organisation, type: :model do
 
     context "when organisation has no service roles" do
       it "returns all service roles" do
-        expect(organisation.available_service_roles.pluck(:name)).to contain_exactly("fpo:full", "spimm:full", "trade_tariff:full")
+        expect(organisation.available_service_roles.pluck(:name)).to contain_exactly("fpo:full", "trade_tariff:full")
       end
     end
 
@@ -155,7 +155,7 @@ RSpec.describe Organisation, type: :model do
       end
 
       it "returns only unassigned service roles" do
-        expect(organisation.available_service_roles.pluck(:name)).to contain_exactly("spimm:full", "trade_tariff:full")
+        expect(organisation.available_service_roles.pluck(:name)).to contain_exactly("trade_tariff:full")
       end
     end
 
