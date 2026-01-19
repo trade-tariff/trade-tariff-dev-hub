@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :role_request do
     organisation
     user
-    role_name { "fpo:full" }
+    role_name { "trade_tariff:full" }
     note { "I need access to manage FPO API keys" }
     status { "pending" }
 

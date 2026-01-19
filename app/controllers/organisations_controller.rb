@@ -44,7 +44,7 @@ private
   end
 
   def organisation
-    @organisation ||= Organisation.find_by(id: params[:id])
+    @organisation ||= Organisation.find_by(id: params[:id]) || current_user.organisation
   end
 
   def organisation_params
