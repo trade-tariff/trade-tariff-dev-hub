@@ -110,6 +110,27 @@ module TradeTariffDevHub
       @revision ||= `cat REVISION 2>/dev/null || echo 'development'`.strip
     end
 
+    def environment
+      ENV.fetch("ENVIRONMENT", "production")
+    end
+
+    def id_token_cookie_name
+      cookie_name_for("id_token")
+    end
+
+    def refresh_token_cookie_name
+      cookie_name_for("refresh_token")
+    end
+
+    def cookie_name_for(base_name)
+      case environment
+      when "production"
+        base_name
+      else
+        "#{environment}_#{base_name}"
+      end.to_sym
+    end
+
     def uk_backend_url
       @uk_backend_url ||= ENV["UK_BACKEND_URL"]
     end
