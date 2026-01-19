@@ -66,10 +66,12 @@ private
 
   def send_role_request_email
     # Build notification to validate it can be constructed (catches errors early)
-    notification = Notification.build_for_role_request(@role_request)
+    notifications = Notification.build_for_role_request(@role_request)
     # In development, validate notification can be built but don't actually send
     return true if Rails.env.development?
 
-    SendNotification.new(notification).call
+    notifications.each do |notification|
+      SendNotification.new(notification).call
+    end
   end
 end
