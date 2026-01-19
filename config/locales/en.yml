@@ -10,7 +10,7 @@ en:
               taken: This email address has already been invited to an organisation
               already_member: This email address is already associated with a member of your organisation
               member_elsewhere: This email address is already associated with a member of another organisation
-              admin_only: "<%= ENV.fetch('ADMIN_DOMAIN', 'transformuk.com') %> email addresses can only be invited to admin organisations"
+              admin_only: "%{domain} email addresses can only be invited to admin organisations"
         organisation:
           attributes:
             organisation_name:
