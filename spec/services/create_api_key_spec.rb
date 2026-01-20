@@ -4,6 +4,7 @@ RSpec.describe CreateApiKey do
   let(:api_gateway_client) { Aws::APIGateway::Client.new(stub_responses: true) }
   let(:organisation) { create(:organisation) }
   let(:description) { "Test API Key" }
+  let(:api_key) { ApiKey.new(organisation: organisation, description: description) }
 
   describe "#call" do
     before do
@@ -27,7 +28,7 @@ RSpec.describe CreateApiKey do
     end
 
     it "creates and saves an API key with valid responses", :aggregate_failures do
-      result = create_api_key.call(organisation.id, description)
+      result = create_api_key.call(api_key)
 
       expect(result.id).to be_a_uuid
       expect(result.organisation_id).to eq(organisation.id)
@@ -42,7 +43,7 @@ RSpec.describe CreateApiKey do
 
     it "does not create a new usage plan if one exists" do
       allow(api_gateway_client).to receive(:create_usage_plan)
-      create_api_key.call(organisation.id, description)
+      create_api_key.call(api_key)
       expect(api_gateway_client).not_to have_received(:create_usage_plan)
     end
   end

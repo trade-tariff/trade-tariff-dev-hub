@@ -83,18 +83,24 @@ RSpec.describe ApiKeysController, type: :controller do
   end
 
   describe "POST #create" do
-    subject(:do_action) { post :create, params: { id: "some-id", description: "test desc" } }
+    subject(:do_action) { post :create, params: { api_key: { description: "test desc" } } }
 
-    let(:api_key) { create(:api_key, api_key_id: "abc123", organisation: current_user.organisation) }
-    let(:service) { instance_double(CreateApiKey, call: api_key) }
+    let(:created_api_key) { build(:api_key, organisation: current_user.organisation) }
+    let(:service) { instance_double(CreateApiKey) }
 
     before do
       allow(CreateApiKey).to receive(:new).and_return(service)
+      allow(service).to receive(:call).and_return(created_api_key)
     end
 
     it "renders the create template" do
-      post :create, params: { id: "some-id", description: "test desc" }
+      do_action
       expect(response).to render_template("create")
+    end
+
+    it "calls the service with an ApiKey object" do
+      do_action
+      expect(service).to have_received(:call).with(an_instance_of(ApiKey))
     end
 
     include_examples "an unauthorised user"

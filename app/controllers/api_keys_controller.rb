@@ -7,7 +7,9 @@ class ApiKeysController < AuthenticatedController
     @api_keys = ApiKey.where(organisation_id: organisation_id)
   end
 
-  def new; end
+  def new
+    @api_key = ApiKey.new(organisation_id: organisation_id)
+  end
 
   def update
     if @api_key.enabled
@@ -20,7 +22,20 @@ class ApiKeysController < AuthenticatedController
   end
 
   def create
-    @api_key = CreateApiKey.new.call(organisation_id, params[:api_key_description])
+    description = api_key_params[:description]
+
+    @api_key = ApiKey.new(
+      organisation_id: organisation_id,
+      description: description,
+      enabled: true,
+    )
+
+    unless @api_key.valid?
+      render :new
+      return
+    end
+
+    @api_key = CreateApiKey.new.call(@api_key)
   end
 
   def revoke
@@ -64,6 +79,10 @@ private
     # Admins can access this controller (checked in AuthenticatedController#allowed?)
     # Regular users need fpo:full role
     ["fpo:full"]
+  end
+
+  def api_key_params
+    params.require(:api_key).permit(:description)
   end
 
   delegate :deletion_enabled?, to: TradeTariffDevHub

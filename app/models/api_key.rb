@@ -36,12 +36,13 @@ private
 
   def limit_keys_per_organisation
     return if organisation.nil?
+    return unless enabled? # Only validate when the key will be active
 
-    existing_count = organisation.api_keys.count
-    existing_count -= 1 if persisted? # Don't count self if updating
+    existing_count = organisation.api_keys.active.count
+    existing_count -= 1 if persisted? && enabled_in_database # Don't double-count self if already active in DB
 
     if existing_count >= 3
-      errors.add(:base, "Organisation can have a maximum of 3 API keys")
+      errors.add(:base, "Organisation can have a maximum of 3 active API keys")
     end
   end
 end
