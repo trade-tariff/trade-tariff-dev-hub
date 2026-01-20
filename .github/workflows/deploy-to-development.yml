@@ -27,6 +27,8 @@ jobs:
     secrets:
       slack-webhook: ${{ secrets.SLACK_WEBHOOK }}
       ssh-key: ${{ secrets.PRIVATE_SSH_KEY }}
+      non_admin_bypass_password: ${{ secrets.NON_ADMIN_BYPASS_PASSWORD }}
+      admin_bypass_password: ${{ secrets.ADMIN_BYPASS_PASSWORD }}
 
   start-services:
     if: >
