@@ -19,7 +19,7 @@ protected
 
   def require_authentication
     # If identity auth is enabled and there's a user session, handle it
-    if TradeTariffDevHub.identity_authentication_enabled? && !Rails.env.development? && user_session.present?
+    if TradeTariffDevHub.identity_authentication_enabled? && !Rails.env.development? && authenticated?
       handle_user_session
       return
     end
@@ -34,8 +34,24 @@ protected
 
     # Dev bypass disabled and no valid identity session - redirect to identity service
     if TradeTariffDevHub.identity_authentication_enabled? && !Rails.env.development?
+      # Clear session if it exists but authentication check failed
+      # (authenticated? handles cookie matching, so if it returned false, session is invalid)
+      clear_authentication! if user_session.present?
       redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
     end
+  end
+
+  def authenticated?
+    return false if user_session.blank?
+    return false unless user_session.current?
+
+    # Check cookie matching only if cookie is present
+    # If no cookie is present, allow the session (cookie might not be set yet in callback flow)
+    cookie_token = cookies[TradeTariffDevHub.id_token_cookie_name]
+    return true if cookie_token.blank? # No cookie to check - allow valid session
+
+    # If cookie is present, it must match the session
+    user_session.cookie_token_match_for?(cookie_token)
   end
 
   def user_session
@@ -105,11 +121,12 @@ protected
     if organisation&.fpo? || organisation&.admin?
       return unless user_session.renew?
 
+      Rails.logger.info("[Auth] Session needs renewal, redirecting to identity service")
       redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
     else
       # NOTE:  Non-FPO orgs should not have an identity session - destroy it
-      user_session&.destroy!
-      session[:token] = nil
+      Rails.logger.info("[Auth] Non-FPO org detected, clearing authentication")
+      clear_authentication!
       redirect_to root_path, alert: "This service is not yet open to the public. If you have any questions please contact us on hmrc-trade-tariff-support-g@digital.hmrc.gov.uk"
     end
   end

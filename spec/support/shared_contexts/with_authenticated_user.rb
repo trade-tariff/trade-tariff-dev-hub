@@ -28,10 +28,13 @@ RSpec.shared_context "with authenticated user" do
 
       ActionDispatch::Session::CookieStore.new(setter, key: "_trade_tariff_dev_hub_session").call(env)
       cookies_key_value = env["action_dispatch.cookies"].as_json.first
-      cookies[:id_token] = "mock-id-token"
+      # Set cookie to match session's id_token for cookie matching validation
+      cookies[TradeTariffDevHub.id_token_cookie_name] = user_session.id_token
       cookies[cookies_key_value.first] = cookies_key_value.last
     else
       session[:token] = user_session.token
+      # Set cookie to match session's id_token for cookie matching validation
+      cookies[TradeTariffDevHub.id_token_cookie_name] = user_session.id_token
     end
   end
 end

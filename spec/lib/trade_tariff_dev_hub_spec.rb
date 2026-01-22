@@ -25,7 +25,14 @@ RSpec.describe TradeTariffDevHub do
     subject(:identity_cookie_domain) { described_class.identity_cookie_domain }
 
     before do
+      # Clear memoization
+      described_class.instance_variable_set(:@identity_cookie_domain, nil)
+      described_class.instance_variable_set(:@base_domain, nil)
+      described_class.instance_variable_set(:@govuk_app_domain, nil)
+
       allow(Rails.env).to receive(:production?).and_return(true)
+      allow(ENV).to receive(:fetch).with("GOVUK_APP_DOMAIN", anything).and_return(govuk_app_domain)
+      allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("GOVUK_APP_DOMAIN").and_return(govuk_app_domain)
     end
 
