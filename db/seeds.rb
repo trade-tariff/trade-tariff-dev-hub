@@ -14,7 +14,7 @@
   },
   {
     name: 'spimm:full',
-    description: 'Full access to SPIMM (Simplified Process for Internal Market Movements) API keys.'
+    description: 'Full access to Categorisation API keys.'
   }
 ].each do |role_attrs|
   Role.find_or_create_by(name: role_attrs[:name]) do |role|
