@@ -65,15 +65,42 @@ module TradeTariffDevHub
     end
 
     def identity_cognito_jwks_keys
+      return if identity_cognito_jwks_url.blank?
+
       Rails.cache.fetch("identity_cognito_jwks_keys", expires_in: 1.hour) do
+        Rails.logger.info("[Auth] Fetching JWKS keys from: #{identity_cognito_jwks_url}")
         response = Faraday.get(identity_cognito_jwks_url)
 
-        return JSON.parse(response.body)["keys"] if response.success?
-
-        Rails.logger.error("Failed to fetch JWKS keys: #{response.status} #{response.body}")
-
-        nil
+        if response.success?
+          keys = JSON.parse(response.body)["keys"]
+          Rails.logger.info("[Auth] Successfully fetched #{keys&.size || 0} JWKS keys")
+          keys
+        else
+          Rails.logger.error("[Auth] Failed to fetch JWKS keys: HTTP #{response.status}")
+          Rails.logger.error("[Auth] JWKS response body: #{response.body&.truncate(500)}")
+          nil
+        end
       end
+    rescue Faraday::ConnectionFailed => e
+      Rails.logger.error("[Auth] JWKS connection failed: #{e.message}")
+      Rails.logger.error("[Auth] JWKS URL was: #{identity_cognito_jwks_url}")
+      nil
+    rescue Faraday::TimeoutError => e
+      Rails.logger.error("[Auth] JWKS request timed out: #{e.message}")
+      nil
+    rescue Faraday::ClientError => e
+      Rails.logger.error("[Auth] JWKS client error (4xx): #{e.message}")
+      Rails.logger.error("[Auth] JWKS URL was: #{identity_cognito_jwks_url}")
+      nil
+    rescue Faraday::ServerError => e
+      Rails.logger.error("[Auth] JWKS server error (5xx): #{e.message}")
+      nil
+    rescue JSON::ParserError => e
+      Rails.logger.error("[Auth] Failed to parse JWKS response as JSON: #{e.message}")
+      nil
+    rescue StandardError => e
+      Rails.logger.error("[Auth] Unexpected error fetching JWKS keys: #{e.class}: #{e.message}")
+      nil
     end
 
     def identity_cognito_jwks_url
