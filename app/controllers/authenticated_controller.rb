@@ -54,10 +54,6 @@ protected
     user_session.cookie_token_match_for?(cookie_token)
   end
 
-  def user_session
-    @user_session ||= Session.find_by(token: session[:token])
-  end
-
   def organisation
     @organisation ||= if user_session&.assumed_organisation_id.present?
                         user_session.assumed_organisation

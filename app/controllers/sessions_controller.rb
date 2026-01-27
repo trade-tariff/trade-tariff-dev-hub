@@ -74,10 +74,6 @@ private
     @id_token ||= cookies[id_token_cookie_name]
   end
 
-  def user_session
-    Session.find_by(token: session[:token])
-  end
-
   def already_authenticated?
     return false if user_session.blank?
     return false unless user_session.current?
