@@ -1,4 +1,4 @@
-NOTIFY_CONFIGURATION = if Rails.env.production?
+NOTIFY_CONFIGURATION = if ENV['ENVIRONMENT'] == 'production'
   {
     templates: {
       developer_portal: {
