@@ -37,6 +37,7 @@ private
   def limit_keys_per_organisation
     return if organisation.nil?
     return unless enabled? # Only validate when the key will be active
+    return if organisation.admin? # Skip limit for admin organisations
 
     existing_count = organisation.api_keys.active.count
     existing_count -= 1 if persisted? && enabled_in_database # Don't double-count self if already active in DB

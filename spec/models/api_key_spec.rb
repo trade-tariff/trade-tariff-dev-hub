@@ -34,5 +34,21 @@ RSpec.describe ApiKey, type: :model do
         expect(api_key_to_revoke).to be_valid
       end
     end
+
+    context "when organisation is an admin organisation" do
+      let(:admin_organisation) { create(:organisation, :admin) }
+
+      it "allows creating more than 3 active API keys" do
+        create_list(:api_key, 3, organisation: admin_organisation, enabled: true)
+        api_key = build(:api_key, organisation: admin_organisation)
+        expect(api_key).to be_valid
+      end
+
+      it "allows creating many active API keys" do
+        create_list(:api_key, 10, organisation: admin_organisation, enabled: true)
+        api_key = build(:api_key, organisation: admin_organisation)
+        expect(api_key).to be_valid
+      end
+    end
   end
 end
