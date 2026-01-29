@@ -79,4 +79,53 @@ RSpec.describe "ApiKeys", type: :request do
       end
     end
   end
+
+  describe "POST /api_keys for admin organisations" do
+    before do
+      current_user.organisation.assign_role!("admin")
+      current_user.organisation.assign_role!("fpo:full")
+    end
+
+    context "when admin organisation has 3 active API keys" do
+      let(:create_service) { instance_double(CreateApiKey) }
+      let(:created_api_key) { build_stubbed(:api_key, organisation: current_user.organisation) }
+
+      before do
+        create_list(:api_key, 3, organisation: current_user.organisation, enabled: true)
+        allow(CreateApiKey).to receive(:new).and_return(create_service)
+        allow(create_service).to receive(:call).and_return(created_api_key)
+      end
+
+      it "allows creating a new key beyond the limit", :aggregate_failures do
+        post api_keys_path, params: { api_key: { description: "New key" } }
+
+        expect(response).to render_template("create")
+        expect(create_service).to have_received(:call).with(an_instance_of(ApiKey))
+      end
+
+      it "does not show validation errors" do
+        post api_keys_path, params: { api_key: { description: "New key" } }
+
+        expect(response.body).not_to include("Organisation can have a maximum of 3 active API keys")
+      end
+    end
+
+    context "when admin organisation has many active API keys" do
+      let(:create_service) { instance_double(CreateApiKey) }
+      let(:created_api_key) { build_stubbed(:api_key, organisation: current_user.organisation) }
+
+      before do
+        create_list(:api_key, 10, organisation: current_user.organisation, enabled: true)
+        allow(CreateApiKey).to receive(:new).and_return(create_service)
+        allow(create_service).to receive(:call).and_return(created_api_key)
+      end
+
+      it "allows creating additional keys", :aggregate_failures do
+        post api_keys_path, params: { api_key: { description: "New key" } }
+
+        expect(response).to render_template("create")
+        expect(create_service).to have_received(:call).with(an_instance_of(ApiKey))
+      end
+    end
+  end
 end
