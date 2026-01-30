@@ -3,7 +3,7 @@
   <% is_admin = current_user&.organisation&.admin? %>
   <% viewed_org = organisation %>
 
-  <%= header.with_navigation_item(text: "Your organisation account", href: organisation_path(current_user.organisation)) %>
+  <%= header.with_navigation_item(text: "Your Organisation Account", href: organisation_path(current_user.organisation)) %>
 
   <% if is_admin %>
     <%= header.with_navigation_item(text: "All Organisations", href: admin_organisations_path, active: current_page?(admin_organisations_path)) %>

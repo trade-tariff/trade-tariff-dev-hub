@@ -25,7 +25,7 @@ Rails.application.routes.draw do
     end
   end
 
-  if false
+  if TradeTariffDevHub.role_request_enabled?
     resources :role_requests, only: %i[new create]
   end
 
