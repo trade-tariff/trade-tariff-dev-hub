@@ -1,6 +1,6 @@
 <% is_admin = current_user&.organisation&.admin? %>
 
-<h1 class="govuk-heading-l">Your organisation account</h1>
+<h1 class="govuk-heading-l">Your Organisation Account</h1>
 
 <% if is_admin %>
   <p class="govuk-body">Manage your organisational details and API keys, as well as grant access requests and manage your team members. From this page you can invite new team members to join the UK Trade Tariff Developer Portal, or remove existing members.</p>
@@ -10,7 +10,7 @@
 
 <%= render 'shared/organisation_details', organisation: @organisation %>
 
-<% if @organisation.admin? %>
+<% unless @organisation.admin? %>
   <section class="govuk-!-margin-bottom-6">
     <h2 class="govuk-heading-m govuk-!-margin-bottom-3">Roles and permissions</h2>
 
@@ -37,7 +37,7 @@
       <p class="govuk-body">No service roles assigned.</p>
     <% end %>
 
-    <% if @has_available_roles %>
+    <% if TradeTariffDevHub.role_request_enabled? && @has_available_roles %>
       <div class="govuk-!-margin-top-4">
         <% if @available_without_pending.any? %>
           <%= govuk_button_link_to 'Request access', new_role_request_path %>

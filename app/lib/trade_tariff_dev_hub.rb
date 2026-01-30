@@ -15,6 +15,10 @@ module TradeTariffDevHub
       ENV.fetch("DELETION_ENABLED", "false") == "true"
     end
 
+    def role_request_enabled?
+      ENV.fetch("FEATURE_FLAG_ROLE_REQUEST", "false") == "true"
+    end
+
     def documentation_url
       ENV.fetch(
         "DOCUMENTATION_URL",
