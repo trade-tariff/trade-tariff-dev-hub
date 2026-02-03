@@ -36,27 +36,13 @@ class Organisation < ApplicationRecord
     end
 
     def find_or_associate_implicit_organisation_to(user)
-      return if user.organisation.present?
-
-      invitation = Invitation.find_by(
-        invitee_email: user.email_address,
-        status: :pending,
-      )
-
-      unless invitation
-        raise InvitationRequiredError, "No pending invitation found for #{user.email_address}"
-      end
-
-      User.transaction do
-        user.organisation = invitation.organisation
-        invitation.accepted!
-        user.save!
-      end
+      AssociateUserToOrganisation.new.call(user)
+    rescue AssociateUserToOrganisation::InvitationRequiredError => e
+      raise InvitationRequiredError, e.message
     end
   end
 
-  class InvitationRequiredError < StandardError
-  end
+  InvitationRequiredError = Class.new(StandardError)
 
   def admin?
     has_role?("admin")
