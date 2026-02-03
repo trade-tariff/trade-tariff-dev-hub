@@ -109,17 +109,24 @@ RSpec.describe Organisation, type: :model do
         )
       end
 
-      it "accepts the invitation" do
-        expect { find_or_associate_implicit_organisation_to }.not_to(change { Invitation.accepted.count })
+      it "raises an InvitationRequiredError" do
+        expect { find_or_associate_implicit_organisation_to }.to raise_error(
+          Organisation::InvitationRequiredError,
+          /No pending invitation found/,
+        )
       end
+    end
 
-      it "associates the existing organisation to the new user", :aggregate_failures do
-        expect { find_or_associate_implicit_organisation_to }.to change(described_class, :count)
-        expect(user.organisation).not_to eq(existing_user.organisation)
-      end
+    context "when the user does not have an organisation and no invitation exists" do
+      subject(:find_or_associate_implicit_organisation_to) { described_class.find_or_associate_implicit_organisation_to(user) }
 
-      it "creates a new organisation" do
-        expect { find_or_associate_implicit_organisation_to }.to change(described_class, :count)
+      let!(:user) { build(:user, organisation: nil, email_address: "new@user.com") }
+
+      it "raises an InvitationRequiredError" do
+        expect { find_or_associate_implicit_organisation_to }.to raise_error(
+          Organisation::InvitationRequiredError,
+          /No pending invitation found/,
+        )
       end
     end
   end

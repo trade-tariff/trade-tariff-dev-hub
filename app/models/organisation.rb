@@ -36,29 +36,26 @@ class Organisation < ApplicationRecord
     end
 
     def find_or_associate_implicit_organisation_to(user)
-      if user.organisation.blank?
-        invitation = Invitation.find_by(
-          invitee_email: user.email_address,
-          status: :pending,
-        )
+      return if user.organisation.present?
 
-        if invitation.present?
-          User.transaction do
-            user.organisation = invitation.organisation
-            invitation.accepted!
-            user.save!
-          end
-        else
-          new(organisation_name: user.email_address).tap do |organisation|
-            organisation.description = "Default implicit organisation for initial user #{user.email_address}"
-            organisation.save!
-            organisation.assign_role!("trade_tariff:full")
-            user.organisation = organisation
-            user.save!
-          end
-        end
+      invitation = Invitation.find_by(
+        invitee_email: user.email_address,
+        status: :pending,
+      )
+
+      unless invitation
+        raise InvitationRequiredError, "No pending invitation found for #{user.email_address}"
+      end
+
+      User.transaction do
+        user.organisation = invitation.organisation
+        invitation.accepted!
+        user.save!
       end
     end
+  end
+
+  class InvitationRequiredError < StandardError
   end
 
   def admin?

@@ -44,15 +44,36 @@ RSpec.describe User, type: :model do
       it { expect { from_passwordless_payload! }.not_to change(Organisation, :count) }
     end
 
-    context "when the user does not exist" do
+    context "when the user does not exist and has no pending invitation" do
+      it "raises an InvitationRequiredError" do
+        expect { from_passwordless_payload! }.to raise_error(Organisation::InvitationRequiredError)
+      end
+    end
+
+    context "when the user does not exist but has a pending invitation" do
+      let(:inviting_user) { create(:user) }
+
+      before do
+        create(
+          :invitation,
+          invitee_email: decoded_token["email"],
+          organisation: inviting_user.organisation,
+          status: :pending,
+          user: inviting_user,
+        )
+      end
+
       it { expect { from_passwordless_payload! }.to change(described_class, :count).by(1) }
-      it { expect { from_passwordless_payload! }.to change(Organisation, :count).by(1) }
+      it { expect { from_passwordless_payload! }.not_to change(Organisation, :count) }
       it { is_expected.to have_attributes(user_id: decoded_token["sub"], email_address: decoded_token["email"]) }
 
-      it "assigns the correct roles to the organisation" do
+      it "joins the existing organisation" do
         user = from_passwordless_payload!
+        expect(user.organisation).to eq(inviting_user.organisation)
+      end
 
-        expect(user.organisation.roles.pluck(:name)).to eq(%w[trade_tariff:full])
+      it "accepts the invitation" do
+        expect { from_passwordless_payload! }.to change { Invitation.accepted.count }.by(1)
       end
     end
 

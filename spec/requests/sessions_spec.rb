@@ -26,15 +26,44 @@ RSpec.describe "Sessions", type: :request do
       expect { get auth_redirect_path }.not_to change(Organisation, :count)
     end
 
-    context "when the user does not exist" do
+    context "when the user does not exist and has no invitation" do
       let(:email_address) { "non-existing@bar.com" }
+
+      it "does not create a new user" do
+        expect { get auth_redirect_path }.not_to change(User, :count)
+      end
+
+      it "redirects to root with private beta message", :aggregate_failures do
+        get auth_redirect_path
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to include("private beta")
+      end
+    end
+
+    context "when the user does not exist but has a pending invitation" do
+      let(:email_address) { "invited@example.com" }
+      let(:inviting_user) { create(:user) }
+
+      before do
+        create(
+          :invitation,
+          invitee_email: email_address,
+          organisation: inviting_user.organisation,
+          status: :pending,
+          user: inviting_user,
+        )
+      end
 
       it "creates a new user" do
         expect { get auth_redirect_path }.to change(User, :count).by(1)
       end
 
-      it "creates a new organisation" do
-        expect { get auth_redirect_path }.to change(Organisation, :count).by(1)
+      it "does not create a new organisation" do
+        expect { get auth_redirect_path }.not_to change(Organisation, :count)
+      end
+
+      it "accepts the invitation" do
+        expect { get auth_redirect_path }.to change { Invitation.accepted.count }.by(1)
       end
     end
 

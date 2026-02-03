@@ -34,6 +34,10 @@ class SessionsController < ApplicationController
     session[:token] = session_token
 
     redirect_to organisation_path(user.organisation)
+  rescue Organisation::InvitationRequiredError => e
+    Rails.logger.info("[Auth] User requires invitation: #{e.message}")
+    clear_authentication!
+    redirect_to root_path, alert: "This service is currently in private beta. You need an invitation from an existing organisation to access it."
   rescue StandardError => e
     Rails.logger.error("[Auth] Authentication error: #{e.class}: #{e.message}")
     Rails.logger.error("[Auth] Backtrace: #{e.backtrace&.first(5)&.join("\n")}")
