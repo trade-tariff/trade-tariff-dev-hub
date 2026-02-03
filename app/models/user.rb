@@ -50,6 +50,11 @@ class User < ApplicationRecord
 
       Organisation.find_or_associate_implicit_organisation_to(user) if user.organisation.blank?
 
+      if user.organisation&.implicitly_created?
+        raise Organisation::InvitationRequiredError,
+              "Organisation for #{user.email_address} was implicitly created and requires a valid invitation"
+      end
+
       user.save!
 
       user
@@ -57,7 +62,13 @@ class User < ApplicationRecord
 
     def dummy_user!
       User.find_or_initialize_by(user_id: "dummy_user", email_address: "dummy@user.com").tap do |user|
-        Organisation.find_or_associate_implicit_organisation_to(user)
+        if user.organisation.blank?
+          org = Organisation.find_or_create_by!(organisation_name: "Dummy Dev Org") do |o|
+            o.description = "Development dummy organisation"
+          end
+          org.assign_role!("trade_tariff:full") unless org.has_role?("trade_tariff:full")
+          user.organisation = org
+        end
         user.save!
       end
     end

@@ -16,5 +16,13 @@ FactoryBot.define do
     trait :admin do
       roles { [Role.find_by(name: "admin")] }
     end
+
+    trait :implicit do
+      roles { [] }
+    end
+
+    trait :trade_tariff_only do
+      roles { [Role.find_by(name: "trade_tariff:full")] }
+    end
   end
 end

@@ -36,33 +36,21 @@ class Organisation < ApplicationRecord
     end
 
     def find_or_associate_implicit_organisation_to(user)
-      if user.organisation.blank?
-        invitation = Invitation.find_by(
-          invitee_email: user.email_address,
-          status: :pending,
-        )
-
-        if invitation.present?
-          User.transaction do
-            user.organisation = invitation.organisation
-            invitation.accepted!
-            user.save!
-          end
-        else
-          new(organisation_name: user.email_address).tap do |organisation|
-            organisation.description = "Default implicit organisation for initial user #{user.email_address}"
-            organisation.save!
-            organisation.assign_role!("trade_tariff:full")
-            user.organisation = organisation
-            user.save!
-          end
-        end
-      end
+      AssociateUserToOrganisation.new.call(user)
+    rescue AssociateUserToOrganisation::InvitationRequiredError => e
+      raise InvitationRequiredError, e.message
     end
   end
 
+  InvitationRequiredError = Class.new(StandardError)
+
   def admin?
     has_role?("admin")
+  end
+
+  def implicitly_created?
+    role_names = roles.pluck(:name)
+    role_names.empty? || role_names == ["trade_tariff:full"]
   end
 
   def fpo?
