@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class RoleRequestsController < AuthenticatedController
+  before_action :ensure_feature_enabled
   before_action :ensure_not_admin
   before_action :ensure_own_organisation
   before_action :set_available_roles
@@ -32,6 +33,12 @@ class RoleRequestsController < AuthenticatedController
   end
 
 private
+
+  def ensure_feature_enabled
+    unless TradeTariffDevHub.role_request_enabled?
+      redirect_to organisation_path(organisation), alert: "Role request functionality is currently disabled"
+    end
+  end
 
   def ensure_not_admin
     redirect_to organisation_path(organisation), alert: "Admins already have access to all roles" if organisation.admin?
