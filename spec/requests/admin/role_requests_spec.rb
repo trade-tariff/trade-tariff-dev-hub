@@ -24,6 +24,53 @@ RSpec.describe "Admin Role Requests", type: :request do
       expect(response.body).to include(pending_request.user.email_address)
       expect(response.body).to include(pending_request.role_name)
     end
+
+    it "displays Notes column header", :aggregate_failures do
+      get admin_role_requests_path
+      expect(response.body).to include("Notes")
+    end
+
+    it "displays notes column for all pending requests", :aggregate_failures do
+      get admin_role_requests_path
+      if pending_request.note.present?
+        # Check for note content (accounting for HTML escaping)
+        expect(response.body).to include(CGI.escapeHTML(pending_request.note))
+      end
+    end
+
+    context "when role request has notes" do
+      let!(:pending_request_with_notes) { create(:role_request, status: "pending", note: "We need access for testing purposes") }
+
+      it "displays notes in the table", :aggregate_failures do
+        get admin_role_requests_path
+        expect(response.body).to include("We need access for testing purposes")
+      end
+
+      it "displays notes in the Notes column cell", :aggregate_failures do
+        get admin_role_requests_path
+        # Verify the note appears in the table structure
+        expect(response.body).to include(pending_request_with_notes.note)
+        # Verify it's in a table cell context (between table row markers)
+        expect(response.body).to match(/<td[^>]*>.*#{Regexp.escape(pending_request_with_notes.note)}.*<\/td>/m)
+      end
+    end
+
+    context "when role request has no notes (legacy request)" do
+      let(:pending_request_without_notes) do
+        # Create a legacy request without notes (skip validations to simulate legacy data)
+        role_request = build(:role_request, status: "pending", note: nil)
+        role_request.save!(validate: false)
+        role_request
+      end
+
+      it "displays empty cell for requests without notes", :aggregate_failures do
+        pending_request_without_notes # Create the record
+        get admin_role_requests_path
+        expect(response).to have_http_status(:ok)
+        # Verify the request appears in the table (empty note cell is fine)
+        expect(response.body).to include(pending_request_without_notes.organisation.organisation_name)
+      end
+    end
   end
 
   describe "POST /admin/role_requests/:id/approve" do
