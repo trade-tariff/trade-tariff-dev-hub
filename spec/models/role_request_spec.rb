@@ -57,6 +57,33 @@ RSpec.describe RoleRequest, type: :model do
     end
   end
 
+  describe "validations" do
+    let(:organisation) { create(:organisation) }
+    let(:user) { create(:user, organisation: organisation) }
+
+    describe "#note" do
+      it "requires a note to be present", :aggregate_failures do
+        role_request = build(:role_request, organisation: organisation, user: user, note: nil)
+
+        expect(role_request).not_to be_valid
+        expect(role_request.errors[:note]).to include("You must provide information about why you need access to this role")
+      end
+
+      it "requires a note to not be blank", :aggregate_failures do
+        role_request = build(:role_request, organisation: organisation, user: user, note: "")
+
+        expect(role_request).not_to be_valid
+        expect(role_request.errors[:note]).to include("You must provide information about why you need access to this role")
+      end
+
+      it "allows a role request with a note" do
+        role_request = build(:role_request, organisation: organisation, user: user, note: "I need this access")
+
+        expect(role_request).to be_valid
+      end
+    end
+  end
+
   describe "#organisation_does_not_have_role" do
     let(:organisation) { create(:organisation) }
     let(:user) { create(:user, organisation: organisation) }

@@ -30,6 +30,7 @@ class RoleRequest < ApplicationRecord
 
   validates :role_name, presence: true
   validates :role_name, inclusion: { in: Role.assignable_names, message: "is not a valid assignable role" }
+  validates :note, presence: { message: "You must provide information about why you need access to this role" }
   validate :organisation_does_not_have_role
   validate :no_duplicate_pending_request
 
