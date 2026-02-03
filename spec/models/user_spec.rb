@@ -79,8 +79,9 @@ RSpec.describe User, type: :model do
     end
 
     context "when the user exists but their organisation was implicitly created" do
-      let!(:implicit_org) { create(:organisation, :trade_tariff_only) }
-      let!(:user) do
+      let(:implicit_org) { create(:organisation, :trade_tariff_only) }
+
+      before do
         create(
           :user,
           user_id: decoded_token["sub"],
