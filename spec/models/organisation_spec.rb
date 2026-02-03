@@ -145,6 +145,40 @@ RSpec.describe Organisation, type: :model do
     end
   end
 
+  describe "#implicitly_created?" do
+    context "when the organisation has no roles" do
+      subject(:organisation) { create(:organisation, :implicit) }
+
+      it { is_expected.to be_implicitly_created }
+    end
+
+    context "when the organisation only has trade_tariff:full role" do
+      subject(:organisation) { create(:organisation, :trade_tariff_only) }
+
+      it { is_expected.to be_implicitly_created }
+    end
+
+    context "when the organisation has admin role" do
+      subject(:organisation) { create(:organisation, :admin) }
+
+      it { is_expected.not_to be_implicitly_created }
+    end
+
+    context "when the organisation has fpo:full role" do
+      subject(:organisation) { create(:organisation, :fpo) }
+
+      it { is_expected.not_to be_implicitly_created }
+    end
+
+    context "when the organisation has multiple roles including trade_tariff:full" do
+      subject(:organisation) do
+        create(:organisation, :fpo).tap { |o| o.assign_role!("trade_tariff:full") }
+      end
+
+      it { is_expected.not_to be_implicitly_created }
+    end
+  end
+
   describe "#available_service_roles" do
     let(:organisation) { create(:organisation) }
 

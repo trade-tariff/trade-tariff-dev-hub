@@ -54,6 +54,7 @@ RSpec.describe User, type: :model do
       let(:inviting_user) { create(:user) }
 
       before do
+        inviting_user.organisation.assign_role!("spimm:full")
         create(
           :invitation,
           invitee_email: decoded_token["email"],
@@ -75,6 +76,37 @@ RSpec.describe User, type: :model do
       it "accepts the invitation" do
         expect { from_passwordless_payload! }.to change { Invitation.accepted.count }.by(1)
       end
+    end
+
+    context "when the user exists but their organisation was implicitly created" do
+      let!(:implicit_org) { create(:organisation, :trade_tariff_only) }
+      let!(:user) do
+        create(
+          :user,
+          user_id: decoded_token["sub"],
+          email_address: decoded_token["email"],
+          organisation: implicit_org,
+        )
+      end
+
+      it "raises an InvitationRequiredError" do
+        expect { from_passwordless_payload! }.to raise_error(Organisation::InvitationRequiredError)
+      end
+    end
+
+    context "when the user exists and their organisation has valid roles" do
+      let!(:valid_org) { create(:organisation, :admin) }
+      let!(:user) do
+        create(
+          :user,
+          user_id: decoded_token["sub"],
+          email_address: decoded_token["email"],
+          organisation: valid_org,
+        )
+      end
+
+      it { is_expected.to eq(user) }
+      it { expect { from_passwordless_payload! }.not_to raise_error }
     end
 
     context "when in development environment" do

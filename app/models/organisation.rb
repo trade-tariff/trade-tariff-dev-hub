@@ -62,6 +62,11 @@ class Organisation < ApplicationRecord
     has_role?("admin")
   end
 
+  def implicitly_created?
+    role_names = roles.pluck(:name)
+    role_names.empty? || role_names == ["trade_tariff:full"]
+  end
+
   def fpo?
     has_role?("fpo:full")
   end
