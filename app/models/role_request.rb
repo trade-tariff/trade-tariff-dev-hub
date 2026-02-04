@@ -31,6 +31,7 @@ class RoleRequest < ApplicationRecord
   validates :role_name, presence: true
   validates :role_name, inclusion: { in: Role.assignable_names, message: "is not a valid assignable role" }
   validates :note, presence: { message: "You must provide information about why you need access to this role" }
+  validates :note, length: { maximum: 200, message: "must be 200 characters or fewer" }
   validate :organisation_does_not_have_role
   validate :no_duplicate_pending_request
 
@@ -49,6 +50,16 @@ class RoleRequest < ApplicationRecord
     transaction do
       update!(status: :approved)
       organisation.assign_role!(role_name)
+      self
+    end
+  end
+
+  def reject!(rejected_by: nil)
+    raise ArgumentError, "reject! must be called by an admin user" if rejected_by.nil?
+    raise ArgumentError, "reject! must be called by an admin user" unless rejected_by.admin?
+
+    transaction do
+      update!(status: :rejected)
       self
     end
   end

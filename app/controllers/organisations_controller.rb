@@ -13,8 +13,8 @@ class OrganisationsController < AuthenticatedController
     @available_roles = @organisation.available_service_roles
     @has_available_roles = @available_roles.any? && !@organisation.admin?
 
-    # Preload pending requests to avoid N+1 queries in view
-    if @has_available_roles
+    # Preload pending requests for role-request UI (avoids N+1 in view)
+    if TradeTariffDevHub.role_request_enabled? && !@organisation.admin?
       @pending_role_names = @organisation.role_requests.pending.pluck(:role_name).to_set
       @available_without_pending = @available_roles.reject { |role| @pending_role_names.include?(role.name) }
       @pending_roles = @available_roles.select { |role| @pending_role_names.include?(role.name) }
