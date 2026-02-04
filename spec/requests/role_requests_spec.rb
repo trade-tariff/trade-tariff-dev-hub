@@ -17,6 +17,33 @@ RSpec.describe "Role Requests", type: :request do
       get new_role_request_path
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Request access")
+      expect(response.body).to include("Note")
+      expect(response.body).not_to include("Note (optional)")
+    end
+
+    context "when FPO role is available" do
+      it "displays FPO-specific information in inset box and includes FPO hint content (hidden by default)", :aggregate_failures do
+        get new_role_request_path
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("FPO (Fast Parcel Operator) API access")
+        expect(response.body).to include("UK Carrier Scheme (UKC)–registered organisations")
+        # FPO hint content is in the HTML but hidden by default, shown only when FPO is selected
+        expect(response.body).to include("fpo-hint-content")
+        expect(response.body).to include("The FPO (Fast Parcel Operator) Commodity Code Identification Tool API is a free-to-use API")
+      end
+    end
+
+    context "when FPO role is not available" do
+      before do
+        current_user.organisation.assign_role!("fpo:full")
+      end
+
+      it "does not display FPO-specific information in inset box or hint", :aggregate_failures do
+        get new_role_request_path
+        expect(response).to have_http_status(:ok)
+        expect(response.body).not_to include("FPO (Fast Parcel Operator) API access")
+        expect(response.body).not_to include("fpo-hint-content")
+      end
     end
 
     context "when user is an admin" do
@@ -92,25 +119,72 @@ RSpec.describe "Role Requests", type: :request do
     end
 
     context "with invalid parameters" do
-      let(:params) do
-        {
-          role_request: {
-            role_name: "invalid:role",
-            note: "",
-          },
-        }
+      # rubocop:disable RSpec/NestedGroups
+      context "when role_name is invalid" do
+        let(:params) do
+          {
+            role_request: {
+              role_name: "invalid:role",
+              note: "Some note",
+            },
+          }
+        end
+
+        it "does not create a role request" do
+          expect { post role_requests_path, params: params }
+            .not_to change(RoleRequest, :count)
+        end
+
+        it "re-renders the new template with errors", :aggregate_failures do
+          post role_requests_path, params: params
+          expect(response).to have_http_status(:ok)
+          expect(response.body).to include("is not a valid assignable role")
+        end
       end
 
-      it "does not create a role request" do
-        expect { post role_requests_path, params: params }
-          .not_to change(RoleRequest, :count)
+      context "when note is blank" do
+        let(:params) do
+          {
+            role_request: {
+              role_name: "fpo:full",
+              note: "",
+            },
+          }
+        end
+
+        it "does not create a role request" do
+          expect { post role_requests_path, params: params }
+            .not_to change(RoleRequest, :count)
+        end
+
+        it "re-renders the new template with errors", :aggregate_failures do
+          post role_requests_path, params: params
+          expect(response).to have_http_status(:ok)
+          expect(response.body).to include("You must provide information about why you need access to this role")
+        end
       end
 
-      it "re-renders the new template with errors", :aggregate_failures do
-        post role_requests_path, params: params
-        expect(response).to have_http_status(:ok)
-        expect(response.body).to include("is not a valid assignable role")
+      context "when note is missing" do
+        let(:params) do
+          {
+            role_request: {
+              role_name: "fpo:full",
+            },
+          }
+        end
+
+        it "does not create a role request" do
+          expect { post role_requests_path, params: params }
+            .not_to change(RoleRequest, :count)
+        end
+
+        it "re-renders the new template with errors", :aggregate_failures do
+          post role_requests_path, params: params
+          expect(response).to have_http_status(:ok)
+          expect(response.body).to include("You must provide information about why you need access to this role")
+        end
       end
+      # rubocop:enable RSpec/NestedGroups
     end
 
     context "when duplicate pending request exists" do
@@ -126,6 +200,25 @@ RSpec.describe "Role Requests", type: :request do
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include("has already been requested and is pending")
+      end
+    end
+
+    context "when note exceeds 200 characters" do
+      let(:params) do
+        {
+          role_request: {
+            role_name: "fpo:full",
+            note: "a" * 201,
+          },
+        }
+      end
+
+      it "does not create a role request", :aggregate_failures do
+        expect { post role_requests_path, params: params }
+          .not_to change(RoleRequest, :count)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("must be 200 characters or fewer")
       end
     end
   end

@@ -8,6 +8,10 @@ module DevBypassAuthentication
 
   VALID_USER_TYPES = [USER_TYPE_ADMIN, USER_TYPE_USER].freeze
 
+  DEV_BYPASS_ADMIN_EMAIL = "dev-admin@transformuk.com"
+  DEV_BYPASS_USER_EMAIL = "dev@transformuk.com"
+  DEV_BYPASS_EMAILS = [DEV_BYPASS_ADMIN_EMAIL, DEV_BYPASS_USER_EMAIL].freeze
+
   included do
     helper_method :dev_bypass_user_type if respond_to?(:helper_method)
   end
@@ -36,10 +40,14 @@ protected
     redirect_to dev_login_path
   end
 
+  def dev_bypass_user?(user)
+    DEV_BYPASS_EMAILS.include?(user&.email_address)
+  end
+
   def find_or_create_dev_user(user_type)
     return nil unless VALID_USER_TYPES.include?(user_type)
 
-    email = user_type == USER_TYPE_ADMIN ? "dev-admin@transformuk.com" : "dev@transformuk.com"
+    email = user_type == USER_TYPE_ADMIN ? DEV_BYPASS_ADMIN_EMAIL : DEV_BYPASS_USER_EMAIL
     user = User.find_or_initialize_by(email_address: email)
 
     # If user already exists and has an organisation, use that organisation
@@ -54,9 +62,8 @@ protected
 
     if user_type == USER_TYPE_ADMIN
       org.assign_role!("admin") unless org.admin?
-    else
-      org.assign_role!("trade_tariff:full") unless org.has_role?("trade_tariff:full")
-      org.assign_role!("fpo:full") unless org.has_role?("fpo:full")
+    elsif dev_bypass_user?(user)
+      assign_default_service_roles_for_dev_bypass(org, user)
     end
 
     if user.persisted?
@@ -83,5 +90,20 @@ protected
     return nil unless dev_bypass_enabled?
 
     current_user_with_dev_bypass&.organisation
+  end
+
+private
+
+  def assign_default_service_roles_for_dev_bypass(org, user)
+    # Only assign default roles when org has no service roles (e.g. brand-new dev org).
+    # This allows removing a role in console to test the "request access" flow without
+    # it being re-added on every request.
+    return unless dev_bypass_user?(user)
+
+    has_any_service_role = org.roles.merge(Role.service_roles).exists?
+    unless has_any_service_role
+      org.assign_role!("trade_tariff:full") unless org.has_role?("trade_tariff:full")
+      org.assign_role!("fpo:full") unless org.has_role?("fpo:full")
+    end
   end
 end

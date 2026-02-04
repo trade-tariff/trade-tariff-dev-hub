@@ -3,16 +3,24 @@
 
   <p class="govuk-body">Select a role you would like to request access to for your organisation. This request will be reviewed by HMRC and you will be notified.</p>
 
+  <% if @available_roles.map(&:name).include?("fpo:full") %>
+    <div class="govuk-inset-text govuk-!-margin-bottom-4">
+      <p class="govuk-body">
+        <strong>FPO (Fast Parcel Operator) API access:</strong> The FPO (Fast Parcel Operator) Commodity Code Identification Tool API is a free-to-use API available to UK Carrier Scheme (UKC)–registered organisations. To enable access, HMRC requires additional information to verify eligibility and organisational use, including company identification details.
+      </p>
+    </div>
+  <% end %>
+
   <div class="govuk-form-group">
     <%= f.govuk_label :role_name, text: "Role" %>
     <div class="govuk-hint">Your request will be reviewed by administrators</div>
     <% role_options = @available_roles.map { |role| ["#{role.name} – #{role.description}", role.name] } %>
-    <%= f.select :role_name, role_options, {}, { class: "govuk-select govuk-!-width-two-thirds" } %>
+    <%= f.select :role_name, role_options, {}, { class: "govuk-select govuk-!-width-two-thirds", id: "role_request_role_name", data: { action: "role-selection-change" } } %>
   </div>
 
   <%= f.govuk_text_area :note,
-                        label: { text: "Note (optional)" },
-                        hint: { text: "Provide any additional information about why you need this access" },
+                        label: { text: "Note" },
+                        hint: { text: raw("Provide information about why you need this access.#{@available_roles.map(&:name).include?('fpo:full') ? "<span id='fpo-hint-content' style='display: none;'><br><br><strong>The FPO (Fast Parcel Operator) Commodity Code Identification Tool API</strong> is a free-to-use API available to UK <strong>Carrier Scheme (UKC)</strong>–registered organisations. To enable access, HMRC requires additional information to verify eligibility and organisational use, including company identification details.</span>" : ''}") },
                         rows: 5,
                         width: 'two-thirds' %>
 
