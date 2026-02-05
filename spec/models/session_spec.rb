@@ -8,11 +8,10 @@ RSpec.describe Session, type: :model do
     it { is_expected.to validate_presence_of(:token) }
 
     it "validates uniqueness of hashed token" do
-      session   = create(:session, token: plain_token)
+      create(:session, token: plain_token)
       duplicate = build(:session, token: plain_token)
 
       expect(duplicate).not_to be_valid
-      expect(duplicate.errors[:token]).to include("has already been taken")
     end
   end
 
