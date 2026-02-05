@@ -7,6 +7,48 @@ RSpec.describe Session, type: :model do
     it { is_expected.to validate_uniqueness_of(:token) }
   end
 
+  describe ".digest" do
+    it "returns the hashed token" do
+      token = "test1234"
+
+      expect(described_class.digest(token)).to eq(Digest::SHA256.hexdigest(token))
+    end
+  end
+
+  describe ".find_by_token" do
+    let(:plain_token) { SecureRandom.uuid }
+
+    context "when session exists" do
+      it "finds a session by plain text token" do
+        session = create(:session, token: plain_token)
+
+        expect(described_class.find_by_token(plain_token)).to eq(session)
+      end
+    end
+
+    context "when session does not exist" do
+      it "returns nil" do
+        expect(described_class.find_by_token("does not exist")).to be_nil
+      end
+    end
+  end
+
+  describe "#token=" do
+    let(:plain_token) { SecureRandom.uuid }
+
+    it "stores the token as a SHA256 digest" do
+      session = build(:session, token: plain_token)
+
+      expect(session.token).to eq(Digest::SHA256.hexdigest(plain_token))
+    end
+
+    it "does not store the plain token" do
+      session = build(:session, token: plain_token)
+
+      expect(session.token).not_to eq(plain_token)
+    end
+  end
+
   describe "#renew?" do
     it "returns true when the token cannot be verified" do
       session = build(:session)
