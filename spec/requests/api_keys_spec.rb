@@ -75,7 +75,7 @@ RSpec.describe "ApiKeys", type: :request do
       it "does not fail validation" do
         patch revoke_api_key_path(api_key_to_revoke)
 
-        expect(response).not_to have_http_status(:unprocessable_entity)
+        expect(response).not_to have_http_status(:unprocessable_content)
       end
     end
   end
