@@ -27,7 +27,7 @@ class Session < ApplicationRecord
   validates :id_token, presence: true
 
   def token=(value)
-    super(self.class.digest(value))
+    super(value.present? ? self.class.digest(value) : value)
   end
 
   def self.digest(token)

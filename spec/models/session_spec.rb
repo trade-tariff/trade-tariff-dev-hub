@@ -1,10 +1,19 @@
 RSpec.describe Session, type: :model do
+  let(:plain_token) { SecureRandom.uuid }
+
   describe "validations" do
     subject(:session) { build(:session) }
 
     it { is_expected.to validate_presence_of(:id_token) }
     it { is_expected.to validate_presence_of(:token) }
-    it { is_expected.to validate_uniqueness_of(:token) }
+
+    it "validates uniqueness of hashed token" do
+      session   = create(:session, token: plain_token)
+      duplicate = build(:session, token: plain_token)
+
+      expect(duplicate).not_to be_valid
+      expect(duplicate.errors[:token]).to include("has already been taken")
+    end
   end
 
   describe ".digest" do
@@ -16,8 +25,6 @@ RSpec.describe Session, type: :model do
   end
 
   describe ".find_by_token" do
-    let(:plain_token) { SecureRandom.uuid }
-
     context "when session exists" do
       it "finds a session by plain text token" do
         session = create(:session, token: plain_token)
@@ -34,8 +41,6 @@ RSpec.describe Session, type: :model do
   end
 
   describe "#token=" do
-    let(:plain_token) { SecureRandom.uuid }
-
     it "stores the token as a SHA256 digest" do
       session = build(:session, token: plain_token)
 
