@@ -37,7 +37,8 @@ protected
       # Clear session if it exists but authentication check failed
       # (authenticated? handles cookie matching, so if it returned false, session is invalid)
       clear_authentication! if user_session.present?
-      redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
+      session[:state] = TradeTariffDevHub.generate_auth_state!
+      redirect_to TradeTariffDevHub.stateful_identity_consumer_url(session[:state]), allow_other_host: true
     end
   end
 
@@ -100,10 +101,6 @@ protected
     return true if organisation&.admin?
 
     allowed_roles.none? || allowed_roles.any? { |role| organisation&.has_role?(role) }
-  end
-
-  def refresh_session!
-    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true if user.nil?
   end
 
   def disallowed_redirect!
