@@ -1,7 +1,8 @@
 # rubocop:disable RSpec/MultipleMemoizedHelpers
 RSpec.shared_context "with authenticated user" do
   let(:current_user) { create(:user) }
-  let(:user_session) { create(:session, user: current_user) }
+  let(:plain_token) { SecureRandom.uuid }
+  let(:user_session) { create(:session, user: current_user, token: plain_token) }
   let(:email_address) { current_user.email_address }
 
   let(:decoded_id_token) do
@@ -15,7 +16,7 @@ RSpec.shared_context "with authenticated user" do
     VerifyToken::Result.new(valid: true, payload: decoded_id_token, reason: nil)
   end
 
-  let(:extra_session) { { token: user_session.token } }
+  let(:extra_session) { { token: plain_token } }
 
   before do |env|
     allow(VerifyToken).to receive(:new).and_return(instance_double(VerifyToken, call: verify_result))
@@ -32,7 +33,7 @@ RSpec.shared_context "with authenticated user" do
       cookies[TradeTariffDevHub.id_token_cookie_name] = user_session.id_token
       cookies[cookies_key_value.first] = cookies_key_value.last
     else
-      session[:token] = user_session.token
+      session[:token] = plain_token
       # Set cookie to match session's id_token for cookie matching validation
       cookies[TradeTariffDevHub.id_token_cookie_name] = user_session.id_token
     end

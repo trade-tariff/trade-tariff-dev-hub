@@ -14,7 +14,7 @@ protected
                         current_user_with_dev_bypass
                       else
                         # Use normal session authentication
-                        Session.find_by(token: session[:token])&.user
+                        Session.find_by_token(session[:token])&.user
                       end
   end
 

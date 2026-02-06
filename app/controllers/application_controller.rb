@@ -29,6 +29,6 @@ class ApplicationController < ActionController::Base
   end
 
   def user_session
-    @user_session ||= Session.find_by(token: session[:token])
+    @user_session ||= Session.find_by_token(session[:token])
   end
 end
