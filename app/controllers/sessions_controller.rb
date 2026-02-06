@@ -4,6 +4,11 @@ class SessionsController < ApplicationController
   def handle_redirect
     log_authentication_context
 
+    if !params[:state] || params[:state] != session[:state]
+      Rails.logger.error("Invalid state parameter.")
+      return redirect_to root_path, alert: "Authentication failed. Please try again."
+    end
+
     if already_authenticated?
       user_organisation = user_session&.user&.organisation
       return redirect_to organisation_path(user_organisation)
@@ -20,11 +25,6 @@ class SessionsController < ApplicationController
       Rails.logger.warn("[Auth] Token validation failed: #{result.reason}")
       clear_authentication!
       return redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
-    end
-
-    if !params[:state] || params[:state] != session[:state]
-      Rails.logger.error("Invalid state parameter.")
-      return redirect_to root_path, alert: "Authentication failed. Please try again."
     end
 
     user = User.from_passwordless_payload!(result.payload)

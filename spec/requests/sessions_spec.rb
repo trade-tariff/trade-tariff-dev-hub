@@ -2,59 +2,40 @@ RSpec.describe "Sessions", type: :request do
   include_context "with authenticated user"
 
   describe "GET /auth/redirect" do
-    let(:extra_session) { {} }
+    let(:extra_session) { { state: "abcdef0123456789" } }
+    let(:params) { { state: "abcdef0123456789" } }
 
-    context "when state parameter is not provided" do
-      it "redirects to the root path", :aggregate_failures do
-        get auth_redirect_path
-        expect(response).to redirect_to(root_path)
-        expect(flash[:alert]).to eq("Authentication failed. Please try again.")
-      end
+    it "creates a Session" do
+      expect { get auth_redirect_path, params: params }.to change(Session, :count).by(1)
     end
 
-    context "when state parameter is provided" do
-      let(:extra_session) { { state: "abcdef0123456789" } }
-      let(:params) { { state: "abcdef0123456789" } }
+    it "redirects the user to their organisation page" do
+      get auth_redirect_path, params: params
+      expect(response).to redirect_to(organisation_path(current_user.organisation))
+    end
 
-      it "redirects the user to their organisation page" do
-        get auth_redirect_path, params: params
-        expect(response).to redirect_to(organisation_path(current_user.organisation))
-      end
+    it "sets the session token" do
+      get auth_redirect_path, params: params
+      expect(session[:token]).to be_a_uuid
+    end
 
-      it "creates a Session" do
-        expect { get auth_redirect_path, params: params }.to change(Session, :count).by(1)
-      end
+    it "does not create a new user implicitly for existing user" do
+      expect { get auth_redirect_path, params: params }.not_to change(User, :count)
+    end
 
-      it "redirects the user to see their api keys" do
-        get auth_redirect_path, params: params
-        expect(response).to redirect_to(api_keys_path)
-      end
-
-      it "sets the session token" do
-        get auth_redirect_path, params: params
-        expect(session[:token]).to be_a_uuid
-      end
-
-      it "does not create a new user implicitly for existing user" do
-        expect { get auth_redirect_path }.not_to change(User, :count)
-      end
-
-      it "does not create an organisation implicitly for existing organisation" do
-        expect { get auth_redirect_path }.not_to change(Organisation, :count)
-      end
+    it "does not create an organisation implicitly for existing organisation" do
+      expect { get auth_redirect_path, params: params }.not_to change(Organisation, :count)
     end
 
     context "when the user does not exist and has no invitation" do
-      let(:extra_session) { { state: "abcdef0123456789" } }
-      let(:params) { { state: "abcdef0123456789" } }
       let(:email_address) { "non-existing@bar.com" }
 
       it "does not create a new user" do
-        expect { get auth_redirect_path }.not_to change(User, :count)
+        expect { get auth_redirect_path, params: params }.not_to change(User, :count)
       end
 
       it "redirects to root with private beta message", :aggregate_failures do
-        get auth_redirect_path
+        get auth_redirect_path, params: params
         expect(response).to redirect_to(root_path)
         expect(flash[:alert]).to include("private beta")
       end
@@ -75,21 +56,30 @@ RSpec.describe "Sessions", type: :request do
       end
 
       it "creates a new user" do
-        expect { get auth_redirect_path }.to change(User, :count).by(1)
+        expect { get auth_redirect_path, params: params }.to change(User, :count).by(1)
       end
 
       it "does not create a new organisation" do
-        expect { get auth_redirect_path }.not_to change(Organisation, :count)
+        expect { get auth_redirect_path, params: params }.not_to change(Organisation, :count)
       end
 
       it "accepts the invitation" do
-        expect { get auth_redirect_path }.to change { Invitation.accepted.count }.by(1)
+        expect { get auth_redirect_path, params: params }.to change { Invitation.accepted.count }.by(1)
+      end
+    end
+
+    context "when a state parameter is missing" do
+      let(:extra_session) { {} }
+
+      it "redirects to root with an authentication failure message", :aggregate_failures do
+        get auth_redirect_path
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to include("Authentication failed")
       end
     end
 
     context "when the session token is already set" do
-      let(:extra_session) { { state: "abcdef0123456789", token: "existing-token" } }
-      let(:params) { { state: "abcdef0123456789" } }
+      let(:extra_session) { { token: "existing-token" } }
 
       before do
         create(:session, token: "existing-token", user: current_user)
