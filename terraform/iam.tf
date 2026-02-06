@@ -51,6 +51,20 @@ data "aws_iam_policy_document" "exec" {
     resources = [data.aws_secretsmanager_secret.this.arn]
   }
 
+  dynamic "statement" {
+    for_each = var.environment == "development" ? [1] : []
+    content {
+      effect = "Allow"
+      actions = [
+        "secretsmanager:GetResourcePolicy",
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:ListSecretVersionIds"
+      ]
+      resources = [data.aws_secretsmanager_secret.job[0].arn]
+    }
+  }
+
   statement {
     effect = "Allow"
     actions = [
