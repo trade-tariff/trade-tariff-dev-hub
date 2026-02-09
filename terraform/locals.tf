@@ -8,4 +8,12 @@ locals {
       value = value
     }
   ]
+  job_secret_value = var.environment == "development" ? try(data.aws_secretsmanager_secret_version.job[0].secret_string, "{}") : "{}"
+  job_secret_map   = jsondecode(local.job_secret_value)
+  job_secret_env_vars = var.environment == "development" ? [
+    for key, value in local.job_secret_map : {
+      name  = key
+      value = value
+    }
+  ] : []
 }
