@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class Notification
-  INVITATION_TEMPLATE_ID = "ec674766-30ab-40a1-87e6-c7b43e80ae9b"
-  ROLE_REQUEST_TEMPLATE_ID = "be46e49d-6291-4bfc-a79d-f4fbe5a63641"
-  ROLE_REQUEST_APPROVED_TEMPLATE_ID = "fa6a7e13-af85-4166-9899-48fa865f3c19"
+  INVITATION_TEMPLATE_ID = NOTIFY_CONFIGURATION.dig(:templates, :developer_portal, :invitation)
+  ROLE_REQUEST_TEMPLATE_ID = NOTIFY_CONFIGURATION.dig(:templates, :developer_portal, :role_request_created)
+  ROLE_REQUEST_APPROVED_TEMPLATE_ID = NOTIFY_CONFIGURATION.dig(:templates, :developer_portal, :role_request_approved)
   REFERENCE_CHARS = [("A".."Z"), ("0".."9")].map(&:to_a).flatten
   REFERENCE_LENGTH = 10
   REFERENCE_PREFIX = "PORTAL-"
