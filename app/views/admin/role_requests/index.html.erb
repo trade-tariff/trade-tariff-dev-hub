@@ -11,6 +11,7 @@
               row.with_cell(text: 'Requester')
               row.with_cell(text: 'Role requested')
               row.with_cell(text: 'Date requested')
+              row.with_cell(text: 'Notes')
               row.with_cell(text: 'Action')
             end
           end
@@ -22,11 +23,18 @@
                 row.with_cell(text: role_request.user.email_address)
                 row.with_cell(text: role_request.role_name)
                 row.with_cell(text: role_request.created_at.strftime('%d %b %Y'))
+                row.with_cell(text: role_request.note || '')
                 row.with_cell do
-                  button_to 'Approve', approve_admin_role_request_path(role_request),
-                            method: :post,
-                            data: { confirm: "Are you sure you want to approve this request and assign #{role_request.role_name} to #{role_request.organisation.organisation_name}?" },
-                            class: 'govuk-button govuk-button--secondary govuk-!-margin-bottom-0'
+                  content_tag :div, class: 'govuk-button-group' do
+                    button_to('Approve', approve_admin_role_request_path(role_request),
+                              method: :post,
+                              data: { confirm: "Are you sure you want to approve this request and assign #{role_request.role_name} to #{role_request.organisation.organisation_name}?" },
+                              class: 'govuk-button govuk-button--secondary govuk-!-margin-bottom-0') +
+                    button_to('Reject', reject_admin_role_request_path(role_request),
+                              method: :post,
+                              data: { confirm: "Are you sure you want to reject this request for #{role_request.role_name} from #{role_request.organisation.organisation_name}?" },
+                              class: 'govuk-button govuk-button--warning govuk-!-margin-bottom-0')
+                  end
                 end
               end
             end

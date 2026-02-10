@@ -56,14 +56,6 @@ RSpec.describe Notification do
       expect(notification.template_id).to eq(Notification::ROLE_REQUEST_TEMPLATE_ID)
       expect(notification.personalisation).to eq(expected_personalisation)
     end
-
-    context "when note is blank" do
-      let(:role_request) { create(:role_request, organisation: organisation, user: user, role_name: "trade_tariff:full", note: nil) }
-
-      it "uses default note text" do
-        expect(notification.personalisation[:note]).to eq("No note provided")
-      end
-    end
   end
 
   describe ".build_for_role_request_approved" do

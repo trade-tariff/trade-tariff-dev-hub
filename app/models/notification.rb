@@ -4,6 +4,7 @@ class Notification
   INVITATION_TEMPLATE_ID = NOTIFY_CONFIGURATION.dig(:templates, :developer_portal, :invitation)
   ROLE_REQUEST_TEMPLATE_ID = NOTIFY_CONFIGURATION.dig(:templates, :developer_portal, :role_request_created)
   ROLE_REQUEST_APPROVED_TEMPLATE_ID = NOTIFY_CONFIGURATION.dig(:templates, :developer_portal, :role_request_approved)
+  ROLE_REQUEST_REJECTED_TEMPLATE_ID = NOTIFY_CONFIGURATION.dig(:templates, :developer_portal, :role_request_rejected)
   REFERENCE_CHARS = [("A".."Z"), ("0".."9")].map(&:to_a).flatten
   REFERENCE_LENGTH = 10
   REFERENCE_PREFIX = "PORTAL-"
@@ -64,6 +65,20 @@ class Notification
       new(
         email: role_request.user.email_address,
         template_id: ROLE_REQUEST_APPROVED_TEMPLATE_ID,
+        personalisation: {
+          organisation_name: role_request.organisation.organisation_name,
+          role_name: role_request.role_name,
+          role_description: role_description,
+          organisation_url: "#{TradeTariffDevHub.govuk_app_domain}/organisations/#{role_request.organisation.id}",
+        },
+      )
+    end
+
+    def build_for_role_request_rejected(role_request)
+      role_description = role_description_for(role_request.role_name)
+      new(
+        email: role_request.user.email_address,
+        template_id: ROLE_REQUEST_REJECTED_TEMPLATE_ID,
         personalisation: {
           organisation_name: role_request.organisation.organisation_name,
           role_name: role_request.role_name,

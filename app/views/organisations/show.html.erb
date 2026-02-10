@@ -37,24 +37,28 @@
       <p class="govuk-body">No service roles assigned.</p>
     <% end %>
 
-    <% if TradeTariffDevHub.role_request_enabled? && @has_available_roles %>
+    <% if TradeTariffDevHub.role_request_enabled? %>
       <div class="govuk-!-margin-top-4">
-        <% if @available_without_pending.any? %>
-          <%= govuk_button_link_to 'Request access', new_role_request_path %>
-        <% end %>
+        <% if @has_available_roles %>
+          <% if @available_without_pending.any? %>
+            <%= govuk_button_link_to 'Request access', new_role_request_path %>
+          <% end %>
 
-        <% if @pending_roles.any? %>
-          <div class="govuk-!-margin-top-4">
-            <h3 class="govuk-heading-s">Pending requests</h3>
-            <ul class="govuk-list">
-              <% @pending_roles.each do |role| %>
-                <li>
-                  <strong><%= role.name %></strong> – <%= role.description %>
-                  <span class="govuk-tag govuk-tag--yellow govuk-!-margin-left-2">Request pending</span>
-                </li>
-              <% end %>
-            </ul>
-          </div>
+          <% if @pending_roles.any? %>
+            <div class="govuk-!-margin-top-4">
+              <h3 class="govuk-heading-s">Pending requests</h3>
+              <ul class="govuk-list">
+                <% @pending_roles.each do |role| %>
+                  <li>
+                    <strong><%= role.name %></strong> – <%= role.description %>
+                    <span class="govuk-tag govuk-tag--yellow govuk-!-margin-left-2">Request pending</span>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+        <% else %>
+          <p class="govuk-body">You have access to all requestable roles.</p>
         <% end %>
       </div>
     <% end %>
