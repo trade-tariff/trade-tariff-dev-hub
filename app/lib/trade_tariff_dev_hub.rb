@@ -145,6 +145,13 @@ module TradeTariffDevHub
       ENV.fetch("ENVIRONMENT", "production")
     end
 
+    # Returns true for production/staging environments only.
+    # Uses ENVIRONMENT (not Rails.env) so that AWS development, where ENVIRONMENT=development
+    # but RAILS_ENV may be production, is correctly treated as non-production.
+    def production_environment?
+      %w[production staging].include?(environment)
+    end
+
     def id_token_cookie_name
       cookie_name_for("id_token")
     end

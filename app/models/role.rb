@@ -25,8 +25,24 @@ class Role < ApplicationRecord
 
   scope :service_roles, -> { where(name: SERVICE_ROLE_NAMES) }
 
+  def self.assignable_service_roles
+    # Returns service roles available for assignment
+    # Excludes spimm:full in production/staging (staging uses RAILS_ENV=production)
+    roles = service_roles
+    if TradeTariffDevHub.production_environment?
+      spimm_role = find_by(name: "spimm:full")
+      roles = roles.where.not(id: spimm_role.id) if spimm_role
+    end
+    roles
+  end
+
   def self.assignable_names
-    SERVICE_ROLE_NAMES
+    # Exclude spimm:full role in production/staging (staging uses RAILS_ENV=production)
+    if TradeTariffDevHub.production_environment?
+      SERVICE_ROLE_NAMES - ["spimm:full"]
+    else
+      SERVICE_ROLE_NAMES
+    end
   end
 
   def admin?

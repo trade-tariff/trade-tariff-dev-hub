@@ -45,6 +45,8 @@ private
 
   def removal_block_message(role_name)
     case @organisation.remove_role_block_reason(role_name)
+    when :admin_role
+      "Cannot remove admin role"
     when :trade_tariff_keys
       "Cannot remove role while organisation has Trade Tariff keys"
     when :active_api_keys

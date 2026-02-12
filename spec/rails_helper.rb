@@ -1,5 +1,6 @@
 require "spec_helper"
 ENV["RAILS_ENV"] ||= "test"
+ENV["ENVIRONMENT"] ||= "test" # So production_environment? is false in test (matches previous Rails.env.production? behaviour)
 
 # Stub dev_bypass_auth_enabled? before loading environment so routes are available
 # This allows the conditional routes in config/routes.rb to be loaded in test

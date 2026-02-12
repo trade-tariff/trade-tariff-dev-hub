@@ -13,7 +13,7 @@ end
 
 # Run rubocop first
 puts "Running RuboCop..."
-rubocop_exit = system(bundle_binstub, "exec", "rubocop", "-A")
+rubocop_exit = system(bundle_binstub, "exec", "rubocop", "-a")
 rubocop_status = $?.exitstatus
 
 unless rubocop_exit

@@ -63,7 +63,7 @@ protected
     if (user_type == USER_TYPE_ADMIN) && !org.admin?
       org.assign_role!("admin")
     end
-    # NOTE: Non-admin dev bypass users can now exist without service roles
+    # NOTE: Non-admin dev bypass users can exist without service roles in all environments
     # Roles must be explicitly assigned through the admin interface or role request flow
 
     if user.persisted?

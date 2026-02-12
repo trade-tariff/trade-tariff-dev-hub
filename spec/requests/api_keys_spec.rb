@@ -3,6 +3,7 @@ RSpec.describe "ApiKeys", type: :request do
 
   before do
     current_user.organisation.assign_role!("fpo:full")
+    allow(TradeTariffDevHub).to receive(:production_environment?).and_return(true)
   end
 
   describe "POST /api_keys" do
@@ -34,21 +35,21 @@ RSpec.describe "ApiKeys", type: :request do
 
     context "when organisation has 2 active and 1 inactive API key" do
       let(:create_service) { instance_double(CreateApiKey) }
-      let(:created_api_key) { build_stubbed(:api_key, organisation: current_user.organisation) }
 
       before do
         create_list(:api_key, 2, organisation: current_user.organisation, enabled: true)
         create(:api_key, organisation: current_user.organisation, enabled: false)
-
+        allow(TradeTariffDevHub).to receive(:production_environment?).and_return(true)
         allow(CreateApiKey).to receive(:new).and_return(create_service)
-        allow(create_service).to receive(:call).and_return(created_api_key)
+        allow(create_service).to receive(:call) do |api_key|
+          create(:api_key, organisation: api_key.organisation, description: api_key.description)
+        end
       end
 
-      it "allows creating a new key", :aggregate_failures do
-        post api_keys_path, params: { api_key: { description: "New key" } }
-
-        expect(response).to render_template("create")
-        expect(create_service).to have_received(:call).with(an_instance_of(ApiKey))
+      it "allows creating a new key (only active keys count toward the limit)" do
+        expect {
+          post api_keys_path, params: { api_key: { description: "New key" } }
+        }.to change(ApiKey, :count).by(1)
       end
     end
   end
@@ -84,6 +85,7 @@ RSpec.describe "ApiKeys", type: :request do
     before do
       current_user.organisation.assign_role!("admin")
       current_user.organisation.assign_role!("fpo:full")
+      allow(TradeTariffDevHub).to receive(:production_environment?).and_return(true)
     end
 
     context "when admin organisation has 3 active API keys" do
