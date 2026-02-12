@@ -1,3 +1,4 @@
+<% content_for :back_link do %><%= govuk_back_link(href: organisation_path(organisation)) %><% end %>
 <%= govuk_form_for @organisation do |f| %>
   <h1 class="govuk-heading-l">Updating organisation name</h1>
   <%= f.govuk_text_field :organisation_name,

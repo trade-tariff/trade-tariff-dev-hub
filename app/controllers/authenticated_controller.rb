@@ -18,25 +18,29 @@ class AuthenticatedController < ApplicationController
 protected
 
   def require_authentication
-    # If identity auth is enabled and there's a user session, handle it
-    if TradeTariffDevHub.identity_authentication_enabled? && !Rails.env.development? && authenticated?
-      handle_user_session
+    # Check for identity authentication first (works in all environments)
+    if authenticated?
+      # In production/staging, handle user session (checks FPO/admin roles, renewal, etc.)
+      if TradeTariffDevHub.production_environment?
+        handle_user_session
+        return
+      end
+      # In dev, if authenticated, allow access
       return
     end
 
-    # No valid identity session - fall through to check dev bypass or redirect
+    # No valid identity session - clear any invalid session before checking fallbacks
+    # (authenticated? handles cookie matching, so if it returned false, session is invalid)
+    clear_authentication! if user_session.present?
 
-    # If dev bypass is enabled and no valid identity session, show dev bypass password page
-    if dev_bypass_enabled?
+    # If dev bypass is enabled AND we're not in production, show dev bypass password page
+    if dev_bypass_enabled? && !TradeTariffDevHub.production_environment?
       require_dev_bypass_authentication
       return
     end
 
-    # Dev bypass disabled and no valid identity session - redirect to identity service
-    if TradeTariffDevHub.identity_authentication_enabled? && !Rails.env.development?
-      # Clear session if it exists but authentication check failed
-      # (authenticated? handles cookie matching, so if it returned false, session is invalid)
-      clear_authentication! if user_session.present?
+    # Dev bypass disabled or in production - redirect to identity service (production/staging only)
+    if TradeTariffDevHub.production_environment?
       redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
     end
   end

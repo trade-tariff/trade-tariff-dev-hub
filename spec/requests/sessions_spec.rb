@@ -90,20 +90,20 @@ RSpec.describe "Sessions", type: :request do
       expect(session[:token]).to be_nil
     end
 
-    it "redirects to the root path" do
+    it "redirects to the signed out path" do
       get logout_path
 
-      expect(response).to redirect_to(root_path)
+      expect(response).to redirect_to(signed_out_path)
     end
 
     it "deletes the id_token cookie" do
-      cookies[:id_token] = "some-id-token"
-      expect { get logout_path }.to change { cookies[:id_token] }.from("some-id-token").to("")
+      cookies[TradeTariffDevHub.id_token_cookie_name] = "some-id-token"
+      expect { get logout_path }.to change { cookies[TradeTariffDevHub.id_token_cookie_name] }.from("some-id-token").to("")
     end
 
     it "deletes the refresh_token cookie" do
-      cookies[:refresh_token] = "some-refresh-token"
-      expect { get logout_path }.to change { cookies[:refresh_token] }.from("some-refresh-token").to("")
+      cookies[TradeTariffDevHub.refresh_token_cookie_name] = "some-refresh-token"
+      expect { get logout_path }.to change { cookies[TradeTariffDevHub.refresh_token_cookie_name] }.from("some-refresh-token").to("")
     end
   end
 

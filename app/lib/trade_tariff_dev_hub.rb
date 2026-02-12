@@ -7,16 +7,16 @@ module TradeTariffDevHub
       )
     end
 
-    def identity_authentication_enabled?
-      @identity_authentication_enabled ||= ENV.fetch("IDENTITY_AUTHENTICATION_ENABLED", "true") == "true"
-    end
-
     def deletion_enabled?
       ENV.fetch("DELETION_ENABLED", "false") == "true"
     end
 
     def role_request_enabled?
-      ENV.fetch("FEATURE_FLAG_ROLE_REQUEST", "false") == "true"
+      # Allow explicit override via environment variable
+      return ENV["FEATURE_FLAG_ROLE_REQUEST"] == "true" if ENV.key?("FEATURE_FLAG_ROLE_REQUEST")
+
+      # Default: enabled in development/test, disabled in production/staging
+      Rails.env.development? || Rails.env.test?
     end
 
     def documentation_url
@@ -48,6 +48,12 @@ module TradeTariffDevHub
       @application_support_email ||= ENV["APPLICATION_SUPPORT_EMAIL"] || "dev@example.com"
     end
 
+    # Optional: when set, used as fallback recipient(s) for role request notifications when no admin org exists.
+    # In development you can set ROLE_REQUEST_NOTIFICATION_EMAIL to receive role requests without an admin organisation.
+    def role_request_notification_email
+      @role_request_notification_email ||= ENV["ROLE_REQUEST_NOTIFICATION_EMAIL"]
+    end
+
     def cors_host
       ENV.fetch("GOVUK_APP_DOMAIN").sub(/https?:\/\//, "")
     end
@@ -66,6 +72,21 @@ module TradeTariffDevHub
 
     def identity_consumer
       @identity_consumer ||= ENV.fetch("IDENTITY_CONSUMER", "portal")
+    end
+
+    # Base URL for the identity service client credentials API (POST/DELETE /api/client_credentials).
+    def identity_client_credentials_api_url
+      @identity_client_credentials_api_url ||= URI.join(identity_base_url, "api/").to_s
+    end
+
+    # Bearer token for identity service API (create/delete app client credentials). Required when provisioning Trade Tariff keys.
+    def identity_api_key
+      @identity_api_key ||= ENV["IDENTITY_API_KEY"]
+    end
+
+    # Pre-created API Gateway usage plan ID for Trade Tariff keys (from Terraform). Required when provisioning Trade Tariff keys.
+    def trade_tariff_usage_plan_id
+      @trade_tariff_usage_plan_id ||= ENV["TRADE_TARIFF_USAGE_PLAN_ID"]
     end
 
     def identity_cognito_jwks_keys
@@ -145,6 +166,13 @@ module TradeTariffDevHub
       ENV.fetch("ENVIRONMENT", "production")
     end
 
+    # Returns true for production/staging environments only.
+    # Uses ENVIRONMENT (not Rails.env) so that AWS development, where ENVIRONMENT=development
+    # but RAILS_ENV may be production, is correctly treated as non-production.
+    def production_environment?
+      %w[production staging].include?(environment)
+    end
+
     def id_token_cookie_name
       cookie_name_for("id_token")
     end
@@ -163,7 +191,7 @@ module TradeTariffDevHub
     end
 
     def uk_backend_url
-      @uk_backend_url ||= ENV["UK_BACKEND_URL"]
+      @uk_backend_url ||= ENV.fetch("UK_BACKEND_URL", "http://backend-uk.tariff.internal:8080/uk/api")
     end
 
     def uk_backend_bearer_token

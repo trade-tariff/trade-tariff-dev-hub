@@ -22,7 +22,7 @@ class DevAuthController < ApplicationController
 
   def destroy
     session.delete(:dev_bypass)
-    redirect_to root_path, notice: "You have been logged out."
+    redirect_to signed_out_path
   end
 
 private
@@ -64,8 +64,6 @@ private
   end
 
   def identity_service_url
-    return root_path unless TradeTariffDevHub.identity_authentication_enabled?
-
     TradeTariffDevHub.identity_consumer_url
   end
 

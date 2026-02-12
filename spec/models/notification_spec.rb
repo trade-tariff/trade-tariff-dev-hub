@@ -56,6 +56,20 @@ RSpec.describe Notification do
       expect(notification.template_id).to eq(Notification::ROLE_REQUEST_TEMPLATE_ID)
       expect(notification.personalisation).to eq(expected_personalisation)
     end
+
+    context "when no admin organisation exists but ROLE_REQUEST_NOTIFICATION_EMAIL is set" do
+      subject(:notifications) { described_class.build_for_role_request(role_request) }
+
+      before do
+        allow(User).to receive(:admin_emails).and_return([])
+        allow(TradeTariffDevHub).to receive(:role_request_notification_email).and_return("fallback@admin.com")
+      end
+
+      it "builds one notification for the fallback email", :aggregate_failures do
+        expect(notifications.size).to eq(1)
+        expect(notifications.first.email).to eq("fallback@admin.com")
+      end
+    end
   end
 
   describe ".build_for_role_request_approved" do

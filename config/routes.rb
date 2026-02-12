@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   get "/auth/redirect", to: "sessions#handle_redirect"
   get "/auth/invalid", to: "sessions#invalid"
   get "/auth/logout", to: "sessions#destroy", as: :logout
+  get "/auth/signed_out", to: "sessions#signed_out", as: :signed_out
 
   if TradeTariffDevHub.dev_bypass_auth_enabled?
     get "/dev/login", to: "dev_auth#new", as: :dev_login
@@ -41,14 +42,17 @@ Rails.application.routes.draw do
     end
   end
 
-  # resources :trade_tariff_keys, only: %i[index new create] do
-  #   member do
-  #     get :revoke, to: 'trade_tariff_keys#update', as: :revoke
-  #     patch :revoke
-  #     get :delete, to: 'trade_tariff_keys#update', as: :delete
-  #     delete :delete
-  #   end
-  # end
+  resources :trade_tariff_keys, only: %i[index new create] do
+    member do
+      get :revoke, to: 'trade_tariff_keys#confirm_action', as: :revoke
+      patch :revoke
+
+      if TradeTariffDevHub.deletion_enabled?
+        get :delete, to: 'trade_tariff_keys#confirm_action', as: :delete
+        delete :delete
+      end
+    end
+  end
 
   namespace :user_verification do
     resources :steps, only: %i[show update index] do

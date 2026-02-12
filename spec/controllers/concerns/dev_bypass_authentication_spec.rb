@@ -124,11 +124,12 @@ RSpec.describe DevBypassAuthentication, type: :controller do
         expect(user.organisation.organisation_name).to eq("User Dev Org")
       end
 
-      it "assigns trade_tariff:full and fpo:full roles to organisation", :aggregate_failures do
+      it "does not automatically assign roles to organisation", :aggregate_failures do
         user = controller.send(:find_or_create_dev_user, DevBypassAuthentication::USER_TYPE_USER)
 
-        expect(user.organisation.has_role?("trade_tariff:full")).to be true
-        expect(user.organisation.has_role?("fpo:full")).to be true
+        # Organisations can exist without roles - roles must be explicitly assigned
+        expect(user.organisation.has_role?("trade_tariff:full")).to be false
+        expect(user.organisation.has_role?("fpo:full")).to be false
       end
     end
 
@@ -146,12 +147,14 @@ RSpec.describe DevBypassAuthentication, type: :controller do
         expect(user).to eq(existing_user)
       end
 
-      it "ensures organisation has required roles", :aggregate_failures do
-        existing_user.organisation.unassign_role!("trade_tariff:full")
+      it "does not automatically assign roles to existing organisation", :aggregate_failures do
+        existing_user.organisation.unassign_role!("trade_tariff:full") if existing_user.organisation.has_role?("trade_tariff:full")
+        existing_user.organisation.unassign_role!("fpo:full") if existing_user.organisation.has_role?("fpo:full")
         controller.send(:find_or_create_dev_user, DevBypassAuthentication::USER_TYPE_USER)
 
-        expect(existing_user.organisation.reload.has_role?("trade_tariff:full")).to be true
-        expect(existing_user.organisation.has_role?("fpo:full")).to be true
+        # Roles are not automatically assigned - organisations can exist without roles
+        expect(existing_user.organisation.reload.has_role?("trade_tariff:full")).to be false
+        expect(existing_user.organisation.has_role?("fpo:full")).to be false
       end
 
       it "uses existing organisation even when name has been changed", :aggregate_failures do

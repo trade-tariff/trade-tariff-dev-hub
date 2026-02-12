@@ -10,9 +10,20 @@ RSpec.describe SessionsController, type: :controller do
     it "clears the stored session", :aggregate_failures do
       get :destroy
 
-      expect(response).to redirect_to(root_path)
+      expect(response).to redirect_to(signed_out_path)
       expect(Session.exists?(id: user_session.id)).to be(false)
       expect(session[:token]).to be_nil
+      expect(flash[:notice]).to be_nil
+    end
+  end
+
+  describe "GET #signed_out" do
+    it "renders the signed out page", :aggregate_failures do
+      get :signed_out
+
+      expect(response).to have_http_status(:ok)
+      expect(response).to render_template(:signed_out)
+      expect(assigns(:hide_auth_banner)).to be(true)
     end
   end
 
@@ -35,7 +46,7 @@ RSpec.describe SessionsController, type: :controller do
       let!(:user) { create(:user, email_address: "user@example.com") }
 
       before do
-        cookies[:id_token] = "encoded-token"
+        cookies[TradeTariffDevHub.id_token_cookie_name] = "encoded-token"
       end
 
       it "creates a session and signs the user in", :aggregate_failures do
@@ -59,22 +70,22 @@ RSpec.describe SessionsController, type: :controller do
         allow(VerifyToken).to receive(:new).and_return(instance_double(VerifyToken, call: invalid_result))
         allow(TradeTariffDevHub).to receive_messages(identity_consumer_url: "http://identity.example.com/admin",
                                                      identity_cookie_domain: ".example.com")
-        cookies[:refresh_token] = "refresh-token"
+        cookies[TradeTariffDevHub.refresh_token_cookie_name] = "refresh-token"
         get :handle_redirect
         expect(response).to redirect_to("http://identity.example.com/admin")
         # NOTE: These are positive instructions to delete the cookies and not the current cookie values. Refresh token is not deleted here since we'll reuse it for reauthentication.
-        expect(response.cookies).to eq("id_token" => nil)
+        expect(response.cookies).to eq(TradeTariffDevHub.id_token_cookie_name.to_s => nil)
       end
 
       it "redirects without clearing cookies when token is expired", :aggregate_failures do
         expired_result = VerifyToken::Result.new(valid: false, payload: nil, reason: :expired)
         allow(VerifyToken).to receive(:new).and_return(instance_double(VerifyToken, call: expired_result))
         allow(TradeTariffDevHub).to receive(:identity_consumer_url).and_return("http://identity.example.com/admin")
-        cookies[:refresh_token] = "refresh-token"
+        cookies[TradeTariffDevHub.refresh_token_cookie_name] = "refresh-token"
         get :handle_redirect
         expect(response).to redirect_to("http://identity.example.com/admin")
-        expect(cookies["id_token"]).to eq("encoded-token")
-        expect(cookies["refresh_token"]).to eq("refresh-token")
+        expect(cookies[TradeTariffDevHub.id_token_cookie_name]).to eq("encoded-token")
+        expect(cookies[TradeTariffDevHub.refresh_token_cookie_name]).to eq("refresh-token")
       end
     end
 
@@ -82,14 +93,14 @@ RSpec.describe SessionsController, type: :controller do
       it "redirects to landing page with access denied message and clears cookies", :aggregate_failures do
         allow(TradeTariffDevHub).to receive_messages(identity_consumer_url: "http://identity.example.com/admin",
                                                      identity_cookie_domain: ".example.com")
-        cookies[:id_token] = "encoded-token"
-        cookies[:refresh_token] = "refresh-token"
+        cookies[TradeTariffDevHub.id_token_cookie_name] = "encoded-token"
+        cookies[TradeTariffDevHub.refresh_token_cookie_name] = "refresh-token"
         expect { get :handle_redirect }.not_to change(User, :count)
         expect(response).to redirect_to(root_path)
         expect(flash[:alert]).to include("You need an invitation from an existing organisation to access it")
 
         # NOTE: These are positive instructions to delete the cookies and not the current cookie values. Refresh token is not deleted here since we'll reuse it for reauthentication.
-        expect(response.cookies).to eq("id_token" => nil)
+        expect(response.cookies).to eq(TradeTariffDevHub.id_token_cookie_name.to_s => nil)
       end
     end
   end

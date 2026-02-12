@@ -42,9 +42,9 @@ class Notification
 
     def build_for_role_request(role_request)
       role_description = role_description_for(role_request.role_name)
-
-      # NOTE: We need to fan out to every configured admin email on the system
-      User.admin_emails.map do |admin_email|
+      # Fan out to admin org users, or fallback to ROLE_REQUEST_NOTIFICATION_EMAIL when no admin org (e.g. development)
+      recipient_emails = role_request_admin_recipients
+      recipient_emails.map do |admin_email|
         new(
           email: admin_email,
           template_id: ROLE_REQUEST_TEMPLATE_ID,
@@ -83,12 +83,20 @@ class Notification
           organisation_name: role_request.organisation.organisation_name,
           role_name: role_request.role_name,
           role_description: role_description,
-          organisation_url: "#{TradeTariffDevHub.govuk_app_domain}/organisations/#{role_request.organisation.id}",
+          terms_and_conditions_url: TradeTariffDevHub.terms_and_conditions_url,
         },
       )
     end
 
   private
+
+    def role_request_admin_recipients
+      emails = User.admin_emails
+      return emails if emails.any?
+
+      fallback = TradeTariffDevHub.role_request_notification_email
+      fallback.present? ? [fallback] : []
+    end
 
     def role_description_for(role_name)
       role = Role.find_by(name: role_name)

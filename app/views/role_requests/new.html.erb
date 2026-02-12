@@ -20,8 +20,9 @@
 
   <%= f.govuk_text_area :note,
                         label: { text: "Note" },
-                        hint: { text: raw("Provide information about why you need this access.#{@available_roles.map(&:name).include?('fpo:full') ? "<span id='fpo-hint-content' style='display: none;'><br><br><strong>The FPO (Fast Parcel Operator) Commodity Code Identification Tool API</strong> is a free-to-use API available to UK <strong>Carrier Scheme (UKC)</strong>–registered organisations. To enable access, HMRC requires additional information to verify eligibility and organisational use, including company identification details.</span>" : ''}") },
+                        hint: { text: raw("Provide information about why you need this access. (500 characters maximum)#{@available_roles.map(&:name).include?('fpo:full') ? "<span id='fpo-hint-content' style='display: none;'><br><br><strong>The FPO (Fast Parcel Operator) Commodity Code Identification Tool API</strong> is a free-to-use API available to UK <strong>Carrier Scheme (UKC)</strong>–registered organisations. To enable access, HMRC requires additional information to verify eligibility and organisational use, including company identification details.</span>" : ''}") },
                         rows: 5,
+                        maxlength: 500,
                         width: 'two-thirds' %>
 
   <div class="govuk-button-group">
