@@ -18,10 +18,8 @@
       </div>
     <% end %>
 
-    <% if TradeTariffDevHub.identity_authentication_enabled? %>
-      <p class="govuk-body govuk-!-margin-top-4">
-        <%= govuk_link_to("Use real identity service", identity_service_url, data: { turbo: false }) %>
-      </p>
-    <% end %>
+    <p class="govuk-body govuk-!-margin-top-4">
+      <%= govuk_link_to("Use real identity service", identity_service_url, data: { turbo: false }) %>
+    </p>
   </div>
 </div>

@@ -60,11 +60,11 @@ protected
             end
           end
 
-    if user_type == USER_TYPE_ADMIN
-      org.assign_role!("admin") unless org.admin?
-    elsif dev_bypass_user?(user)
-      assign_default_service_roles_for_dev_bypass(org, user)
+    if (user_type == USER_TYPE_ADMIN) && !org.admin?
+      org.assign_role!("admin")
     end
+    # NOTE: Non-admin dev bypass users can now exist without service roles
+    # Roles must be explicitly assigned through the admin interface or role request flow
 
     if user.persisted?
       user.update!(organisation: org) unless user.organisation == org
@@ -90,20 +90,5 @@ protected
     return nil unless dev_bypass_enabled?
 
     current_user_with_dev_bypass&.organisation
-  end
-
-private
-
-  def assign_default_service_roles_for_dev_bypass(org, user)
-    # Only assign default roles when org has no service roles (e.g. brand-new dev org).
-    # This allows removing a role in console to test the "request access" flow without
-    # it being re-added on every request.
-    return unless dev_bypass_user?(user)
-
-    has_any_service_role = org.roles.merge(Role.service_roles).exists?
-    unless has_any_service_role
-      org.assign_role!("trade_tariff:full") unless org.has_role?("trade_tariff:full")
-      org.assign_role!("fpo:full") unless org.has_role?("fpo:full")
-    end
   end
 end

@@ -6,7 +6,7 @@ RSpec.describe "Dev Auth", type: :request do
       dev_bypass_auth_enabled?: true,
       dev_bypass_admin_password: "admin-password",
       dev_bypass_user_password: "user-password",
-      identity_authentication_enabled?: false,
+      identity_consumer_url: "https://identity.example.com",
     )
     # Reload routes to ensure dev routes are available
     Rails.application.reload_routes!
@@ -32,27 +32,10 @@ RSpec.describe "Dev Auth", type: :request do
       expect(response).to redirect_to(organisation_path(user.organisation))
     end
 
-    context "when identity authentication is enabled" do
-      before do
-        allow(TradeTariffDevHub).to receive_messages(identity_authentication_enabled?: true, identity_consumer_url: "https://identity.example.com")
-      end
-
-      it "shows link to use real identity service", :aggregate_failures do
-        get dev_login_path
-        expect(response.body).to include("Use real identity service")
-        expect(response.body).to include('href="https://identity.example.com"')
-      end
-    end
-
-    context "when identity authentication is disabled" do
-      before do
-        allow(TradeTariffDevHub).to receive(:identity_authentication_enabled?).and_return(false)
-      end
-
-      it "does not show link to use real identity service" do
-        get dev_login_path
-        expect(response.body).not_to include("Use real identity service")
-      end
+    it "shows link to use real identity service", :aggregate_failures do
+      get dev_login_path
+      expect(response.body).to include("Use real identity service")
+      expect(response.body).to include('href="https://identity.example.com"')
     end
   end
 
