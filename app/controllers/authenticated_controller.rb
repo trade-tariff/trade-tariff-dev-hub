@@ -18,8 +18,8 @@ class AuthenticatedController < ApplicationController
 protected
 
   def require_authentication
-    # In production/staging (both use RAILS_ENV=production), use identity authentication if there's a user session
-    if Rails.env.production? && authenticated?
+    # In production/staging (staging uses RAILS_ENV=production), use identity authentication if there's a user session
+    if TradeTariffDevHub.production_environment? && authenticated?
       handle_user_session
       return
     end
@@ -33,7 +33,7 @@ protected
     end
 
     # Dev bypass disabled and no valid identity session - redirect to identity service (production/staging only)
-    if Rails.env.production?
+    if TradeTariffDevHub.production_environment?
       # Clear session if it exists but authentication check failed
       # (authenticated? handles cookie matching, so if it returned false, session is invalid)
       clear_authentication! if user_session.present?

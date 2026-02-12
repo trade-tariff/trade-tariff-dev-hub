@@ -39,5 +39,5 @@ The dev bypass creates test users and organisations automatically on first login
 
 API keys created by Playwright tests use a description prefix `playwright-` (e.g. `playwright-${Date.now()}`). A daily scheduled task removes these keys so the admin org doesn’t accumulate them.
 
-- **Rake task:** `rails cleanup:api_keys` — only runs in development, or when `CLEANUP_PLAYWRIGHT_KEYS_ENABLED=true`, and only for the admin organisation.
+- **Rake task:** `rails cleanup:api_keys` — only runs in development, or when `CLEANUP_PLAYWRIGHT_KEYS_ENABLED=true`, and cleans up Playwright keys from all organisations.
 - **AWS:** In the development environment, Terraform defines an ECS job (`dev-hub-job`) and an EventBridge rule that runs it daily at 03:00 UTC with command `bundle exec rails cleanup:api_keys`. Set `CLEANUP_PLAYWRIGHT_KEYS_ENABLED=true` in the `dev-hub-job-configuration` secret so the task runs the cleanup.

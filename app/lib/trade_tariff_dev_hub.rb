@@ -145,6 +145,13 @@ module TradeTariffDevHub
       ENV.fetch("ENVIRONMENT", "production")
     end
 
+    # Returns true for production/staging environments
+    # Note: Staging uses RAILS_ENV=production, so we check Rails.env.production?
+    # rather than ENVIRONMENT variable to catch both production and staging
+    def production_environment?
+      Rails.env.production?
+    end
+
     def id_token_cookie_name
       cookie_name_for("id_token")
     end
