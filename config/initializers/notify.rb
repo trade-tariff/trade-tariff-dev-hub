@@ -27,7 +27,7 @@ else # development / default
         invitation: 'c74b7b8b-eb6c-4a33-b1c0-61b3dcb54aeb',
         role_request_approved: 'aefe2597-ff21-4642-b4bf-0b0292797859',
         role_request_created: '41d98840-34b0-43f3-a059-cbd3ceff17be',
-        role_request_rejected: '793509cd-49ab-47a5-ab6e-ad44bcced970',
+        role_request_rejected: 'a70bf451-63da-4459-861a-155cae7707fb',
       },
     },
   }

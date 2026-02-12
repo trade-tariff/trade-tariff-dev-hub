@@ -64,8 +64,6 @@ private
   end
 
   def identity_service_url
-    return root_path unless TradeTariffDevHub.identity_authentication_enabled?
-
     TradeTariffDevHub.identity_consumer_url
   end
 
