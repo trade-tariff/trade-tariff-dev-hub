@@ -49,7 +49,7 @@ module TradeTariffDevHub
     end
 
     def cors_host
-      ENV.fetch("GOVUK_APP_DOMAIN", "*").sub(/https?:\/\//, "")
+      ENV.fetch("GOVUK_APP_DOMAIN").sub(/https?:\/\//, "")
     end
 
     def identity_consumer_url
