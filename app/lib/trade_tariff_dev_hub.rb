@@ -52,6 +52,16 @@ module TradeTariffDevHub
       ENV.fetch("GOVUK_APP_DOMAIN").sub(/https?:\/\//, "")
     end
 
+    def stateful_identity_consumer_url(state)
+      uri = URI.parse(TradeTariffDevHub.identity_consumer_url)
+      uri.query = URI.encode_www_form({ "state" => state })
+      uri.to_s
+    end
+
+    def generate_auth_state!
+      SecureRandom.hex(16)
+    end
+
     def identity_consumer_url
       @identity_consumer_url ||= URI.join(identity_base_url, identity_consumer).to_s
     end
