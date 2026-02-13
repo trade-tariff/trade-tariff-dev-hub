@@ -68,6 +68,7 @@ Rails.application.routes.draw do
     resources :role_requests, only: [:index] do
       member do
         post :approve
+        post :reject
       end
     end
   end

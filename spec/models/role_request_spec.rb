@@ -44,6 +44,39 @@ RSpec.describe RoleRequest, type: :model do
     end
   end
 
+  describe "#reject!" do
+    let(:admin_organisation) { create(:organisation, :admin) }
+    let(:admin_user) { create(:user, organisation: admin_organisation) }
+    let(:organisation) { create(:organisation, :trade_tariff_only) }
+    let(:role_request) { create(:role_request, organisation: organisation, role_name: "fpo:full") }
+
+    it "updates status to rejected" do
+      expect { role_request.reject!(rejected_by: admin_user) }.to change { role_request.reload.status }.from("pending").to("rejected")
+    end
+
+    it "does not assign the role to the organisation" do
+      expect { role_request.reject!(rejected_by: admin_user) }.not_to(change { organisation.reload.has_role?("fpo:full") })
+    end
+
+    it "returns self" do
+      expect(role_request.reject!(rejected_by: admin_user)).to eq(role_request)
+    end
+
+    context "when rejected_by is nil" do
+      it "raises an ArgumentError" do
+        expect { role_request.reject!(rejected_by: nil) }.to raise_error(ArgumentError, "reject! must be called by an admin user")
+      end
+    end
+
+    context "when rejected_by is not an admin" do
+      let(:non_admin_user) { create(:user, organisation: organisation) }
+
+      it "raises an ArgumentError" do
+        expect { role_request.reject!(rejected_by: non_admin_user) }.to raise_error(ArgumentError, "reject! must be called by an admin user")
+      end
+    end
+  end
+
   describe ".pending" do
     let!(:pending_request) { create(:role_request, status: "pending") }
 
@@ -54,6 +87,33 @@ RSpec.describe RoleRequest, type: :model do
 
     it "returns only pending requests" do
       expect(described_class.pending).to contain_exactly(pending_request)
+    end
+  end
+
+  describe "validations" do
+    let(:organisation) { create(:organisation) }
+    let(:user) { create(:user, organisation: organisation) }
+
+    describe "#note" do
+      it "requires a note to be present", :aggregate_failures do
+        role_request = build(:role_request, organisation: organisation, user: user, note: nil)
+
+        expect(role_request).not_to be_valid
+        expect(role_request.errors[:note]).to include("You must provide information about why you need access to this role")
+      end
+
+      it "requires a note to not be blank", :aggregate_failures do
+        role_request = build(:role_request, organisation: organisation, user: user, note: "")
+
+        expect(role_request).not_to be_valid
+        expect(role_request.errors[:note]).to include("You must provide information about why you need access to this role")
+      end
+
+      it "allows a role request with a note" do
+        role_request = build(:role_request, organisation: organisation, user: user, note: "I need this access")
+
+        expect(role_request).to be_valid
+      end
     end
   end
 
@@ -147,6 +207,39 @@ RSpec.describe RoleRequest, type: :model do
         new_request = build(:role_request, organisation: organisation, user: user, role_name: "trade_tariff:full")
 
         expect(new_request).to be_valid
+      end
+    end
+  end
+
+  describe "note validation" do
+    let(:organisation) { create(:organisation) }
+    let(:user) { create(:user, organisation: organisation) }
+
+    context "when note exceeds 200 characters" do
+      it "prevents creating a role request with note that is too long", :aggregate_failures do
+        long_note = "a" * 201
+        role_request = build(:role_request, organisation: organisation, user: user, note: long_note)
+
+        expect(role_request).not_to be_valid
+        expect(role_request.errors[:note]).to include("must be 200 characters or fewer")
+      end
+    end
+
+    context "when note is exactly 200 characters" do
+      it "allows creating a role request" do
+        note = "a" * 200
+        role_request = build(:role_request, organisation: organisation, user: user, note: note)
+
+        expect(role_request).to be_valid
+      end
+    end
+
+    context "when note is less than 200 characters" do
+      it "allows creating a role request" do
+        note = "a" * 199
+        role_request = build(:role_request, organisation: organisation, user: user, note: note)
+
+        expect(role_request).to be_valid
       end
     end
   end
