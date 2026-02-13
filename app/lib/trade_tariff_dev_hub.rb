@@ -7,16 +7,16 @@ module TradeTariffDevHub
       )
     end
 
-    def identity_authentication_enabled?
-      @identity_authentication_enabled ||= ENV.fetch("IDENTITY_AUTHENTICATION_ENABLED", "true") == "true"
-    end
-
     def deletion_enabled?
       ENV.fetch("DELETION_ENABLED", "false") == "true"
     end
 
     def role_request_enabled?
-      ENV.fetch("FEATURE_FLAG_ROLE_REQUEST", "false") == "true"
+      # Allow explicit override via environment variable
+      return ENV["FEATURE_FLAG_ROLE_REQUEST"] == "true" if ENV.key?("FEATURE_FLAG_ROLE_REQUEST")
+
+      # Default: enabled in development/test, disabled in production/staging
+      Rails.env.development? || Rails.env.test?
     end
 
     def documentation_url
@@ -143,6 +143,13 @@ module TradeTariffDevHub
 
     def environment
       ENV.fetch("ENVIRONMENT", "production")
+    end
+
+    # Returns true for production/staging environments
+    # Note: Staging uses RAILS_ENV=production, so we check Rails.env.production?
+    # rather than ENVIRONMENT variable to catch both production and staging
+    def production_environment?
+      Rails.env.production?
     end
 
     def id_token_cookie_name

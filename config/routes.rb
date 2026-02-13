@@ -41,14 +41,17 @@ Rails.application.routes.draw do
     end
   end
 
-  # resources :trade_tariff_keys, only: %i[index new create] do
-  #   member do
-  #     get :revoke, to: 'trade_tariff_keys#update', as: :revoke
-  #     patch :revoke
-  #     get :delete, to: 'trade_tariff_keys#update', as: :delete
-  #     delete :delete
-  #   end
-  # end
+  resources :trade_tariff_keys, only: %i[index new create] do
+    member do
+      get :revoke, to: 'trade_tariff_keys#update', as: :revoke
+      patch :revoke
+
+      if TradeTariffDevHub.deletion_enabled?
+        get :delete, to: 'trade_tariff_keys#update', as: :delete
+        delete :delete
+      end
+    end
+  end
 
   namespace :user_verification do
     resources :steps, only: %i[show update index] do

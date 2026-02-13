@@ -15,7 +15,7 @@ class Admin::OrganisationsController < AuthenticatedController
     db_column = @sort_column == "name" ? "organisation_name" : @sort_column
 
     @pagy, @organisations = pagy(
-      Organisation.includes(:users, :api_keys, :trade_tariff_keys, :invitations)
+      Organisation.includes(:users, :api_keys, :trade_tariff_keys, :invitations, :roles)
                   .order(db_column => @sort_direction.to_sym),
       page: params[:page],
       items: 20,
@@ -30,7 +30,7 @@ class Admin::OrganisationsController < AuthenticatedController
     @admin_role = @roles.find(&:admin?)
     @service_roles = @roles.reject(&:admin?)
     assigned_service_role_ids = @service_roles.map(&:id)
-    @available_role_options = Role.service_roles
+    @available_role_options = Role.assignable_service_roles
                                   .where.not(id: assigned_service_role_ids)
                                   .order(:name)
     @users = @organisation.users

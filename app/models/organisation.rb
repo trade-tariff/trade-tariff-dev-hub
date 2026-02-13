@@ -62,6 +62,8 @@ class Organisation < ApplicationRecord
   end
 
   def remove_role_block_reason(role_name)
+    return :admin_role if role_name == "admin"
+
     if role_name.start_with?("trade_tariff") && trade_tariff_keys.active.exists?
       :trade_tariff_keys
     elsif role_name.start_with?("fpo") && api_keys.active.exists?
@@ -99,7 +101,7 @@ class Organisation < ApplicationRecord
 
   def available_service_roles
     assigned_service_role_ids = roles.service_roles.pluck(:id)
-    Role.service_roles.where.not(id: assigned_service_role_ids).order(:name)
+    Role.assignable_service_roles.where.not(id: assigned_service_role_ids).order(:name)
   end
 
   def pending_request_for?(role_name)

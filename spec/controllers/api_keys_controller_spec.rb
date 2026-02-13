@@ -18,7 +18,7 @@ RSpec.describe ApiKeysController, type: :controller do
 
       it "sets a flash alert message" do
         get :index
-        expect(flash[:alert]).to match("This service is not yet open to the public. If you have any questions please contact us on hmrc-trade-tariff-support-g@digital.hmrc.gov.uk")
+        expect(flash[:alert]).to match("does not have the required permissions to access this section")
       end
     end
   end
