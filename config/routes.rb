@@ -76,6 +76,8 @@ Rails.application.routes.draw do
   get :privacy, to: "pages#privacy"
   get :cookies, to: "pages#cookies"
 
+  post '/csp-violation-report', to: 'csp_reports#create'
+
   match "/400", to: "errors#bad_request", via: :all
   match "/404", to: "errors#not_found", via: :all, as: :not_found
   match "/405", to: "errors#method_not_allowed", via: :all

@@ -52,5 +52,11 @@ module TradeTariffDevHub
     end
 
     config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
+
+    config.action_dispatch.default_headers.merge!(
+      'X-Frame-Options' => 'SAMEORIGIN',
+      'X-XSS-Protection' => '0',
+      'X-Content-Type-Options' => 'nosniff',
+      )
   end
 end
