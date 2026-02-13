@@ -29,22 +29,21 @@ Rails.application.configure do
 
   # HSTS should only be set over HTTPS
   config.action_dispatch.default_headers.merge!(
-    'Strict-Transport-Security' => 'max-age=31536000; includeSubDomains',
-    )
+    "Strict-Transport-Security" => "max-age=31536000; includeSubDomains",
+  )
 
   # Skip http-to-https redirect for the default health check endpoint.
   # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
 
-  config.logger = ActiveSupport::Logger.new(STDOUT)
+  config.logger = ActiveSupport::Logger.new($stdout)
   config.lograge.enabled = true
   config.lograge.formatter = Lograge::Formatters::Logstash.new
   config.lograge.ignore_actions = [
-    'Rails::HealthController#show',
+    "Rails::HealthController#show",
   ]
   config.lograge.custom_options = lambda do |_event|
-    { domain: ENV['GOVUK_APP_DOMAIN'] }
+    { domain: ENV["GOVUK_APP_DOMAIN"] }
   end
-
 
   # Change to "debug" to log everything (including potentially personally-identifiable information!)
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
@@ -63,7 +62,7 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   # Only use :id for inspections in production.
-  config.active_record.attributes_for_inspect = [ :id ]
+  config.active_record.attributes_for_inspect = [:id]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
   # config.hosts = [

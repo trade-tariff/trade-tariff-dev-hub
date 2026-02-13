@@ -1,6 +1,6 @@
 require_relative "boot"
 
-require_relative '../app/lib/trade_tariff_dev_hub'
+require_relative "../app/lib/trade_tariff_dev_hub"
 
 # Fix for annotate gem compatibility with newer Ruby versions
 Fixnum = Integer unless defined?(Fixnum)
@@ -45,7 +45,7 @@ module TradeTariffDevHub
     config.middleware.insert_before 0, Rack::Cors do
       allow do
         origins TradeTariffDevHub.cors_host
-        resource '*',
+        resource "*",
                  headers: :any,
                  methods: %i[get options]
       end
@@ -54,9 +54,9 @@ module TradeTariffDevHub
     config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
 
     config.action_dispatch.default_headers.merge!(
-      'X-Frame-Options' => 'SAMEORIGIN',
-      'X-XSS-Protection' => '0',
-      'X-Content-Type-Options' => 'nosniff',
-      )
+      "X-Frame-Options" => "SAMEORIGIN",
+      "X-XSS-Protection" => "0",
+      "X-Content-Type-Options" => "nosniff",
+    )
   end
 end
