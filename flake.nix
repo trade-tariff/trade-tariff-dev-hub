@@ -28,7 +28,7 @@
         rubyVersion = builtins.head (builtins.split "\n" (builtins.readFile ./.ruby-version));
         ruby = pkgs."ruby-${rubyVersion}";
 
-        lint = pkgs.writeScriptBin "lint" ''
+        lint = pkgs.writeShellScriptBin "lint" ''
           changed_files=$(git diff --name-only --diff-filter=ACM --merge-base main)
 
           bundle exec rubocop --autocorrect-all --force-exclusion $changed_files Gemfile
@@ -47,7 +47,7 @@
           export PGHOST=$PWD/.nix/postgres
           export DB_USER=""
         '';
-        postgresql-start = pkgs.writeScriptBin "pg-start" ''
+        postgresql-start = pkgs.writeShellScriptBin "pg-start" ''
           ${pg-environment-variables}
 
           if [ ! -d $PGDATA ]; then
@@ -58,8 +58,8 @@
 
           ${postgresql}/bin/postgres -k $PGHOST -c listen_addresses=''' -c unix_socket_directories=$PGHOST
         '';
-        init = pkgs.writeScriptBin "init" ''cd terraform && terraform init -backend=false'';
-        update-providers = pkgs.writeScriptBin "update-providers" ''cd terraform && terraform init -backend=false -reconfigure -upgrade'';
+        init = pkgs.writeShellScriptBin "init" ''cd terraform && terraform init -backend=false'';
+        update-providers = pkgs.writeShellScriptBin "update-providers" ''cd terraform && terraform init -backend=false -reconfigure -upgrade'';
       in
       {
         devShells.default = pkgs.mkShell {
