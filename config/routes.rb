@@ -3,24 +3,24 @@ Rails.application.routes.draw do
 
   root "homepage#index"
 
-  get '/auth/redirect', to: 'sessions#handle_redirect'
-  get '/auth/invalid', to: 'sessions#invalid'
-  get '/auth/logout', to: 'sessions#destroy', as: :logout
+  get "/auth/redirect", to: "sessions#handle_redirect"
+  get "/auth/invalid", to: "sessions#invalid"
+  get "/auth/logout", to: "sessions#destroy", as: :logout
 
   if TradeTariffDevHub.dev_bypass_auth_enabled?
-    get '/dev/login', to: 'dev_auth#new', as: :dev_login
-    post '/dev/login', to: 'dev_auth#create'
-    delete '/dev/logout', to: 'dev_auth#destroy', as: :dev_logout
+    get "/dev/login", to: "dev_auth#new", as: :dev_login
+    post "/dev/login", to: "dev_auth#create"
+    delete "/dev/logout", to: "dev_auth#destroy", as: :dev_logout
   end
 
   resources :organisations, only: %i[index show edit update]
   resources :users, only: %i[destroy]
-  get 'users/:id/remove', to: 'users#remove', as: :remove_user
+  get "users/:id/remove", to: "users#remove", as: :remove_user
 
   resources :invitations, only: %i[new create edit update] do
     member do
-      get :resend, to: 'invitations#resend', as: :resend
-      get :delete, to: 'invitations#update', as: :delete
+      get :resend, to: "invitations#resend", as: :resend
+      get :delete, to: "invitations#update", as: :delete
       delete :delete
     end
   end
@@ -31,11 +31,11 @@ Rails.application.routes.draw do
 
   resources :api_keys, only: %i[index new create] do
     member do
-      get :revoke, to: 'api_keys#update', as: :revoke
+      get :revoke, to: "api_keys#update", as: :revoke
       patch :revoke
 
       if TradeTariffDevHub.deletion_enabled?
-        get :delete, to: 'api_keys#update', as: :delete
+        get :delete, to: "api_keys#update", as: :delete
         delete :delete
       end
     end
@@ -60,9 +60,9 @@ Rails.application.routes.draw do
   end
 
   namespace :admin do
-    resources :organisations, only: [:index, :show], path: 'organisations' do
-      post :roles, to: 'organisation_roles#create'
-      delete :roles, to: 'organisation_roles#destroy'
+    resources :organisations, only: %i[index show], path: "organisations" do
+      post :roles, to: "organisation_roles#create"
+      delete :roles, to: "organisation_roles#destroy"
     end
 
     resources :role_requests, only: [:index] do
@@ -75,6 +75,8 @@ Rails.application.routes.draw do
 
   get :privacy, to: "pages#privacy"
   get :cookies, to: "pages#cookies"
+
+  post "/csp-violation-report", to: "csp_reports#create"
 
   match "/400", to: "errors#bad_request", via: :all
   match "/404", to: "errors#not_found", via: :all, as: :not_found
