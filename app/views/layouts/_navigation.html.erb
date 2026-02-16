@@ -8,7 +8,15 @@
   <% if is_admin %>
     <%= header.with_navigation_item(text: "All Organisations", href: admin_organisations_path, active: current_page?(admin_organisations_path)) %>
     <% if TradeTariffDevHub.role_request_enabled? %>
-      <%= header.with_navigation_item(text: "Access Requests", href: admin_role_requests_path, active: current_page?(admin_role_requests_path)) %>
+      <% pending_count = pending_role_requests_count %>
+      <% if pending_count > 0 %>
+        <% access_requests_text = capture do %>
+          Access Requests <span class="govuk-tag govuk-tag--blue" style="margin-left: 0.5em; font-size: 0.875em; vertical-align: middle;"><%= pending_count %></span>
+        <% end %>
+        <%= header.with_navigation_item(text: access_requests_text.html_safe, href: admin_role_requests_path, active: current_page?(admin_role_requests_path)) %>
+      <% else %>
+        <%= header.with_navigation_item(text: "Access Requests", href: admin_role_requests_path, active: current_page?(admin_role_requests_path)) %>
+      <% end %>
     <% end %>
   <% end %>
 

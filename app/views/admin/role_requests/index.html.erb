@@ -23,7 +23,9 @@
                 row.with_cell(text: role_request.user.email_address)
                 row.with_cell(text: role_request.role_name)
                 row.with_cell(text: role_request.created_at.strftime('%d %b %Y'))
-                row.with_cell(text: role_request.note || '')
+                row.with_cell do
+                  content_tag(:div, role_request.note.presence || '', class: 'govuk-body govuk-!-margin-0', style: 'max-width: 25em; word-wrap: break-word; overflow-wrap: break-word;')
+                end
                 row.with_cell do
                   content_tag :div, class: 'govuk-button-group' do
                     button_to('Approve', approve_admin_role_request_path(role_request),

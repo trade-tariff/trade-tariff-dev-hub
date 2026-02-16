@@ -215,28 +215,28 @@ RSpec.describe RoleRequest, type: :model do
     let(:organisation) { create(:organisation) }
     let(:user) { create(:user, organisation: organisation) }
 
-    context "when note exceeds 200 characters" do
+    context "when note exceeds 500 characters" do
       it "prevents creating a role request with note that is too long", :aggregate_failures do
-        long_note = "a" * 201
+        long_note = "a" * 501
         role_request = build(:role_request, organisation: organisation, user: user, note: long_note)
 
         expect(role_request).not_to be_valid
-        expect(role_request.errors[:note]).to include("must be 200 characters or fewer")
+        expect(role_request.errors[:note]).to include("must be 500 characters or fewer")
       end
     end
 
-    context "when note is exactly 200 characters" do
+    context "when note is exactly 500 characters" do
       it "allows creating a role request" do
-        note = "a" * 200
+        note = "a" * 500
         role_request = build(:role_request, organisation: organisation, user: user, note: note)
 
         expect(role_request).to be_valid
       end
     end
 
-    context "when note is less than 200 characters" do
+    context "when note is less than 500 characters" do
       it "allows creating a role request" do
-        note = "a" * 199
+        note = "a" * 499
         role_request = build(:role_request, organisation: organisation, user: user, note: note)
 
         expect(role_request).to be_valid

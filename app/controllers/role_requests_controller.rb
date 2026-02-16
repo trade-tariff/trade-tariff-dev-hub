@@ -20,11 +20,16 @@ class RoleRequestsController < AuthenticatedController
     )
 
     if @role_request.save
-      if send_role_request_email
-        redirect_to organisation_path(organisation), notice: "Your access request has been submitted successfully"
-      else
-        Rails.logger.error "Failed to send role request email for role #{@role_request.role_name} from #{@role_request.user.email_address}"
-        redirect_to organisation_path(organisation), alert: "Your access request has been submitted, but we failed to send the notification email. Please contact support if you don't receive a response."
+      begin
+        admins_sent = send_role_request_emails
+        if admins_sent
+          redirect_to organisation_path(organisation), notice: "Your access request has been submitted successfully"
+        else
+          redirect_to organisation_path(organisation), notice: "Your access request has been submitted. We could not notify the admin team—please contact #{TradeTariffDevHub.application_support_email} if you don't hear back."
+        end
+      rescue Faraday::ConnectionFailed, Faraday::TimeoutError => e
+        Rails.logger.warn("Role request admin notification failed (backend unreachable): #{e.message}")
+        redirect_to organisation_path(organisation), notice: "Your access request has been submitted. We could not notify the admin team—please contact #{TradeTariffDevHub.application_support_email} if you don't hear back."
       end
     else
       @available_roles = available_roles_for_request
@@ -77,14 +82,10 @@ private
     params.require(:role_request).permit(:role_name, :note)
   end
 
-  def send_role_request_email
-    # Build notification to validate it can be constructed (catches errors early)
-    notifications = Notification.build_for_role_request(@role_request)
-    # In development, validate notification can be built but don't actually send
-    return true if Rails.env.development?
-
-    notifications.each do |notification|
-      SendNotification.new(notification).call
-    end
+  # Sends notification to admin recipients.
+  # Returns true if all admin notifications were sent, false otherwise.
+  def send_role_request_emails
+    admin_notifications = Notification.build_for_role_request(@role_request)
+    admin_notifications.empty? || admin_notifications.all? { |notification| SendNotification.new(notification).call }
   end
 end
