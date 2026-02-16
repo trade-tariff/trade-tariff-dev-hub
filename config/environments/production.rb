@@ -27,10 +27,18 @@ Rails.application.configure do
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   config.force_ssl = true
 
-  # HSTS should only be set over HTTPS
-  config.action_dispatch.default_headers.merge!(
-    "Strict-Transport-Security" => "max-age=31536000; includeSubDomains",
-  )
+  # force_ssl = true does the following:
+  #   Redirects HTTP → HTTPS
+  #   Marks cookies as Secure
+  #   Adds the HSTS header
+  #   Enables SSL middleware
+  #
+  #   The HSTS header Rails sends by default is: Strict-Transport-Security: max-age=63072000; includeSubDomains
+
+  # Uncomment HSTS config to change default values
+  # config.action_dispatch.default_headers.merge!(
+  #   'Strict-Transport-Security' => 'max-age=31536000; includeSubDomains',
+  #   )
 
   # Skip http-to-https redirect for the default health check endpoint.
   # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
