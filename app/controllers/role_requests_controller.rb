@@ -34,6 +34,12 @@ class RoleRequestsController < AuthenticatedController
 
 private
 
+  def allowed_roles
+    # Allow access to role request page even if organisation has no roles
+    # This allows organizations to request their first role
+    []
+  end
+
   def ensure_feature_enabled
     unless TradeTariffDevHub.role_request_enabled?
       redirect_to organisation_path(organisation), alert: "Role request functionality is currently disabled"

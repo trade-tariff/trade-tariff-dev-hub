@@ -1,8 +1,7 @@
-<%# TODO: Re-enable when trade_tariff_keys routes are uncommented %>
-<%# <% if key.active? %>
-<%#   <%= link_to 'Revoke', revoke_trade_tariff_key_path(key), method: :patch, class: 'govuk-link', data: { confirm: 'Are you sure you want to revoke this Trade Tariff key? This action cannot be undone.' } %>
-<%# <% else %>
-<%#   <%= link_to 'Delete', delete_trade_tariff_key_path(key), method: :delete, class: 'govuk-link govuk-link--warning', data: { confirm: 'Are you sure you want to permanently delete this Trade Tariff key? This action cannot be undone.' } %>
-<%# <% end %>
-
-<span class="govuk-hint govuk-!-margin-0">No actions available</span>
+<% if key.active? %>
+  <%= link_to 'Revoke', revoke_trade_tariff_key_path(key), method: :patch, class: 'govuk-link', data: { confirm: 'Are you sure you want to revoke this Trade Tariff key? This action cannot be undone.' } %>
+<% elsif TradeTariffDevHub.deletion_enabled? %>
+  <%= link_to 'Delete', delete_trade_tariff_key_path(key), method: :delete, class: 'govuk-link govuk-link--warning', data: { confirm: 'Are you sure you want to permanently delete this Trade Tariff key? This action cannot be undone.' } %>
+<% else %>
+  <span class="govuk-hint govuk-!-margin-0">No actions available</span>
+<% end %>

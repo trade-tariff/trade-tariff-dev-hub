@@ -180,16 +180,23 @@ RSpec.describe Organisation, type: :model do
   end
 
   describe "#available_service_roles" do
-    let(:organisation) { create(:organisation) }
-
     context "when organisation has no service roles" do
+      let(:organisation) { create(:organisation, :implicit) }
+
+      before do
+        allow(TradeTariffDevHub).to receive(:production_environment?).and_return(false)
+      end
+
       it "returns all service roles that are not taken" do
-        expect(organisation.available_service_roles.pluck(:name)).to contain_exactly("spimm:full", "trade_tariff:full")
+        expect(organisation.available_service_roles.pluck(:name)).to contain_exactly("fpo:full", "spimm:full", "trade_tariff:full")
       end
     end
 
     context "when organisation has all service roles" do
+      let(:organisation) { create(:organisation, :implicit) }
+
       before do
+        allow(TradeTariffDevHub).to receive(:production_environment?).and_return(false)
         organisation.roles << organisation.available_service_roles
         organisation.save!
       end

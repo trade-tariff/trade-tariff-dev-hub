@@ -2,9 +2,8 @@ RSpec.describe "Role Requests", type: :request do
   include_context "with authenticated user"
 
   before do
-    # Avoid handle_user_session redirect: org must not have fpo/admin to request roles,
-    # but identity auth redirects to root when org lacks fpo/admin. Disable identity for this spec.
-    allow(TradeTariffDevHub).to receive_messages(role_request_enabled?: true, identity_authentication_enabled?: false)
+    # NOTE: Identity authentication is always enabled, but dev bypass takes precedence in tests
+    allow(TradeTariffDevHub).to receive_messages(role_request_enabled?: true)
     Rails.application.reload_routes!
     # Remove default fpo:full role from factory, then assign trade_tariff:full
     current_user.organisation.unassign_role!("fpo:full") if current_user.organisation.has_role?("fpo:full")

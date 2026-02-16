@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "fileutils"
+
+# Exit early if we're not in a Rails app
+ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../Gemfile", __dir__)
+bundle_binstub = File.expand_path("bundle", __dir__)
+
+unless File.exist?(bundle_binstub)
+  abort "bundle binstub not found. Run `bundle binstubs bundler --force`"
+end
+
+# Run rubocop first
+puts "Running RuboCop..."
+rubocop_exit = system(bundle_binstub, "exec", "rubocop", "-a")
+rubocop_status = $?.exitstatus
+
+unless rubocop_exit
+  puts "\n❌ RuboCop failed with exit code #{rubocop_status}"
+  exit rubocop_status
+end
+
+puts "\n✓ RuboCop passed\n\n"
+
+# Run rspec
+puts "Running RSpec..."
+rspec_exit = system(bundle_binstub, "exec", "rspec", *ARGV)
+rspec_status = $?.exitstatus
+
+unless rspec_exit
+  puts "\n❌ RSpec failed with exit code #{rspec_status}"
+  exit rspec_status
+end
+
+puts "\n✓ All tests passed!"

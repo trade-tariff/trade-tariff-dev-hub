@@ -20,13 +20,13 @@
 #
 
 class ApiKey < ApplicationRecord
+  include KeyLimitValidation
+
   has_paper_trail
 
   belongs_to :organisation
 
   scope :active, -> { where(enabled: true) }
-
-  validate :limit_keys_per_organisation
 
   def delete_completely!
     DeleteApiKey.new.call(self)
@@ -34,16 +34,11 @@ class ApiKey < ApplicationRecord
 
 private
 
-  def limit_keys_per_organisation
-    return if organisation.nil?
-    return unless enabled? # Only validate when the key will be active
-    return if organisation.admin? # Skip limit for admin organisations
+  def association_name
+    :api_keys
+  end
 
-    existing_count = organisation.api_keys.active.count
-    existing_count -= 1 if persisted? && enabled_in_database # Don't double-count self if already active in DB
-
-    if existing_count >= 3
-      errors.add(:base, "Organisation can have a maximum of 3 active API keys")
-    end
+  def key_type_name
+    "API keys"
   end
 end

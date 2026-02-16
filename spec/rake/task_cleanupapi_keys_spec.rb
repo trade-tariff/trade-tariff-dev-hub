@@ -28,15 +28,15 @@ RSpec.describe Rake::Task, "cleanup:api_keys" do
 
   context "when in development" do
     let(:admin_org) { create(:organisation, organisation_name: "Admin Dev Org") }
+    let(:non_admin_org) { create(:organisation, organisation_name: "User Dev Org") }
 
     before do
       allow(Rails.env).to receive(:development?).and_return(true)
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("CLEANUP_PLAYWRIGHT_KEYS_ENABLED").and_return(nil)
-      allow(Organisation).to receive(:admin_organisation).and_return(admin_org)
     end
 
-    context "when admin organisation has no playwright keys" do
+    context "when no organisations have playwright keys" do
       it "does not call DeleteApiKey", :aggregate_failures do
         expect { described_class["cleanup:api_keys"].invoke }.to output(/\A.*\z/m).to_stdout
 
@@ -44,60 +44,66 @@ RSpec.describe Rake::Task, "cleanup:api_keys" do
       end
     end
 
-    context "when admin organisation has playwright-prefixed keys" do
-      let!(:playwright_key) do
+    context "when organisations have playwright-prefixed keys" do
+      let!(:admin_playwright_key) do
         create(:api_key, organisation: admin_org, description: "playwright-#{Time.zone.now.to_i}")
       end
+      let!(:user_playwright_key) do
+        create(:api_key, organisation: non_admin_org, description: "playwright-test-key")
+      end
 
-      it "deletes only keys with description starting with playwright-", :aggregate_failures do
+      it "deletes playwright keys from all organisations", :aggregate_failures do
         deleter = instance_double(DeleteApiKey, call: true)
         allow(DeleteApiKey).to receive(:new).and_return(deleter)
 
         expect { described_class["cleanup:api_keys"].invoke }.to output(/\A.*\z/m).to_stdout
 
-        expect(deleter).to have_received(:call).with(playwright_key)
+        expect(deleter).to have_received(:call).with(admin_playwright_key)
+        expect(deleter).to have_received(:call).with(user_playwright_key)
       end
     end
 
-    context "when admin organisation has mixed keys" do
-      let!(:playwright_key) do
+    context "when organisations have mixed keys" do
+      let(:deleter) { instance_double(DeleteApiKey, call: true) }
+
+      before do
         create(:api_key, organisation: admin_org, description: "playwright-test")
-      end
-      let!(:other_key) do
         create(:api_key, organisation: admin_org, description: "My real key")
+        create(:api_key, organisation: non_admin_org, description: "playwright-user-key")
+        create(:api_key, organisation: non_admin_org, description: "User real key")
+        allow(DeleteApiKey).to receive(:new).and_return(deleter)
       end
 
-      it "deletes only the playwright key", :aggregate_failures do
-        deleter = instance_double(DeleteApiKey, call: true)
-        allow(DeleteApiKey).to receive(:new).and_return(deleter)
-
+      it "deletes only playwright keys from all organisations", :aggregate_failures do
         expect { described_class["cleanup:api_keys"].invoke }.to output(/\A.*\z/m).to_stdout
 
-        expect(deleter).to have_received(:call).with(playwright_key)
-        expect(deleter).not_to have_received(:call).with(other_key)
+        expect(deleter).to have_received(:call).exactly(2).times
       end
     end
   end
 
   context "when CLEANUP_PLAYWRIGHT_KEYS_ENABLED=true (deployed dev)" do
     let(:admin_org) { create(:organisation, organisation_name: "Admin Dev Org") }
+    let(:non_admin_org) { create(:organisation, organisation_name: "User Dev Org") }
 
     before do
       allow(Rails.env).to receive(:development?).and_return(false)
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("CLEANUP_PLAYWRIGHT_KEYS_ENABLED").and_return("true")
-      allow(Organisation).to receive(:admin_organisation).and_return(admin_org)
+      allow(TradeTariffDevHub).to receive(:production_environment?).and_return(false)
     end
 
-    it "runs cleanup for admin org", :aggregate_failures do
-      create(:api_key, organisation: admin_org, description: "playwright-123")
+    it "runs cleanup for all organisations", :aggregate_failures do
+      admin_key = create(:api_key, organisation: admin_org, description: "playwright-123")
+      user_key = create(:api_key, organisation: non_admin_org, description: "playwright-456")
       deleter = instance_double(DeleteApiKey, call: true)
       allow(DeleteApiKey).to receive(:new).and_return(deleter)
 
       expect { described_class["cleanup:api_keys"].invoke }.to output(/\A.*\z/m).to_stdout
 
-      expect(DeleteApiKey).to have_received(:new)
-      expect(deleter).to have_received(:call)
+      expect(DeleteApiKey).to have_received(:new).twice
+      expect(deleter).to have_received(:call).with(admin_key)
+      expect(deleter).to have_received(:call).with(user_key)
     end
   end
 end

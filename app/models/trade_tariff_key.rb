@@ -19,6 +19,8 @@
 #
 
 class TradeTariffKey < ApplicationRecord
+  include KeyLimitValidation
+
   has_paper_trail
 
   belongs_to :organisation
@@ -28,8 +30,6 @@ class TradeTariffKey < ApplicationRecord
   validates :scopes, presence: true, length: { minimum: 1 }
   attribute :enabled, :boolean, default: true
   scope :active, -> { where(enabled: true) }
-
-  validate :limit_keys_per_organisation
 
   def delete_completely!
     TradeTariff::DeleteTradeTariffKey.new.call(self)
@@ -49,14 +49,11 @@ class TradeTariffKey < ApplicationRecord
 
 private
 
-  def limit_keys_per_organisation
-    return if organisation.nil?
+  def association_name
+    :trade_tariff_keys
+  end
 
-    existing_count = organisation.trade_tariff_keys.count
-    existing_count -= 1 if persisted? # Don't count self if updating
-
-    if existing_count >= 3
-      errors.add(:base, "Organisation can have a maximum of 3 Trade Tariff keys")
-    end
+  def key_type_name
+    "Trade Tariff keys"
   end
 end
