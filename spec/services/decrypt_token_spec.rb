@@ -3,7 +3,7 @@ RSpec.describe DecryptToken do
     subject(:call) { described_class.new(token).call }
 
     let(:secret) { "my-secret-key" }
-    let(:key) { ActiveSupport::KeyGenerator.new(secret).generate_key("salt", 32) }
+    let(:key) { ActiveSupport::KeyGenerator.new(secret).generate_key("identity_token_encryption_v1", 32) }
     let(:encryptor) { ActiveSupport::MessageEncryptor.new(key) }
     let(:token) { encryptor.encrypt_and_sign("my-token") }
 
@@ -54,7 +54,7 @@ RSpec.describe DecryptToken do
     end
 
     it "generates a key with the correct secret and salt" do
-      key = ActiveSupport::KeyGenerator.new(secret).generate_key("salt", 32)
+      key = ActiveSupport::KeyGenerator.new(secret).generate_key("identity_token_encryption_v1", 32)
       expect(crypt.instance_variable_get(:@secret)).to eq(key)
     end
   end
