@@ -8,6 +8,24 @@ locals {
       value = value
     }
   ]
+
+  ecs_tls_env_vars = [
+    {
+      name      = "SSL_KEY_PEM"
+      valueFrom = "${data.aws_secretsmanager_secret.ecs_tls_certificate.arn}:private_key::"
+    },
+    {
+      name      = "SSL_CERT_PEM"
+      valueFrom = "${data.aws_secretsmanager_secret.ecs_tls_certificate.arn}:certificate::"
+    },
+    {
+      name      = "SSL_PORT"
+      value     = "8443"
+    }
+  ]
+
+  devhub_service_env_vars = concat(local.secret_env_vars, local.ecs_tls_env_vars)
+
   job_secret_value = var.environment == "development" ? try(data.aws_secretsmanager_secret_version.job[0].secret_string, "{}") : "{}"
   job_secret_map   = jsondecode(local.job_secret_value)
   job_secret_env_vars = var.environment == "development" ? [
