@@ -48,6 +48,12 @@ module TradeTariffDevHub
       @application_support_email ||= ENV["APPLICATION_SUPPORT_EMAIL"] || "dev@example.com"
     end
 
+    # Optional: when set, used as fallback recipient(s) for role request notifications when no admin org exists.
+    # In development you can set ROLE_REQUEST_NOTIFICATION_EMAIL to receive role requests without an admin organisation.
+    def role_request_notification_email
+      @role_request_notification_email ||= ENV["ROLE_REQUEST_NOTIFICATION_EMAIL"]
+    end
+
     def cors_host
       ENV.fetch("GOVUK_APP_DOMAIN").sub(/https?:\/\//, "")
     end

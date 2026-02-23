@@ -112,13 +112,59 @@ RSpec.describe "Role Requests", type: :request do
       expect(response.body).to include("Your access request has been submitted successfully")
     end
 
-    it "sends a role request email" do
+    it "sends a notification to admins (requester confirmation template not yet configured)" do
       post role_requests_path, params: params
-      expect(WebMock).to have_requested(:post, "#{TradeTariffDevHub.uk_backend_url}/notifications")
+      expect(WebMock).to have_requested(:post, "#{TradeTariffDevHub.uk_backend_url}/notifications").times(1)
+    end
+
+    context "when admin notification fails to send" do
+      before do
+        stub_request(:post, "#{TradeTariffDevHub.uk_backend_url}/notifications")
+          .to_return(status: 422, body: "{}", headers: { "Content-Type" => "application/json" })
+      end
+
+      it "redirects with notice that request was submitted but admins could not be notified", :aggregate_failures do
+        post role_requests_path, params: params
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
+        follow_redirect!
+        expect(response.body).to include("could not notify the admin team")
+        expect(response.body).to include("please contact")
+      end
+    end
+
+    context "when admin notification fails with server error" do
+      before do
+        stub_request(:post, "#{TradeTariffDevHub.uk_backend_url}/notifications")
+          .to_return(status: 401, body: "Unauthorized", headers: {})
+      end
+
+      it "redirects with notice that request was submitted but admins could not be notified", :aggregate_failures do
+        post role_requests_path, params: params
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
+        follow_redirect!
+        expect(response.body).to include("could not notify the admin team")
+        expect(response.body).to include("please contact")
+      end
+    end
+
+    context "when notification backend is unreachable (connection or timeout)" do
+      before do
+        stub_request(:post, "#{TradeTariffDevHub.uk_backend_url}/notifications")
+          .to_raise(Faraday::ConnectionFailed.new("Connection refused"))
+      end
+
+      it "creates the role request and redirects with notice that admins could not be notified", :aggregate_failures do
+        expect { post role_requests_path, params: params }
+          .to change { RoleRequest.where(role_name: "fpo:full", organisation: current_user.organisation).count }.by(1)
+
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
+        follow_redirect!
+        expect(response.body).to include("could not notify the admin team")
+        expect(response.body).to include("please contact")
+      end
     end
 
     context "with invalid parameters" do
-      # rubocop:disable RSpec/NestedGroups
       context "when role_name is invalid" do
         let(:params) do
           {
@@ -183,7 +229,6 @@ RSpec.describe "Role Requests", type: :request do
           expect(response.body).to include("You must provide information about why you need access to this role")
         end
       end
-      # rubocop:enable RSpec/NestedGroups
     end
 
     context "when duplicate pending request exists" do
@@ -202,12 +247,12 @@ RSpec.describe "Role Requests", type: :request do
       end
     end
 
-    context "when note exceeds 200 characters" do
+    context "when note exceeds 500 characters" do
       let(:params) do
         {
           role_request: {
             role_name: "fpo:full",
-            note: "a" * 201,
+            note: "a" * 501,
           },
         }
       end
@@ -217,7 +262,7 @@ RSpec.describe "Role Requests", type: :request do
           .not_to change(RoleRequest, :count)
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include("must be 200 characters or fewer")
+        expect(response.body).to include("must be 500 characters or fewer")
       end
     end
   end

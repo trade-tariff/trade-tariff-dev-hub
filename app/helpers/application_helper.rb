@@ -60,6 +60,13 @@ module ApplicationHelper
     content_tag(:strong, text, class: classes)
   end
 
+  def pending_role_requests_count
+    return 0 unless respond_to?(:current_user) && current_user.present?
+    return 0 unless current_user.organisation&.admin?
+
+    RoleRequest.pending.count
+  end
+
 private
 
   def status_tag_class(status)

@@ -16,7 +16,7 @@ elsif ENV['ENVIRONMENT'] == 'staging'
         invitation: 'dbdc7cf1-c44b-4f24-9654-bedcfae56f6f',
         role_request_approved: '73336beb-71aa-4b40-8c41-f0315584f0c2',
         role_request_created: '3d2cef6c-0879-4d8b-b174-1f5fdf7a87d8',
-        role_request_rejected: '793509cd-49ab-47a5-ab6e-ad44bcced970',
+        role_request_rejected: 'fd3ff633-e52e-4205-99d5-8a0e3894d3a8',
       },
     },
   }

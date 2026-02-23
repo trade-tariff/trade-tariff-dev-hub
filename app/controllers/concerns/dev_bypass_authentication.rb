@@ -37,7 +37,14 @@ protected
     return if dev_bypass_user_type.present?
 
     session[:return_to] = request.fullpath
-    redirect_to dev_login_path
+    redirect_to dev_login_url
+  end
+
+  def dev_login_url
+    # Use url_for so redirect works when named route isn't loaded (e.g. controller specs that redraw routes)
+    url_for(controller: "dev_auth", action: "new", only_path: true)
+  rescue StandardError
+    "/dev/login"
   end
 
   def dev_bypass_user?(user)

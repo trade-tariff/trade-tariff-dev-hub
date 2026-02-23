@@ -8,6 +8,9 @@ plugins: rubocop-rspec
 RSpec/ExampleLength:
   Max: 10
 
+RSpec/NestedGroups:
+  Max: 4
+
 inherit_mode:
   merge:
     - Exclude
