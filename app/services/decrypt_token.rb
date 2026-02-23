@@ -21,7 +21,7 @@ class DecryptToken
   def self.crypt
     @crypt ||= begin
       Rails.logger.debug("[Auth] DecryptToken: Initializing MessageEncryptor")
-      key = ActiveSupport::KeyGenerator.new(TradeTariffDevHub.identity_encryption_secret).generate_key("salt", 32)
+      key = ActiveSupport::KeyGenerator.new(TradeTariffDevHub.identity_encryption_secret).generate_key("identity_token_encryption_v1", 32)
 
       ActiveSupport::MessageEncryptor.new(key)
     end
