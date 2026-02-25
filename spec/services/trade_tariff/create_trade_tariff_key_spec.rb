@@ -1,50 +1,139 @@
+# frozen_string_literal: true
+
 RSpec.describe TradeTariff::CreateTradeTariffKey do
-  subject(:create_trade_tariff_key) { described_class.new }
+  subject(:create_trade_tariff_key) do
+    described_class.new(identity_client: identity_client, api_gateway_client: api_gateway_client)
+  end
 
   let(:organisation) { create(:organisation) }
-  let(:description) { "Test Trade Tariff Key" }
-  let(:scopes) { %w[read write] }
+  let(:identity_client) { instance_double(Identity::ClientCredentialsApi) }
+  let(:api_gateway_client) { instance_double(Aws::APIGateway::Client) }
+  let(:stub_creds) do
+    {
+      client_id: "cognito-#{SecureRandom.alphanumeric(16)}",
+      client_secret: SecureRandom.hex(24),
+      api_gateway_key_id: "agw-#{SecureRandom.hex(8)}",
+    }
+  end
+  let(:call_params) { { description: "Test Trade Tariff Key", scopes: %w[read write] } }
+
+  before do
+    allow(TradeTariffDevHub).to receive_messages(
+      trade_tariff_usage_plan_id: "test-usage-plan-id",
+      identity_api_token: "test-token",
+      application_support_email: "support@example.com",
+    )
+    allow(identity_client).to receive(:create!).with(call_params[:scopes]).and_return(
+      Identity::ClientCredentialsApi::CreateResult.new(client_id: stub_creds[:client_id], client_secret: stub_creds[:client_secret]),
+    )
+    allow(api_gateway_client).to receive(:create_api_key).and_return(
+      Struct.new(:id).new(stub_creds[:api_gateway_key_id]),
+    )
+    allow(api_gateway_client).to receive(:create_usage_plan_key)
+  end
 
   describe "#call" do
-    it "creates and saves a Trade Tariff key with valid attributes", :aggregate_failures do
-      result = create_trade_tariff_key.call(organisation.id, description, scopes)
+    it "returns a CreateResult with trade_tariff_key and client_secret", :aggregate_failures do
+      result = create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes])
 
-      expect(result.id).to be_a_uuid
-      expect(result.organisation_id).to eq(organisation.id)
-      expect(result.secret).to be_a_secret
-      expect(result.client_id).to be_a_trade_tariff_client_id
-      expect(result.description).to eq(description)
-      expect(result.scopes).to eq(scopes)
-      expect(result.created_at).to be_present
-      expect(result.updated_at).to be_present
-      expect(result).to be_persisted
+      expect(result).to be_a(TradeTariff::CreateTradeTariffKey::CreateResult)
+      expect(result.trade_tariff_key).to be_persisted
+      expect(result.client_secret).to eq(stub_creds[:client_secret])
     end
 
-    it "generates a unique client_id" do
-      key1 = create_trade_tariff_key.call(organisation.id, description, scopes)
-      key2 = create_trade_tariff_key.call(organisation.id, description, scopes)
+    it "creates a Trade Tariff key with identity client_id and no stored secret", :aggregate_failures do
+      result = create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes])
+      key = result.trade_tariff_key
 
-      expect(key1.client_id).not_to eq(key2.client_id)
+      expect(key.client_id).to eq(stub_creds[:client_id])
+      expect(key.secret).to be_nil
+      expect(key.organisation_id).to eq(organisation.id)
+      expect(key.description).to eq(call_params[:description])
+      expect(key.scopes).to eq(call_params[:scopes])
+      expect(key.api_gateway_id).to eq(stub_creds[:api_gateway_key_id])
+      expect(key.usage_plan_id).to eq("test-usage-plan-id")
+      expect(key.enabled).to be true
     end
 
-    it "generates a unique secret" do
-      key1 = create_trade_tariff_key.call(organisation.id, description, scopes)
-      key2 = create_trade_tariff_key.call(organisation.id, description, scopes)
+    it "calls identity API with scopes" do
+      create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes])
 
-      expect(key1.secret).not_to eq(key2.secret)
+      expect(identity_client).to have_received(:create!).with(%w[read write])
+    end
+
+    it "creates API Gateway key with value set to client_id" do
+      create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes])
+
+      expect(api_gateway_client).to have_received(:create_api_key).with(
+        hash_including(name: a_string_matching(/#{stub_creds[:client_id][0..7]}/), value: stub_creds[:client_id], enabled: true),
+      )
+    end
+
+    it "associates API key with usage plan" do
+      create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes])
+
+      expect(api_gateway_client).to have_received(:create_usage_plan_key).with(
+        key_id: stub_creds[:api_gateway_key_id],
+        key_type: "API_KEY",
+        usage_plan_id: "test-usage-plan-id",
+      )
     end
 
     it "uses default scopes if not provided" do
-      result = create_trade_tariff_key.call(organisation.id, description)
+      allow(identity_client).to receive(:create!).with(%w[read write]).and_return(
+        Identity::ClientCredentialsApi::CreateResult.new(client_id: stub_creds[:client_id], client_secret: stub_creds[:client_secret]),
+      )
 
-      expect(result.scopes).to eq(%w[read write])
+      result = create_trade_tariff_key.call(organisation.id, call_params[:description])
+
+      expect(result.trade_tariff_key.scopes).to eq(%w[read write])
     end
 
     it "generates a default description if not provided", :aggregate_failures do
       result = create_trade_tariff_key.call(organisation.id, nil)
 
-      expect(result.description).to be_present
-      expect(result.description).to include("Autogenerated")
+      expect(result.trade_tariff_key.description).to be_present
+      expect(result.trade_tariff_key.description).to include("Autogenerated")
+    end
+
+    it "raises ArgumentError with support email when TRADE_TARIFF_USAGE_PLAN_ID is not configured" do
+      allow(TradeTariffDevHub).to receive(:trade_tariff_usage_plan_id).and_return(nil)
+
+      expect { create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes]) }.to raise_error(ArgumentError, /Something went wrong.*support@example.com/)
+    end
+
+    it "raises ArgumentError with support email when IDENTITY_API_TOKEN is not configured" do
+      allow(TradeTariffDevHub).to receive(:identity_api_token).and_return(nil)
+
+      expect { create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes]) }.to raise_error(ArgumentError, /Something went wrong.*support@example.com/)
+    end
+
+    context "when API Gateway create fails" do
+      before do
+        allow(api_gateway_client).to receive(:create_api_key).and_raise(Aws::APIGateway::Errors::ServiceError.new(nil, "error"))
+        allow(identity_client).to receive(:delete).with(stub_creds[:client_id])
+      end
+
+      it "rolls back by deleting the Cognito client", :aggregate_failures do
+        expect { create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes]) }.to raise_error(Aws::APIGateway::Errors::ServiceError)
+        expect(identity_client).to have_received(:delete).with(stub_creds[:client_id])
+      end
+
+      it "does not persist a Trade Tariff key", :aggregate_failures do
+        expect { create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes]) }.to raise_error(Aws::APIGateway::Errors::ServiceError)
+        expect(TradeTariffKey.count).to eq(0)
+      end
+    end
+
+    context "when identity create fails" do
+      before do
+        allow(identity_client).to receive(:create!).and_raise(Identity::ClientCredentialsApi::Error.new("401"))
+      end
+
+      it "raises and does not call API Gateway", :aggregate_failures do
+        expect { create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes]) }.to raise_error(Identity::ClientCredentialsApi::Error)
+        expect(api_gateway_client).not_to have_received(:create_api_key)
+      end
     end
   end
 end

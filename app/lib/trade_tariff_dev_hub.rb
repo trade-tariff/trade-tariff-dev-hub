@@ -74,6 +74,21 @@ module TradeTariffDevHub
       @identity_consumer ||= ENV.fetch("IDENTITY_CONSUMER", "portal")
     end
 
+    # Base URL for the identity service client credentials API (POST/DELETE /api/client_credentials).
+    def identity_client_credentials_api_url
+      @identity_client_credentials_api_url ||= URI.join(identity_base_url, "api/").to_s
+    end
+
+    # Bearer token for identity service API (create/delete app client credentials). Required when provisioning Trade Tariff keys.
+    def identity_api_token
+      @identity_api_token ||= ENV["IDENTITY_API_TOKEN"]
+    end
+
+    # Pre-created API Gateway usage plan ID for Trade Tariff keys (from Terraform). Required when provisioning Trade Tariff keys.
+    def trade_tariff_usage_plan_id
+      @trade_tariff_usage_plan_id ||= ENV["TRADE_TARIFF_USAGE_PLAN_ID"]
+    end
+
     def identity_cognito_jwks_keys
       return if identity_cognito_jwks_url.blank?
 

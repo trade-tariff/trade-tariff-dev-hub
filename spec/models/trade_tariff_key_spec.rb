@@ -9,7 +9,6 @@ RSpec.describe TradeTariffKey, type: :model do
 
   it { is_expected.to validate_presence_of(:client_id) }
   it { is_expected.to validate_uniqueness_of(:client_id) }
-  it { is_expected.to validate_presence_of(:secret) }
   it { is_expected.to validate_presence_of(:scopes) }
 
   describe "#limit_keys_per_organisation" do
