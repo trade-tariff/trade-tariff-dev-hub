@@ -20,7 +20,7 @@ RSpec.describe TradeTariff::CreateTradeTariffKey do
   before do
     allow(TradeTariffDevHub).to receive_messages(
       trade_tariff_usage_plan_id: "test-usage-plan-id",
-      identity_api_token: "test-token",
+      identity_api_key: "test-token",
       application_support_email: "support@example.com",
     )
     allow(identity_client).to receive(:create!).with(call_params[:scopes]).and_return(
@@ -102,8 +102,8 @@ RSpec.describe TradeTariff::CreateTradeTariffKey do
       expect { create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes]) }.to raise_error(ArgumentError, /Something went wrong.*support@example.com/)
     end
 
-    it "raises ArgumentError with support email when IDENTITY_API_TOKEN is not configured" do
-      allow(TradeTariffDevHub).to receive(:identity_api_token).and_return(nil)
+    it "raises ArgumentError with support email when IDENTITY_API_KEY is not configured" do
+      allow(TradeTariffDevHub).to receive(:identity_api_key).and_return(nil)
 
       expect { create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes]) }.to raise_error(ArgumentError, /Something went wrong.*support@example.com/)
     end

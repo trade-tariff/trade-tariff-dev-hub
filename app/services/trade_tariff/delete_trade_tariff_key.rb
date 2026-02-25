@@ -24,7 +24,7 @@ class TradeTariff::DeleteTradeTariffKey
 private
 
   def delete_from_api_gateway(api_gateway_id)
-    @api_gateway_client.delete_api_key(api_key_id: api_gateway_id)
+    @api_gateway_client.delete_api_key(api_key: api_gateway_id)
   rescue Aws::APIGateway::Errors::NotFoundException
     Rails.logger.warn("[DeleteTradeTariffKey] API key #{api_gateway_id} not found in API Gateway, continuing")
   rescue StandardError => e

@@ -49,6 +49,11 @@ class TradeTariffKeysController < AuthenticatedController
   end
 
   def delete
+    unless @trade_tariff_key.revoked?
+      redirect_to redirect_path_after_action, alert: "Only revoked keys can be deleted"
+      return
+    end
+
     TradeTariff::DeleteTradeTariffKey.new.call(@trade_tariff_key)
     redirect_to redirect_path_after_action, notice: "Trade Tariff key deleted"
   end

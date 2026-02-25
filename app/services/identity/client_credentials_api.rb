@@ -26,10 +26,13 @@ module Identity
       case response.status
       when 201
         body = response.body.is_a?(Hash) ? response.body : JSON.parse(response.body)
-        CreateResult.new(
-          client_id: body["client_id"],
-          client_secret: body["client_secret"],
-        )
+        client_id = body["client_id"]
+        client_secret = body["client_secret"]
+        if client_id.blank? || client_secret.blank?
+          raise Error, "Identity API returned 201 but response missing client_id or client_secret"
+        end
+
+        CreateResult.new(client_id: client_id, client_secret: client_secret)
       when 400, 401, 404, 422, 502, 503
         raise Error, "Identity API error #{response.status}: #{response.body&.truncate(200)}"
       else
@@ -63,7 +66,7 @@ module Identity
         conn.response :json
         conn.adapter Faraday.default_adapter
         conn.response :logger if Rails.logger.debug?
-        conn.headers["Authorization"] = "Bearer #{TradeTariffDevHub.identity_api_token}"
+        conn.headers["Authorization"] = "Bearer #{TradeTariffDevHub.identity_api_key}"
       end
     end
   end

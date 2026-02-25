@@ -33,7 +33,7 @@ RSpec.describe TradeTariff::DeleteTradeTariffKey do
       it "calls API Gateway to delete the API key" do
         delete_trade_tariff_key.call(trade_tariff_key)
 
-        expect(api_gateway_client).to have_received(:delete_api_key).with(api_key_id: trade_tariff_key.api_gateway_id)
+        expect(api_gateway_client).to have_received(:delete_api_key).with(api_key: trade_tariff_key.api_gateway_id)
       end
     end
 

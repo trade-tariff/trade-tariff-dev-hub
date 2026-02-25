@@ -176,7 +176,7 @@ if Rails.env.development?
   end
 
   # Create 1 Trade Tariff key for Admin Dev Org (only provisions via identity/API Gateway when env is configured)
-  if TradeTariffDevHub.trade_tariff_usage_plan_id.present? && TradeTariffDevHub.identity_api_token.present?
+  if TradeTariffDevHub.trade_tariff_usage_plan_id.present? && TradeTariffDevHub.identity_api_key.present?
     TradeTariff::CreateTradeTariffKey.new.call(admin_dev_org.id, "Admin Dev Org Trade Tariff Key")
   else
     # Stub key for local dev only (.env.development); not for use in AWS dev—AWS uses secrets and real provisioning.

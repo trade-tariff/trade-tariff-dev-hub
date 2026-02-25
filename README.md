@@ -37,7 +37,7 @@ The dev bypass creates test users and organisations automatically on first login
 
 ### Trade Tariff keys (identity + API Gateway)
 
-To **create real Trade Tariff keys** (Cognito + API Gateway), set `IDENTITY_API_TOKEN` and `TRADE_TARIFF_USAGE_PLAN_ID` (see [docs/TRADE_TARIFF_KEYS_SETUP.md](docs/TRADE_TARIFF_KEYS_SETUP.md) for how to find the usage plan in AWS and per-environment setup).
+To **create real Trade Tariff keys** (Cognito + API Gateway), set `IDENTITY_API_KEY` and `TRADE_TARIFF_USAGE_PLAN_ID` (see [docs/TRADE_TARIFF_KEYS_SETUP.md](docs/TRADE_TARIFF_KEYS_SETUP.md) for how to find the usage plan in AWS and per-environment setup).
 
 ### Playwright API key cleanup (dev only)
 
