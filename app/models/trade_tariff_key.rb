@@ -9,6 +9,7 @@
 #  organisation_id :uuid             not null
 #  description     :text
 #  enabled         :boolean          default(TRUE), not null
+#  revoked_at      :datetime
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #  api_gateway_id  :string
@@ -37,7 +38,7 @@ class TradeTariffKey < ApplicationRecord
   end
 
   def revoke!
-    update!(enabled: false)
+    update!(enabled: false, revoked_at: Time.current)
   end
 
   def active?

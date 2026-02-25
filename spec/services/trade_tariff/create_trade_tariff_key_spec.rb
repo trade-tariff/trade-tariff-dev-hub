@@ -20,7 +20,7 @@ RSpec.describe TradeTariff::CreateTradeTariffKey do
   before do
     allow(TradeTariffDevHub).to receive_messages(
       trade_tariff_usage_plan_id: "test-usage-plan-id",
-      identity_api_token: "test-token",
+      identity_api_key: "test-token",
       application_support_email: "support@example.com",
     )
     allow(identity_client).to receive(:create!).with(call_params[:scopes]).and_return(
@@ -102,8 +102,8 @@ RSpec.describe TradeTariff::CreateTradeTariffKey do
       expect { create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes]) }.to raise_error(ArgumentError, /Something went wrong.*support@example.com/)
     end
 
-    it "raises ArgumentError with support email when IDENTITY_API_TOKEN is not configured" do
-      allow(TradeTariffDevHub).to receive(:identity_api_token).and_return(nil)
+    it "raises ArgumentError with support email when IDENTITY_API_KEY is not configured" do
+      allow(TradeTariffDevHub).to receive(:identity_api_key).and_return(nil)
 
       expect { create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes]) }.to raise_error(ArgumentError, /Something went wrong.*support@example.com/)
     end
@@ -133,6 +133,24 @@ RSpec.describe TradeTariff::CreateTradeTariffKey do
       it "raises and does not call API Gateway", :aggregate_failures do
         expect { create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes]) }.to raise_error(Identity::ClientCredentialsApi::Error)
         expect(api_gateway_client).not_to have_received(:create_api_key)
+      end
+    end
+
+    context "when save! fails after external provisioning" do
+      before do
+        key_instance = build(:trade_tariff_key, organisation: organisation, client_id: stub_creds[:client_id],
+                                                scopes: call_params[:scopes], description: call_params[:description], enabled: true)
+        allow(key_instance).to receive(:save!).and_raise(ActiveRecord::RecordInvalid.new(key_instance))
+        allow(TradeTariffKey).to receive(:new).and_return(key_instance)
+        allow(api_gateway_client).to receive(:delete_api_key)
+        allow(identity_client).to receive(:delete)
+      end
+
+      it "rolls back external resources and re-raises", :aggregate_failures do
+        expect { create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes]) }.to raise_error(ActiveRecord::RecordInvalid)
+        expect(api_gateway_client).to have_received(:delete_api_key).with(api_key: stub_creds[:api_gateway_key_id])
+        expect(identity_client).to have_received(:delete).with(stub_creds[:client_id])
+        expect(TradeTariffKey.count).to eq(0)
       end
     end
   end

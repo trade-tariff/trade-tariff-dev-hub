@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class TradeTariffKeysController < AuthenticatedController
-  before_action :set_trade_tariff_key, only: %i[update revoke delete]
+  before_action :set_trade_tariff_key, only: %i[confirm_action revoke delete]
 
   def index
     @trade_tariff_keys = TradeTariffKey.where(organisation_id: organisation_id).order(created_at: :desc)
@@ -9,7 +9,7 @@ class TradeTariffKeysController < AuthenticatedController
 
   def new; end
 
-  def update
+  def confirm_action
     if @trade_tariff_key.enabled
       render "revoke"
     else
@@ -46,11 +46,20 @@ class TradeTariffKeysController < AuthenticatedController
       TradeTariff::RevokeTradeTariffKey.new.call(@trade_tariff_key)
       redirect_to redirect_path_after_action, notice: "Trade Tariff key revoked"
     end
+  rescue TradeTariff::RevokeTradeTariffKey::ExternalRevokeError => e
+    redirect_to redirect_path_after_action, alert: e.message
   end
 
   def delete
+    unless @trade_tariff_key.revoked?
+      redirect_to redirect_path_after_action, alert: "Only revoked keys can be deleted"
+      return
+    end
+
     TradeTariff::DeleteTradeTariffKey.new.call(@trade_tariff_key)
     redirect_to redirect_path_after_action, notice: "Trade Tariff key deleted"
+  rescue TradeTariff::DeleteTradeTariffKey::ExternalDeleteError => e
+    redirect_to redirect_path_after_action, alert: e.message
   end
 
 private

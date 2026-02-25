@@ -80,8 +80,8 @@ module TradeTariffDevHub
     end
 
     # Bearer token for identity service API (create/delete app client credentials). Required when provisioning Trade Tariff keys.
-    def identity_api_token
-      @identity_api_token ||= ENV["IDENTITY_API_TOKEN"]
+    def identity_api_key
+      @identity_api_key ||= ENV["IDENTITY_API_KEY"]
     end
 
     # Pre-created API Gateway usage plan ID for Trade Tariff keys (from Terraform). Required when provisioning Trade Tariff keys.

@@ -12,7 +12,7 @@ class TradeTariff::CreateTradeTariffKey
 
   def call(organisation_id, description = nil, scopes = %w[read write])
     usage_plan_id = TradeTariffDevHub.trade_tariff_usage_plan_id
-    identity_token = TradeTariffDevHub.identity_api_token
+    identity_token = TradeTariffDevHub.identity_api_key
     if usage_plan_id.blank? || identity_token.blank?
       raise ArgumentError, "Something went wrong. Please contact #{TradeTariffDevHub.application_support_email} for assistance."
     end
@@ -30,24 +30,33 @@ class TradeTariff::CreateTradeTariffKey
     begin
       create_in_api_gateway(trade_tariff_key, usage_plan_id)
       associate_to_usage_plan(trade_tariff_key, usage_plan_id)
+      trade_tariff_key.save!
     rescue StandardError
       rollback(creds&.client_id, trade_tariff_key&.api_gateway_id)
       raise
     end
-    trade_tariff_key.save!
     CreateResult.new(trade_tariff_key: trade_tariff_key, client_secret: creds.client_secret)
   end
 
 private
 
   def create_in_api_gateway(trade_tariff_key, _usage_plan_id)
-    name = "#{trade_tariff_key.description.presence || 'key'}-#{trade_tariff_key.client_id[0..7]}"
+    name = api_gateway_key_name_for(trade_tariff_key)
     response = @api_gateway_client.create_api_key(
       name: name,
       value: trade_tariff_key.client_id,
       enabled: true,
     )
     trade_tariff_key.api_gateway_id = response.id.presence || raise("Failed to create API key")
+  end
+
+  def api_gateway_key_name_for(trade_tariff_key)
+    org = Organisation.find(trade_tariff_key.organisation_id)
+    safe_org = org.organisation_name.to_s.gsub(/[^\p{Alnum}\s-]/i, "").truncate(40).squish
+    date_part = Time.current.utc.strftime("%Y%m%d")
+    prefix = trade_tariff_key.client_id[0..7]
+    base = "#{safe_org}-#{date_part}-#{prefix}"
+    base.presence || "key-#{prefix}"
   end
 
   def associate_to_usage_plan(trade_tariff_key, usage_plan_id)
@@ -63,7 +72,7 @@ private
   def rollback(client_id, api_gateway_id)
     if api_gateway_id.present?
       begin
-        @api_gateway_client.delete_api_key(api_key_id: api_gateway_id)
+        @api_gateway_client.delete_api_key(api_key: api_gateway_id)
       rescue Aws::APIGateway::Errors::NotFoundException
         # Already gone
       rescue StandardError => e

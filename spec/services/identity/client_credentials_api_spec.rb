@@ -7,7 +7,7 @@ RSpec.describe Identity::ClientCredentialsApi do
   let(:base_url) { "http://identity.test/api/" }
 
   before do
-    allow(TradeTariffDevHub).to receive_messages(identity_client_credentials_api_url: base_url, identity_api_token: "test-token")
+    allow(TradeTariffDevHub).to receive_messages(identity_client_credentials_api_url: base_url, identity_api_key: "test-token")
   end
 
   describe "#create!" do
@@ -53,6 +53,18 @@ RSpec.describe Identity::ClientCredentialsApi do
 
       it "raises Error" do
         expect { api.create!(scopes) }.to raise_error(Identity::ClientCredentialsApi::Error, /400/)
+      end
+    end
+
+    context "when API returns 201 but body missing client_id or client_secret" do
+      let(:response) { instance_double(Faraday::Response, status: 201, body: { "client_id" => "id-123" }) }
+
+      before do
+        allow(http_client).to receive(:post).and_return(response)
+      end
+
+      it "raises Error" do
+        expect { api.create!(scopes) }.to raise_error(Identity::ClientCredentialsApi::Error, /missing client_id or client_secret/)
       end
     end
   end
