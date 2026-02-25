@@ -84,6 +84,21 @@ module TradeTariffDevHub
       @identity_api_key ||= ENV["IDENTITY_API_KEY"]
     end
 
+    # OAuth2 token endpoint for Cognito client_credentials.
+    # Prefer explicit env var; otherwise derive from ENVIRONMENT.
+    def cognito_token_endpoint
+      return ENV["COGNITO_TOKEN_ENDPOINT"] if ENV["COGNITO_TOKEN_ENDPOINT"].present?
+
+      case environment
+      when "development"
+        "https://auth.id.dev.trade-tariff.service.gov.uk/oauth2/token"
+      when "staging"
+        "https://auth.id.staging.trade-tariff.service.gov.uk/oauth2/token"
+      else
+        "https://auth.id.trade-tariff.service.gov.uk/oauth2/token"
+      end
+    end
+
     # Pre-created API Gateway usage plan ID for Trade Tariff keys (from Terraform). Required when provisioning Trade Tariff keys.
     def trade_tariff_usage_plan_id
       @trade_tariff_usage_plan_id ||= ENV["TRADE_TARIFF_USAGE_PLAN_ID"]

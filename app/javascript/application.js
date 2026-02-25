@@ -4,16 +4,33 @@ import { initAll } from 'govuk-frontend'
 document.addEventListener('DOMContentLoaded', () => {
   initAll();
 
-  const button = document.getElementById('copy-to-clipboard')
-  const target = document.getElementById('api-key-secret')
+  const legacyButton = document.getElementById('copy-to-clipboard')
+  const legacyTarget = document.getElementById('api-key-secret')
 
-  button?.addEventListener('click', () => {
-    navigator.clipboard.writeText(target.textContent)
+  legacyButton?.addEventListener('click', () => {
+    navigator.clipboard.writeText(legacyTarget.textContent)
       .then(() => {
-        button.textContent = 'Copied!'
-        setTimeout(() => button.textContent = 'Copy to clipboard', 1500)
+        legacyButton.textContent = 'Copied!'
+        setTimeout(() => legacyButton.textContent = 'Copy to clipboard', 1500)
       })
       .catch(err => console.error('Failed to copy:', err))
+  })
+
+  document.querySelectorAll('[data-copy-target]').forEach((copyButton) => {
+    copyButton.addEventListener('click', () => {
+      const targetId = copyButton.getAttribute('data-copy-target')
+      const copyTarget = document.getElementById(targetId)
+      const copyText = copyTarget?.textContent
+      if (!copyText) return
+
+      const originalLabel = copyButton.textContent
+      navigator.clipboard.writeText(copyText)
+        .then(() => {
+          copyButton.textContent = 'Copied!'
+          setTimeout(() => (copyButton.textContent = originalLabel), 1500)
+        })
+        .catch(err => console.error('Failed to copy:', err))
+    })
   })
 
   // Show/hide FPO-specific content based on role selection
