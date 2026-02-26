@@ -37,7 +37,7 @@ module "service" {
     "bundle exec rails db:migrate"
   ]
 
-  service_environment_config = local.secret_env_vars
+  service_environment_config = local.devhub_service_env_vars
 
   sns_topic_arns = [data.aws_sns_topic.slack_topic.arn]
 }
