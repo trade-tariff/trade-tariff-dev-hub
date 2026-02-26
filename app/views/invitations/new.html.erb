@@ -1,4 +1,5 @@
 <%= govuk_form_for @invitation do |f| %>
+  <%= govuk_back_link(href: organisation_path(organisation)) %>
   <h1 class="govuk-heading-l">Enter the email address</h1>
   <%= f.govuk_text_field :invitee_email, width: 'two-thirds', label: nil, hint: { text: "Supply the email address of the person you would like to invite to your organisation." } %>
   <div class="govuk-button-group">

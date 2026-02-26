@@ -40,6 +40,8 @@ RSpec.describe "Organisations", type: :request do
     it "renders the edit organisation form", :aggregate_failures do
       get edit_organisation_path(current_user.organisation)
       expect(response).to have_http_status(:ok)
+      expect(response.body).to include('class="govuk-back-link"')
+      expect(response.body).to include("href=\"#{organisation_path(current_user.organisation)}\"")
       expect(response.body).to include("action=\"#{organisation_path(current_user.organisation)}\"")
       expect(response.body).to include('method="post"')
       expect(response.body).to include('name="organisation[organisation_name]"')

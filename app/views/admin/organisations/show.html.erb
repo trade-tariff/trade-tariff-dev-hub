@@ -1,9 +1,7 @@
 <div class="govuk-width-container">
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
-      <p class="govuk-body">
-        <%= link_to '← Back to organisations', admin_organisations_path, class: 'govuk-link' %>
-      </p>
+      <%= govuk_back_link(href: admin_organisations_path) %>
       <h1 class="govuk-heading-l"><%= @organisation.organisation_name %></h1>
 
       <%= render 'shared/organisation_details', organisation: @organisation %>

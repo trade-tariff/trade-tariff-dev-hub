@@ -130,4 +130,57 @@ RSpec.describe "ApiKeys", type: :request do
       end
     end
   end
+
+  describe "GET back-link rendering" do
+    it "renders back link on new API key page", :aggregate_failures do
+      get new_api_key_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('class="govuk-back-link"')
+      expect(response.body).to include("href=\"#{api_keys_path}\"")
+    end
+
+    it "renders back link on revoke page", :aggregate_failures do
+      active_api_key = create(:api_key, organisation: current_user.organisation, enabled: true)
+      get revoke_api_key_path(active_api_key)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('class="govuk-back-link"')
+      expect(response.body).to include("href=\"#{api_keys_path}\"")
+    end
+
+    it "renders back link on delete page", :aggregate_failures do
+      revoked_api_key = create(:api_key, organisation: current_user.organisation, enabled: false)
+      get delete_api_key_path(revoked_api_key)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('class="govuk-back-link"')
+      expect(response.body).to include("href=\"#{api_keys_path}\"")
+    end
+
+    context "when user is an admin accessing another organisation's API key" do
+      let(:admin_organisation) { create(:organisation, :admin) }
+      let(:current_user) { create(:user, organisation: admin_organisation) }
+
+      let(:other_organisation) { create(:organisation) }
+
+      it "renders admin organisation back link on revoke page", :aggregate_failures do
+        other_org_active_api_key = create(:api_key, organisation: other_organisation, enabled: true)
+        get revoke_api_key_path(other_org_active_api_key)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('class="govuk-back-link"')
+        expect(response.body).to include("href=\"#{admin_organisation_path(other_organisation.id)}\"")
+      end
+
+      it "renders admin organisation back link on delete page", :aggregate_failures do
+        other_org_revoked_api_key = create(:api_key, organisation: other_organisation, enabled: false)
+        get delete_api_key_path(other_org_revoked_api_key)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('class="govuk-back-link"')
+        expect(response.body).to include("href=\"#{admin_organisation_path(other_organisation.id)}\"")
+      end
+    end
+  end
 end

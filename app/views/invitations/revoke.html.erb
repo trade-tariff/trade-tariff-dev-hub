@@ -1,5 +1,6 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
+    <%= govuk_back_link(href: back_link_path_for_invitation(@invitation)) %>
     <h1 class="govuk-heading-l">Revoke invitation</h1>
     <p class="govuk-body">Check the below details regarding the invitation you have selected to revoke and confirm your choice.</p>
     <%= govuk_warning_text(text: "Your invitation will be revoked and if the user tries to sign up against your organisation they will no longer be able to.") %>

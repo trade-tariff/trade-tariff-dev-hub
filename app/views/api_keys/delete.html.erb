@@ -1,5 +1,6 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
+    <%= govuk_back_link(href: back_link_path_for_api_key(@api_key)) %>
     <h1 class="govuk-heading-l">Delete an API key</h1>
     <%= govuk_warning_text(text: "Your API Key will be deleted with immediate effect and cannot be reactivated once deleted.") %>
     <p class="govuk-body">Please check the below details regarding the API Key you have selected to delete and confirm your choice.</p>
