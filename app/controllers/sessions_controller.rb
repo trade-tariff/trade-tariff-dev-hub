@@ -52,7 +52,11 @@ class SessionsController < ApplicationController
   def destroy
     clear_authentication!(full: true)
 
-    redirect_to root_path, notice: "You have been logged out."
+    redirect_to signed_out_path
+  end
+
+  def signed_out
+    @hide_auth_banner = true
   end
 
 private

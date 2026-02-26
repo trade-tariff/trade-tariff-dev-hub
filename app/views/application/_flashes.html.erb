@@ -1,26 +1,16 @@
-<div class="flashes">
-  <% if alert %>
-    <div class="govuk-notification-banner" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
-      <div class="govuk-notification-banner__header">
-        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
-          Important
-        </h2>
-      </div>
-      <div class="govuk-notification-banner__content">
-        <p><%= sanitize alert %></p>
-      </div>
-    </div>
-  <% end %>
-  <% if notice %>
-    <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
-      <div class="govuk-notification-banner__header">
-        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
-          Success
-        </h2>
-      </div>
-      <div class="govuk-notification-banner__content">
-        <p><%= sanitize notice %></p>
-      </div>
-    </div>
-  <% end %>
-</div>
+<% flash_message = alert.presence || notice.presence %>
+<% show_important_banner = alert.present? %>
+
+<% if flash_message.present? %>
+  <% heading_text = flash_message.is_a?(Hash) ? flash_message[:heading] || flash_message["heading"] : flash_message %>
+  <% body_text = flash_message.is_a?(Hash) ? flash_message[:body] || flash_message["body"] : nil %>
+
+  <div class="flashes">
+    <%= govuk_notification_banner(title_text: (show_important_banner ? "Important" : "Success"), success: !show_important_banner) do |banner| %>
+      <% banner.with_heading(text: sanitize(heading_text)) %>
+      <% if body_text.present? %>
+        <p class="govuk-body"><%= sanitize(body_text) %></p>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

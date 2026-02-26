@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   get "/auth/redirect", to: "sessions#handle_redirect"
   get "/auth/invalid", to: "sessions#invalid"
   get "/auth/logout", to: "sessions#destroy", as: :logout
+  get "/auth/signed_out", to: "sessions#signed_out", as: :signed_out
 
   if TradeTariffDevHub.dev_bypass_auth_enabled?
     get "/dev/login", to: "dev_auth#new", as: :dev_login
