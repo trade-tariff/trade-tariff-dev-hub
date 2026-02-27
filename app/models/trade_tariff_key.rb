@@ -4,13 +4,16 @@
 #
 #  id              :uuid             not null, primary key
 #  client_id       :string           not null
-#  secret          :string           not null
+#  secret          :string
 #  scopes          :jsonb            default("[]")
 #  organisation_id :uuid             not null
 #  description     :text
+#  enabled         :boolean          default(TRUE), not null
+#  revoked_at      :datetime
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
-#  enabled         :boolean          default("true"), not null
+#  api_gateway_id  :string
+#  usage_plan_id   :string
 #
 # Indexes
 #
@@ -26,7 +29,6 @@ class TradeTariffKey < ApplicationRecord
   belongs_to :organisation
 
   validates :client_id, presence: true, uniqueness: true
-  validates :secret, presence: true
   validates :scopes, presence: true, length: { minimum: 1 }
   attribute :enabled, :boolean, default: true
   scope :active, -> { where(enabled: true) }
@@ -36,7 +38,7 @@ class TradeTariffKey < ApplicationRecord
   end
 
   def revoke!
-    update!(enabled: false)
+    update!(enabled: false, revoked_at: Time.current)
   end
 
   def active?

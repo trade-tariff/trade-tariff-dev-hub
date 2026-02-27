@@ -175,8 +175,21 @@ if Rails.env.development?
     end
   end
 
-  # Create 1 Trade Tariff key for Admin Dev Org
-  TradeTariff::CreateTradeTariffKey.new.call(admin_dev_org.id, "Admin Dev Org Trade Tariff Key")
+  # Create 1 Trade Tariff key for Admin Dev Org (only provisions via identity/API Gateway when env is configured)
+  if TradeTariffDevHub.trade_tariff_usage_plan_id.present? && TradeTariffDevHub.identity_api_key.present?
+    TradeTariff::CreateTradeTariffKey.new.call(admin_dev_org.id, "Admin Dev Org Trade Tariff Key")
+  else
+    # Stub key for local dev only (.env.development); not for use in AWS dev—AWS uses secrets and real provisioning.
+    TradeTariffKey.find_or_create_by!(
+      organisation_id: admin_dev_org.id,
+      description: "Admin Dev Org Trade Tariff Key"
+    ) do |key|
+      key.client_id = "TT-seed-#{SecureRandom.alphanumeric(12)}"
+      key.secret = "admin-dev-trade-tariff-secret"
+      key.scopes = %w[read write]
+      key.enabled = true
+    end
+  end
 
   # Create regular dev user organisation (not admin)
   dev_user_org = Organisation.find_or_create_by!(organisation_name: "Dev User Org") do |org|
