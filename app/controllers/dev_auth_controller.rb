@@ -22,7 +22,7 @@ class DevAuthController < ApplicationController
 
   def destroy
     session.delete(:dev_bypass)
-    redirect_to root_path, notice: "You have been logged out."
+    redirect_to signed_out_path
   end
 
 private

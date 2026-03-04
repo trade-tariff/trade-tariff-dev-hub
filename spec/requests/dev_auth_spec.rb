@@ -104,22 +104,22 @@ RSpec.describe "Dev Auth", type: :request do
 
     it "clears the dev bypass session", :aggregate_failures do
       delete dev_logout_path
-      expect(response).to redirect_to(root_path)
+      expect(response).to redirect_to(signed_out_path)
       # After logout, try to access a protected page - should redirect to login
       get api_keys_path
       expect(response).to redirect_to(dev_login_path)
     end
 
-    it "redirects to root path" do
+    it "redirects to signed out path" do
       delete dev_logout_path
-      expect(response).to redirect_to(root_path)
+      expect(response).to redirect_to(signed_out_path)
     end
 
-    it "sets a notice message", :aggregate_failures do
+    it "shows the signed out confirmation page", :aggregate_failures do
       delete dev_logout_path
-      expect(response).to redirect_to(root_path)
+      expect(response).to redirect_to(signed_out_path)
       follow_redirect!
-      expect(response.body).to include("You have been logged out")
+      expect(response.body).to include("You have signed out")
     end
   end
 end

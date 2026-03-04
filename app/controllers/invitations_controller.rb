@@ -14,10 +14,13 @@ class InvitationsController < AuthenticatedController
 
     if @invitation.save
       if @invitation.send_email
-        redirect_to organisation_path(organisation), notice: "Invitation sent to #{@invitation.invitee_email}"
+        redirect_to organisation_path(organisation), notice: { heading: "Invitation sent" }
       else
         Rails.logger.error "Failed to send invitation email to #{@invitation.invitee_email}"
-        redirect_to organisation_path(organisation), alert: "Failed to send email to #{@invitation.invitee_email}. Please try again later."
+        redirect_to organisation_path(organisation), alert: {
+          heading: "We could not send the invitation",
+          body: "Try again later.",
+        }
       end
     else
       render :new
@@ -58,13 +61,16 @@ class InvitationsController < AuthenticatedController
     # PATCH request: perform revocation
     if @invitation.pending?
       @invitation.revoked!
-      redirect_to redirect_path_after_action, notice: "Invitation to #{@invitation.invitee_email} has been revoked."
+      redirect_to redirect_path_after_action, notice: { heading: "Invitation revoked" }
     else
-      redirect_to redirect_path_after_action, alert: "Invitation to #{@invitation.invitee_email} cannot be revoked as it is #{@invitation.status}."
+      redirect_to redirect_path_after_action, alert: "Only pending invitations can be revoked."
     end
   rescue StandardError => e
     Rails.logger.error("Error revoking invitation: #{e.class} - #{e.message}")
-    redirect_to redirect_path_after_action, alert: "There was a problem revoking the invitation to #{@invitation&.invitee_email}."
+    redirect_to redirect_path_after_action, alert: {
+      heading: "We could not revoke the invitation",
+      body: "Try again later.",
+    }
   end
 
   def resend
@@ -73,10 +79,13 @@ class InvitationsController < AuthenticatedController
     elsif !@invitation.pending?
       redirect_to redirect_path_after_action, alert: "Only pending invitations can be resent."
     elsif @invitation.send_email
-      redirect_to redirect_path_after_action, notice: "Invitation resent to #{@invitation.invitee_email}"
+      redirect_to redirect_path_after_action, notice: { heading: "Invitation resent" }
     else
       Rails.logger.error "Failed to resend invitation email to #{@invitation.invitee_email}"
-      redirect_to redirect_path_after_action, alert: "Failed to resend email to #{@invitation.invitee_email}"
+      redirect_to redirect_path_after_action, alert: {
+        heading: "We could not resend the invitation",
+        body: "Try again later.",
+      }
     end
   end
 
@@ -84,9 +93,8 @@ class InvitationsController < AuthenticatedController
     if @invitation.nil?
       redirect_to redirect_path_after_action, alert: "Invitation not found."
     elsif @invitation.revoked?
-      invitee = @invitation.invitee_email
       @invitation.destroy!
-      redirect_to redirect_path_after_action, notice: "Invitation for #{invitee} has been deleted."
+      redirect_to redirect_path_after_action, notice: { heading: "Invitation deleted" }
     else
       redirect_to redirect_path_after_action, alert: "Only revoked invitations can be deleted."
     end
