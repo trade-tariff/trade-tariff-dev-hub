@@ -2,6 +2,7 @@
 
 class TradeTariff::RevokeTradeTariffKey
   class ExternalRevokeError < StandardError; end
+
   def initialize(api_gateway_client: nil)
     @api_gateway_client = api_gateway_client || Aws::APIGateway::Client.new
   end

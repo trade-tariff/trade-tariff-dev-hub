@@ -1,56 +1,51 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <%= govuk_panel(title_text: "Trade Tariff API key created") %>
+    <h1 class="govuk-heading-l">Trade Tariff API key created</h1>
 
-    <h2 class="govuk-heading-l">Copy your secret now</h2>
-    <%= govuk_warning_text(text: "You must copy this secret to somewhere safe. You will not be able to view it again once you leave this page.") %>
+    <%= govuk_warning_text(text: "Copy your client secret now. It will not be shown again once you leave this page.") %>
 
-    <div class="govuk-summary-list govuk-!-margin-bottom-6">
-      <div class="govuk-summary-list__row">
-        <dt class="govuk-summary-list__key">Client ID</dt>
-        <dd class="govuk-summary-list__value"><code class="govuk-code" id="trade-tariff-client-id"><%= @trade_tariff_key.client_id %></code></dd>
-        <dd class="govuk-summary-list__actions"></dd>
-      </div>
-      <div class="govuk-summary-list__row">
-        <dt class="govuk-summary-list__key">Client secret</dt>
-        <dd class="govuk-summary-list__value"><code class="govuk-code" id="trade-tariff-client-secret"><%= @client_secret %></code></dd>
-        <dd class="govuk-summary-list__actions">
-          <button type="button"
-                  class="govuk-button govuk-button--secondary"
-                  data-module="govuk-button"
-                  data-copy-target="trade-tariff-client-secret">
-            Copy secret
-          </button>
-        </dd>
-      </div>
-      <div class="govuk-summary-list__row">
-        <dt class="govuk-summary-list__key">Scopes</dt>
-        <dd class="govuk-summary-list__value"><%= @trade_tariff_key.scopes.join(', ') %></dd>
-        <dd class="govuk-summary-list__actions"></dd>
-      </div>
-    </div>
+    <%= govuk_summary_list do |summary_list|
+      summary_list.with_row do |row|
+        row.with_key(text: "Client ID")
+        row.with_value(text: @trade_tariff_key.client_id)
+      end
+      summary_list.with_row do |row|
+        row.with_key(text: "Description")
+        row.with_value(text: @trade_tariff_key.description)
+      end
+      summary_list.with_row do |row|
+        row.with_key(text: "Scopes")
+        row.with_value(text: @trade_tariff_key.scopes.join(", "))
+      end
+    end %>
 
-    <h2 class="govuk-heading-l">Get an access token</h2>
-    <p class="govuk-body">Use the token endpoint for this environment:</p>
-    <div class="govuk-inset-text govuk-!-margin-bottom-4">
-      <code class="govuk-code" id="trade-tariff-token-endpoint"><%= TradeTariffDevHub.cognito_token_endpoint %></code>
-    </div>
-
-    <p class="govuk-body">Example curl command:</p>
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">Client secret</h2>
     <div class="govuk-inset-text govuk-!-margin-bottom-2">
-      <pre class="govuk-body govuk-!-margin-0"><code class="govuk-code" id="trade-tariff-curl-command">curl --request POST &quot;<%= TradeTariffDevHub.cognito_token_endpoint %>&quot; \
-  -H &quot;Content-Type: application/x-www-form-urlencoded&quot; \
-  -d &quot;grant_type=client_credentials&amp;client_id=<%= @trade_tariff_key.client_id %>&amp;client_secret=<%= @client_secret %>&quot;</code></pre>
+      <code class="govuk-code" id="trade-tariff-client-secret"><%= @client_secret %></code>
     </div>
-    <button type="button"
-            class="govuk-button govuk-button--secondary"
-            data-module="govuk-button"
-            data-copy-target="trade-tariff-curl-command">
-      Copy curl command
-    </button>
+    <div class="govuk-!-margin-bottom-6">
+      <button type="button" class="govuk-button govuk-button--secondary" data-module="govuk-button" data-copy-target="trade-tariff-client-secret" data-copy-button>
+        Copy secret
+      </button>
+    </div>
 
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">How to get an access token</h2>
+    <p class="govuk-body">Use the token endpoint below with your client ID and secret to obtain an access token.</p>
     <p class="govuk-body">
-      <%= govuk_link_to "Back to Trade Tariff keys", trade_tariff_keys_path %>
+      <strong>Token endpoint:</strong>
+      <br>
+      <code class="govuk-code" id="trade-tariff-token-endpoint"><%= @cognito_token_endpoint %></code>
     </p>
+    <p class="govuk-body govuk-!-margin-bottom-2"><strong>Example curl command:</strong></p>
+    <pre class="app-code-block govuk-body govuk-!-margin-bottom-2"><code id="trade-tariff-curl-command"><%= trade_tariff_curl_example(@cognito_token_endpoint, @trade_tariff_key.client_id, @client_secret) %></code></pre>
+    <div class="govuk-!-margin-bottom-6">
+      <button type="button" class="govuk-button govuk-button--secondary" data-module="govuk-button" data-copy-target="trade-tariff-curl-command" data-copy-button>
+        Copy curl command
+      </button>
+    </div>
+
+    <div class="govuk-button-group">
+      <%= govuk_button_link_to("Back to Trade Tariff keys", trade_tariff_keys_path) %>
+    </div>
   </div>
 </div>
