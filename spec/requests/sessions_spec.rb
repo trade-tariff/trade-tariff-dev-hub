@@ -90,10 +90,10 @@ RSpec.describe "Sessions", type: :request do
       expect(session[:token]).to be_nil
     end
 
-    it "redirects to the root path" do
+    it "redirects to the signed out path" do
       get logout_path
 
-      expect(response).to redirect_to(root_path)
+      expect(response).to redirect_to(signed_out_path)
     end
 
     it "deletes the id_token cookie" do

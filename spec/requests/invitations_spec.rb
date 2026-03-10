@@ -55,7 +55,7 @@ RSpec.describe "Invitations", type: :request do
         post invitations_path, params: params
         expect(response).to redirect_to(organisation_path(current_user.organisation))
         follow_redirect!
-        expect(response.body).to include("Invitation sent to foo@bar.com")
+        expect(response.body).to include("Invitation sent")
       end
 
       it "sends an invitation email" do
@@ -76,6 +76,22 @@ RSpec.describe "Invitations", type: :request do
         post invitations_path, params: params
         expect(response).to have_http_status(:ok)
         expect(response.body).to include("Enter a properly formatted email address")
+      end
+    end
+
+    context "when invitation is created but email sending fails" do
+      let(:params) { { invitation: { invitee_email: "foo@bar.com" } } }
+
+      before do
+        allow(SendNotification).to receive(:new).and_return(instance_double(SendNotification, call: false))
+      end
+
+      it "shows an important banner with retry guidance", :aggregate_failures do
+        post invitations_path, params: params
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
+        follow_redirect!
+        expect(response.body).to include("We could not send the invitation")
+        expect(response.body).to include("Try again later.")
       end
     end
 
@@ -114,7 +130,7 @@ RSpec.describe "Invitations", type: :request do
       patch invitation_path(invitation)
       expect(response).to redirect_to(organisation_path(current_user.organisation))
       follow_redirect!
-      expect(response.body).to include("Invitation to #{invitation.invitee_email} has been revoked.")
+      expect(response.body).to include("Invitation revoked")
       expect(invitation.reload.status).to eq("revoked")
     end
 
@@ -134,7 +150,8 @@ RSpec.describe "Invitations", type: :request do
         patch invitation_path(invitation)
         expect(response).to redirect_to(organisation_path(current_user.organisation))
         follow_redirect!
-        expect(response.body).to include("There was a problem revoking the invitation")
+        expect(response.body).to include("We could not revoke the invitation")
+        expect(response.body).to include("Try again later.")
       end
     end
   end
@@ -157,13 +174,27 @@ RSpec.describe "Invitations", type: :request do
       get resend_invitation_path(invitation)
       expect(response).to redirect_to(organisation_path(current_user.organisation))
       follow_redirect!
-      expect(response.body).to include("Invitation resent to #{invitation.invitee_email}")
+      expect(response.body).to include("Invitation resent")
       expect(invitation.reload.status).to eq("pending")
     end
 
     it "sends an invitation email" do
       get resend_invitation_path(invitation)
       expect(SendNotification).to have_received(:new).with(instance_of(Notification))
+    end
+
+    context "when invitation email resend fails" do
+      before do
+        allow(SendNotification).to receive(:new).and_return(instance_double(SendNotification, call: false))
+      end
+
+      it "shows an important banner with retry guidance", :aggregate_failures do
+        get resend_invitation_path(invitation)
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
+        follow_redirect!
+        expect(response.body).to include("We could not resend the invitation")
+        expect(response.body).to include("Try again later.")
+      end
     end
   end
 
@@ -241,7 +272,8 @@ RSpec.describe "Invitations", type: :request do
 
         expect(response).to redirect_to(organisation_path(current_user.organisation))
         follow_redirect!
-        expect(response.body).to include("Invitation for #{invitation.invitee_email} has been deleted.")
+        expect(response.body).to include("Invitation deleted")
+        expect(response.body).not_to include(invitation.invitee_email)
       end
     end
 
@@ -282,7 +314,8 @@ RSpec.describe "Invitations", type: :request do
 
         expect(response).to redirect_to(admin_organisation_path(other_organisation.id))
         follow_redirect!
-        expect(response.body).to include("Invitation for #{invitation.invitee_email} has been deleted.")
+        expect(response.body).to include("Invitation deleted")
+        expect(response.body).not_to include(invitation.invitee_email)
       end
     end
   end
@@ -301,7 +334,7 @@ RSpec.describe "Invitations", type: :request do
         patch invitation_path(invitation)
         expect(response).to redirect_to(admin_organisation_path(other_organisation.id))
         follow_redirect!
-        expect(response.body).to include("Invitation to #{invitation.invitee_email} has been revoked.")
+        expect(response.body).to include("Invitation revoked")
       end
     end
 
@@ -312,7 +345,7 @@ RSpec.describe "Invitations", type: :request do
         patch invitation_path(invitation)
         expect(response).to redirect_to(organisation_path(current_user.organisation))
         follow_redirect!
-        expect(response.body).to include("Invitation to #{invitation.invitee_email} has been revoked.")
+        expect(response.body).to include("Invitation revoked")
       end
     end
   end
@@ -342,7 +375,7 @@ RSpec.describe "Invitations", type: :request do
         get resend_invitation_path(invitation)
         expect(response).to redirect_to(admin_organisation_path(other_organisation.id))
         follow_redirect!
-        expect(response.body).to include("Invitation resent to #{invitation.invitee_email}")
+        expect(response.body).to include("Invitation resent")
       end
     end
 

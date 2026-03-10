@@ -10,9 +10,20 @@ RSpec.describe SessionsController, type: :controller do
     it "clears the stored session", :aggregate_failures do
       get :destroy
 
-      expect(response).to redirect_to(root_path)
+      expect(response).to redirect_to(signed_out_path)
       expect(Session.exists?(id: user_session.id)).to be(false)
       expect(session[:token]).to be_nil
+      expect(flash[:notice]).to be_nil
+    end
+  end
+
+  describe "GET #signed_out" do
+    it "renders the signed out page", :aggregate_failures do
+      get :signed_out
+
+      expect(response).to have_http_status(:ok)
+      expect(response).to render_template(:signed_out)
+      expect(assigns(:hide_auth_banner)).to be(true)
     end
   end
 
