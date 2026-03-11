@@ -1,5 +1,5 @@
+<% content_for :back_link do %><%= govuk_back_link(href: api_keys_path) %><% end %>
 <%= govuk_form_for @api_key do |f| %>
-  <%= govuk_back_link(href: api_keys_path) %>
   <h1 class="govuk-heading-l">Enter a description for this API key</h1>
   <%= f.govuk_text_field :description, width: 'two-thirds', label: nil, hint: { text: "Use a description you will recognise in the future so that you know which system or developer is using this API key. Do not reuse the same description across API keys." } %>
   <div class="govuk-button-group">

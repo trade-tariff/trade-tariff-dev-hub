@@ -1,7 +1,7 @@
+<% content_for :back_link do %><%= govuk_back_link(href: admin_organisations_path) %><% end %>
 <div class="govuk-width-container">
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
-      <%= govuk_back_link(href: admin_organisations_path) %>
       <h1 class="govuk-heading-l"><%= @organisation.organisation_name %></h1>
 
       <%= render 'shared/organisation_details', organisation: @organisation %>
