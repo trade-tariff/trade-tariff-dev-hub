@@ -31,6 +31,9 @@
       <%= govuk_link_to("feedback (opens in a new tab)", ENV["FEEDBACK_URL"] || 'https://www.trade-tariff.service.gov.uk/feedback', target: "_blank") %>
       will help us improve it.
     <% end %>
+    <% if content_for?(:back_link) %>
+      <%= yield :back_link %>
+    <% end %>
     <main class="govuk-main-wrapper app-main-class" id="main-content">
       <%= render 'flashes' %>
       <%= yield %>

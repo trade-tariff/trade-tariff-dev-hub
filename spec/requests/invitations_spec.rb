@@ -6,6 +6,8 @@ RSpec.describe "Invitations", type: :request do
       get new_invitation_path
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Enter the email address")
+      expect(response.body).to include('class="govuk-back-link"')
+      expect(response.body).to include("href=\"#{organisation_path(current_user.organisation)}\"")
     end
 
     it "includes the correct action URL", :aggregate_failures do
@@ -120,6 +122,8 @@ RSpec.describe "Invitations", type: :request do
       get edit_invitation_path(invitation)
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Your invitation will be revoked")
+      expect(response.body).to include('class="govuk-back-link"')
+      expect(response.body).to include("href=\"#{organisation_path(current_user.organisation)}\"")
     end
   end
 
@@ -208,6 +212,8 @@ RSpec.describe "Invitations", type: :request do
         expect(response.body).to include("Delete invitation")
         expect(response.body).to include("This invitation will be deleted with immediate effect")
         expect(response.body).to include(invitation.invitee_email)
+        expect(response.body).to include('class="govuk-back-link"')
+        expect(response.body).to include("href=\"#{organisation_path(current_user.organisation)}\"")
       end
 
       it "displays invitation details in a table", :aggregate_failures do
@@ -243,6 +249,8 @@ RSpec.describe "Invitations", type: :request do
         get delete_invitation_path(invitation)
         expect(response).to have_http_status(:ok)
         expect(response.body).to include("Delete invitation")
+        expect(response.body).to include('class="govuk-back-link"')
+        expect(response.body).to include("href=\"#{admin_organisation_path(other_organisation.id)}\"")
       end
     end
 
