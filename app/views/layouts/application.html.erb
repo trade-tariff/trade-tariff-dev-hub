@@ -35,6 +35,7 @@
       <%= yield :back_link %>
     <% end %>
     <main class="govuk-main-wrapper app-main-class" id="main-content">
+      <%= render 'application/rate_limiting_notice' %>
       <%= render 'flashes' %>
       <%= yield %>
     </main>
