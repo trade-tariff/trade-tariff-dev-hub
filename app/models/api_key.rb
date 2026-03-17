@@ -6,7 +6,7 @@
 #  organisation_id :uuid             not null
 #  api_key_id      :string           not null
 #  api_gateway_id  :string           not null
-#  enabled         :boolean          default("true")
+#  enabled         :boolean          default(TRUE)
 #  secret          :string           not null
 #  usage_plan_id   :string           not null
 #  description     :string           not null

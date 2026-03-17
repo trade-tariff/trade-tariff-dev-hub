@@ -44,11 +44,11 @@ Rails.application.routes.draw do
 
   resources :trade_tariff_keys, only: %i[index new create] do
     member do
-      get :revoke, to: 'trade_tariff_keys#update', as: :revoke
+      get :revoke, to: 'trade_tariff_keys#confirm_action', as: :revoke
       patch :revoke
 
       if TradeTariffDevHub.deletion_enabled?
-        get :delete, to: 'trade_tariff_keys#update', as: :delete
+        get :delete, to: 'trade_tariff_keys#confirm_action', as: :delete
         delete :delete
       end
     end

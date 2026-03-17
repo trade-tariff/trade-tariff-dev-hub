@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class TradeTariffKeysController < AuthenticatedController
-  before_action :set_trade_tariff_key, only: %i[update revoke delete]
+  before_action :set_trade_tariff_key, only: %i[confirm_action revoke delete]
 
   def index
     @trade_tariff_keys = TradeTariffKey.where(organisation_id: organisation_id).order(created_at: :desc)
@@ -9,7 +9,7 @@ class TradeTariffKeysController < AuthenticatedController
 
   def new; end
 
-  def update
+  def confirm_action
     if @trade_tariff_key.enabled
       render "revoke"
     else
@@ -19,15 +19,22 @@ class TradeTariffKeysController < AuthenticatedController
 
   def create
     default_scopes = %w[read write]
-    @trade_tariff_key = TradeTariff::CreateTradeTariffKey.new.call(organisation_id, trade_tariff_key_params[:trade_tariff_key_description], default_scopes)
+    result = TradeTariff::CreateTradeTariffKey.new.call(organisation_id, trade_tariff_key_params[:trade_tariff_key_description], default_scopes)
+    @trade_tariff_key = result.trade_tariff_key
+    @client_secret = result.client_secret
   rescue ActiveRecord::RecordInvalid => e
     @trade_tariff_key = e.record
     flash.now[:alert] = e.record.errors.full_messages.join(", ")
     render :new, status: :unprocessable_content
+  rescue ArgumentError => e
+    Rails.logger.error("Failed to create Trade Tariff key: #{e.message}")
+    flash.now[:alert] = e.message
+    @trade_tariff_key = nil
+    render :new, status: :unprocessable_content
   rescue StandardError => e
     Rails.logger.error("Failed to create Trade Tariff key: #{e.message}")
     Rails.logger.error(e.backtrace.join("\n"))
-    flash.now[:alert] = "Failed to create Trade Tariff key. Please try again."
+    flash.now[:alert] = "Something went wrong. Please contact #{TradeTariffDevHub.application_support_email} for assistance."
     @trade_tariff_key = nil
     render :new, status: :unprocessable_content
   end
@@ -39,11 +46,20 @@ class TradeTariffKeysController < AuthenticatedController
       TradeTariff::RevokeTradeTariffKey.new.call(@trade_tariff_key)
       redirect_to redirect_path_after_action, notice: "Trade Tariff key revoked"
     end
+  rescue TradeTariff::RevokeTradeTariffKey::ExternalRevokeError => e
+    redirect_to redirect_path_after_action, alert: e.message
   end
 
   def delete
+    unless @trade_tariff_key.revoked?
+      redirect_to redirect_path_after_action, alert: "Only revoked keys can be deleted"
+      return
+    end
+
     TradeTariff::DeleteTradeTariffKey.new.call(@trade_tariff_key)
     redirect_to redirect_path_after_action, notice: "Trade Tariff key deleted"
+  rescue TradeTariff::DeleteTradeTariffKey::ExternalDeleteError => e
+    redirect_to redirect_path_after_action, alert: e.message
   end
 
 private
