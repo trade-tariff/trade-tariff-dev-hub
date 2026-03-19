@@ -61,11 +61,16 @@ module Identity
   private
 
     def http_client
+      cert_path = "/tmp/backend.crt"
+      File.write(cert_path, ENV["SSL_CERT_PEM"]&.gsub('\\n', "\n"))
+
       @http_client ||= Faraday.new(url: TradeTariffDevHub.identity_client_credentials_api_url) do |conn|
         conn.request :json
         conn.response :json
         conn.adapter Faraday.default_adapter
         conn.response :logger if Rails.logger.debug?
+        conn.ssl.verify = false
+        conn.ssl.ca_file = cert_path
         conn.headers["Authorization"] = "Bearer #{TradeTariffDevHub.identity_api_key}"
       end
     end
