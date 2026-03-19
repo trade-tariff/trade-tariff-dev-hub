@@ -22,6 +22,7 @@ class TradeTariffKeysController < AuthenticatedController
     result = TradeTariff::CreateTradeTariffKey.new.call(organisation_id, trade_tariff_key_params[:trade_tariff_key_description], default_scopes)
     @trade_tariff_key = result.trade_tariff_key
     @client_secret = result.client_secret
+    @cognito_token_endpoint = TradeTariffDevHub.cognito_token_endpoint
   rescue ActiveRecord::RecordInvalid => e
     @trade_tariff_key = e.record
     flash.now[:alert] = e.record.errors.full_messages.join(", ")
