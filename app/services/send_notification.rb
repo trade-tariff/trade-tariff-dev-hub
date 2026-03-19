@@ -46,11 +46,16 @@ private
   private
 
     def client
+      cert_path = "/tmp/backend.crt"
+      File.write(cert_path, ENV["SSL_CERT_PEM"]&.gsub('\\n', "\n"))
+
       @client ||= Faraday.new(url: TradeTariffDevHub.uk_backend_url) do |conn|
         conn.request :url_encoded
         conn.adapter Faraday.default_adapter
         conn.response :logger if Rails.logger.debug?
         conn.response :json
+        conn.ssl.verify = false
+        conn.ssl.ca_file = cert_path
         conn.headers["User-Agent"] = user_agent
         conn.headers["Accept"] = ACCEPT
         conn.headers["Authorization"] = "Bearer #{TradeTariffDevHub.uk_backend_bearer_token}"

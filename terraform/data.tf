@@ -19,6 +19,10 @@ data "aws_lb_target_group" "this" {
   name = "hub"
 }
 
+data "aws_lb_target_group" "this_https" {
+  name = "hub-https"
+}
+
 data "aws_security_group" "this" {
   name = "trade-tariff-ecs-security-group-${var.environment}"
 }
