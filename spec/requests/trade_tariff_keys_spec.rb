@@ -26,13 +26,17 @@ RSpec.describe "Trade Tariff keys", type: :request do
         allow(create_service).to receive(:call).and_return(create_result)
       end
 
-      it "renders the create template with key and secret", :aggregate_failures do
+      it "renders the create template with key, secret, token endpoint and curl example", :aggregate_failures do
         post trade_tariff_keys_path, params: { trade_tariff_key_description: "My key" }
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include("Trade Tariff API key created")
         expect(response.body).to include(trade_tariff_key.client_id)
         expect(response.body).to include("secret-once-only")
+        expect(response.body).to include("oauth2/token")
+        expect(response.body).to include("curl")
+        expect(response.body).to include("Copy secret")
+        expect(response.body).to include("Copy curl command")
       end
     end
 

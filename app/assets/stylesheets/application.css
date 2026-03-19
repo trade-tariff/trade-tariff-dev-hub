@@ -1,0 +1,6 @@
+/* App-specific overrides and utilities (GOV.UK Design System grey-3 #f3f2f1) */
+.app-code-block {
+  background: #f3f2f1;
+  padding: 1rem;
+  overflow-x: auto;
+}
