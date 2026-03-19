@@ -1,12 +1,15 @@
 <% is_admin = current_user&.organisation&.admin? %>
 
-<h1 class="govuk-heading-l">Your Organisation Account</h1>
-
-<% if is_admin %>
-  <p class="govuk-body">Manage your organisational details and API keys, as well as grant access requests and manage your team members. From this page you can invite new team members to join the UK Trade Tariff Developer Portal, or remove existing members.</p>
-<% else %>
-  <p class="govuk-body">Manage your organisational details and request access to roles as well as invite new and remove existing members.</p>
-<% end %>
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Your Organisation Account</h1>
+    <% if is_admin %>
+      <p class="govuk-body">Manage your organisational details and API keys, as well as grant access requests and manage your team members. From this page you can invite new team members to join the UK Trade Tariff Developer Portal, or remove existing members.</p>
+    <% else %>
+      <p class="govuk-body">Manage your organisational details and request access to roles as well as invite new and remove existing members.</p>
+    <% end %>
+  </div>
+</div>
 
 <%= render 'shared/organisation_details', organisation: @organisation %>
 
@@ -119,5 +122,9 @@
 
 <%= govuk_button_link_to 'Invite new member', new_invitation_path %>
 
-<h2 class="govuk-heading-m">If you need help</h2>
-<p class="govuk-body">If you have any further queries relating to the developer portal, <%= govuk_link_to 'use the enquiry form', 'https://www.trade-tariff.service.gov.uk/enquiry_form', target: '_blank' %>.</p>
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h2 class="govuk-heading-m">If you need help</h2>
+    <p class="govuk-body">If you have any further queries relating to the developer portal, <%= govuk_link_to 'use the enquiry form', 'https://www.trade-tariff.service.gov.uk/enquiry_form', target: '_blank' %>.</p>
+  </div>
+</div>
