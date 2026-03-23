@@ -56,13 +56,13 @@ data "aws_ecs_cluster" "this" {
 }
 
 data "aws_secretsmanager_secret" "job" {
-  count = var.environment == "development" ? 1 : 0
+  count = var.enable_cleanup_job ? 1 : 0
 
   name = "dev-hub-job-configuration"
 }
 
 data "aws_secretsmanager_secret_version" "job" {
-  count = var.environment == "development" ? 1 : 0
+  count = var.enable_cleanup_job ? 1 : 0
 
   secret_id = data.aws_secretsmanager_secret.job[0].id
 }

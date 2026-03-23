@@ -1,9 +1,9 @@
-# ECS job for scheduled tasks (e.g. daily API key cleanup). Development only.
+# ECS job for scheduled tasks (e.g. daily API key cleanup).
 # EventBridge triggers the job with a command override to run the rake task.
 
 module "dev-hub-job" {
   source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v1.21.0"
-  count  = var.environment == "development" ? 1 : 0
+  count  = var.enable_cleanup_job ? 1 : 0
 
   region = var.region
 
@@ -33,14 +33,14 @@ module "dev-hub-job" {
 }
 
 data "aws_ecs_task_definition" "job" {
-  count = var.environment == "development" ? 1 : 0
+  count = var.enable_cleanup_job ? 1 : 0
 
   task_definition = "dev-hub-job-${local.account_id}"
   depends_on      = [module.dev-hub-job]
 }
 
 resource "aws_cloudwatch_event_rule" "dev_hub_cleanup" {
-  count = var.environment == "development" ? 1 : 0
+  count = var.enable_cleanup_job ? 1 : 0
 
   name                = "dev-hub-daily-cleanup-${var.environment}"
   description         = "Triggers daily API key cleanup for dev-hub"
@@ -48,7 +48,7 @@ resource "aws_cloudwatch_event_rule" "dev_hub_cleanup" {
 }
 
 resource "aws_cloudwatch_event_target" "dev_hub_cleanup" {
-  count = var.environment == "development" ? 1 : 0
+  count = var.enable_cleanup_job ? 1 : 0
 
   rule     = aws_cloudwatch_event_rule.dev_hub_cleanup[0].name
   arn      = data.aws_ecs_cluster.this.arn
@@ -74,7 +74,7 @@ resource "aws_cloudwatch_event_target" "dev_hub_cleanup" {
 }
 
 data "aws_iam_policy_document" "eventbridge_assume_role" {
-  count = var.environment == "development" ? 1 : 0
+  count = var.enable_cleanup_job ? 1 : 0
 
   statement {
     actions = ["sts:AssumeRole"]
@@ -86,21 +86,21 @@ data "aws_iam_policy_document" "eventbridge_assume_role" {
 }
 
 resource "aws_iam_role" "eventbridge_ecs" {
-  count = var.environment == "development" ? 1 : 0
+  count = var.enable_cleanup_job ? 1 : 0
 
   name               = "dev-hub-eventbridge-ecs-${var.environment}"
   assume_role_policy = data.aws_iam_policy_document.eventbridge_assume_role[0].json
 }
 
 resource "aws_iam_role_policy_attachment" "eventbridge_run_task" {
-  count = var.environment == "development" ? 1 : 0
+  count = var.enable_cleanup_job ? 1 : 0
 
   role       = aws_iam_role.eventbridge_ecs[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
 }
 
 data "aws_iam_policy_document" "eventbridge_pass_role" {
-  count = var.environment == "development" ? 1 : 0
+  count = var.enable_cleanup_job ? 1 : 0
 
   statement {
     actions = ["iam:PassRole"]
@@ -112,14 +112,14 @@ data "aws_iam_policy_document" "eventbridge_pass_role" {
 }
 
 resource "aws_iam_policy" "eventbridge_pass_role" {
-  count = var.environment == "development" ? 1 : 0
+  count = var.enable_cleanup_job ? 1 : 0
 
   name   = "dev-hub-eventbridge-pass-role-${var.environment}"
   policy = data.aws_iam_policy_document.eventbridge_pass_role[0].json
 }
 
 resource "aws_iam_role_policy_attachment" "eventbridge_pass_role" {
-  count = var.environment == "development" ? 1 : 0
+  count = var.enable_cleanup_job ? 1 : 0
 
   role       = aws_iam_role.eventbridge_ecs[0].name
   policy_arn = aws_iam_policy.eventbridge_pass_role[0].arn
