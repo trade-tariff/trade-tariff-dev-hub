@@ -2,3 +2,4 @@ bucket  = "terraform-state-development-844815912454"
 key     = "dev-hub.tfstate"
 region  = "eu-west-2"
 encrypt = true
+use_lockfile = true
