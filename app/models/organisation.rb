@@ -15,6 +15,8 @@
 #
 
 class Organisation < ApplicationRecord
+  ORGANISATION_NAME_EMAIL_LIKE_FORMAT = /\A#{URI::MailTo::EMAIL_REGEXP.source}\z/io
+
   has_paper_trail
 
   has_many :users, dependent: :destroy
@@ -28,6 +30,8 @@ class Organisation < ApplicationRecord
   # Uniqueness validation is enforced at application level only
   validates :organisation_name, presence: true, uniqueness: true
   # rubocop:enable Rails/UniqueValidationWithoutIndex
+
+  validate :organisation_name_must_not_resemble_email, on: :update
 
   class << self
     def admin_organisation
@@ -106,5 +110,16 @@ class Organisation < ApplicationRecord
 
   def pending_request_for?(role_name)
     role_requests.pending.exists?(role_name: role_name)
+  end
+
+private
+
+  def organisation_name_must_not_resemble_email
+    return unless organisation_name_changed?
+    return if organisation_name.blank?
+
+    return unless organisation_name.match?(ORGANISATION_NAME_EMAIL_LIKE_FORMAT)
+
+    errors.add(:organisation_name, :email_like)
   end
 end

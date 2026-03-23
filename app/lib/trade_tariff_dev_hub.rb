@@ -19,6 +19,10 @@ module TradeTariffDevHub
       Rails.env.development? || Rails.env.test?
     end
 
+    def self_service_org_creation_enabled?
+      ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] == "true"
+    end
+
     def documentation_url
       ENV.fetch(
         "DOCUMENTATION_URL",

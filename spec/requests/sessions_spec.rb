@@ -29,6 +29,10 @@ RSpec.describe "Sessions", type: :request do
     context "when the user does not exist and has no invitation" do
       let(:email_address) { "non-existing@bar.com" }
 
+      before do
+        allow(TradeTariffDevHub).to receive(:self_service_org_creation_enabled?).and_return(false)
+      end
+
       it "does not create a new user" do
         expect { get auth_redirect_path }.not_to change(User, :count)
       end
@@ -37,6 +41,22 @@ RSpec.describe "Sessions", type: :request do
         get auth_redirect_path
         expect(response).to redirect_to(root_path)
         expect(flash[:alert]).to include("private beta")
+      end
+    end
+
+    context "when a transform user does not exist and has no invitation" do
+      let(:email_address) { "new.user@transformuk.com" }
+
+      before do
+        allow(TradeTariffDevHub).to receive(:self_service_org_creation_enabled?).and_return(false)
+      end
+
+      it "shows the transform admin-holder guidance", :aggregate_failures do
+        get auth_redirect_path
+
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to include("private beta")
+        expect(flash[:alert]).to include("talk to the admin account holders")
       end
     end
 
