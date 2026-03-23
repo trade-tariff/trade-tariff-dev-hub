@@ -1,3 +1,8 @@
+# TESTING ONLY - remove before merge
+resource "time_sleep" "cancel_test" {
+  create_duration = "3m"
+}
+
 module "service" {
   source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v1.21.0"
 
