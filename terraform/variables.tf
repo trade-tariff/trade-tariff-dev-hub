@@ -3,6 +3,12 @@ variable "environment" {
   type        = string
 }
 
+variable "enable_cleanup_job" {
+  description = "Whether to provision the scheduled ECS job (e.g. Playwright API key cleanup). Set per environment in config_*.tfvars."
+  type        = bool
+  default     = false
+}
+
 variable "region" {
   description = "AWS region to use."
   type        = string

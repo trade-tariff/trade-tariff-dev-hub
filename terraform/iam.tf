@@ -52,7 +52,7 @@ data "aws_iam_policy_document" "exec" {
   }
 
   dynamic "statement" {
-    for_each = var.environment == "development" ? [1] : []
+    for_each = var.enable_cleanup_job ? [1] : []
     content {
       effect = "Allow"
       actions = [
