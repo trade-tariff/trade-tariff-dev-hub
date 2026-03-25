@@ -1,9 +1,10 @@
-class CspReportsController < ApplicationController
-  skip_forgery_protection only: %i[create]
-
+class CspReportsController < ActionController::API
   def create
-    Rails.logger.warn "CSP Violation: #{request.body.read}"
-    NewRelic::Agent.notice_error("CSP Violation: #{request.body.read}")
+    payload = request.raw_post
+
+    Rails.logger.warn("CSP Violation: #{payload}")
+    NewRelic::Agent.notice_error("CSP Violation: #{payload}")
+
     head :ok
   end
 end
