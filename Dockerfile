@@ -40,7 +40,11 @@ RUN rm -rf node_modules log tmp && \
 # Build runtime image
 FROM ruby:${RUBY_VERSION}-alpine${ALPINE_VERSION} AS production
 
-RUN apk add --update --no-cache tzdata postgresql-client && \
+RUN apk add --update --no-cache \
+  postgresql-client
+  bash \
+  socat \
+  tzdata && \
   cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
   echo "Europe/London" > /etc/timezone
 
