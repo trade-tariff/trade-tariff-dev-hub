@@ -3,6 +3,35 @@ RSpec.describe Organisation, type: :model do
 
   it { expect(PaperTrail.request).to be_enabled_for_model(described_class) }
 
+  describe "organisation_name (email-like values)" do
+    it "allows a name that looks like an email on create", :aggregate_failures do
+      org = build(:organisation, organisation_name: "selfserve@example.com")
+      expect(org).to be_valid
+      expect { org.save! }.not_to raise_error
+    end
+
+    it "does not allow changing the name to a value that looks like an email", :aggregate_failures do
+      org = create(:organisation, organisation_name: "Acme Ltd")
+      org.organisation_name = "contact@acme.example"
+      expect(org).not_to be_valid
+      expect(org.errors[:organisation_name]).to include("Enter a name that is not an email address")
+    end
+
+    it "allows changing away from an email-like name to a non-email name", :aggregate_failures do
+      org = create(:organisation, organisation_name: "selfserve@example.com-abc12345")
+      org.organisation_name = "Acme Ltd"
+      expect(org).to be_valid
+      expect { org.save! }.not_to raise_error
+    end
+
+    it "does not re-validate an unchanged email-like name on update", :aggregate_failures do
+      org = create(:organisation, organisation_name: "selfserve@example.com-abc12345")
+      org.description = "Updated description"
+      expect(org).to be_valid
+      expect { org.save! }.not_to raise_error
+    end
+  end
+
   describe "#has_role?" do
     subject(:has_role?) { organisation.has_role?("trade_tariff:full") }
 

@@ -72,5 +72,17 @@ RSpec.describe "Organisations", type: :request do
         expect(current_user.organisation.reload.organisation_name).not_to eq("")
       end
     end
+
+    context "when the new name looks like an email address" do
+      let(:params) { { organisation: { organisation_name: "someone@example.com" } } }
+
+      it "does not update the organisation and shows an error", :aggregate_failures do
+        previous_name = current_user.organisation.organisation_name
+        patch organisation_path(current_user.organisation), params: params
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Enter a name that is not an email address")
+        expect(current_user.organisation.reload.organisation_name).to eq(previous_name)
+      end
+    end
   end
 end

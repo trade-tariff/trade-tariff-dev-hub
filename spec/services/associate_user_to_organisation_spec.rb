@@ -59,6 +59,10 @@ RSpec.describe AssociateUserToOrganisation do
     context "when the user does not have an organisation and no invitation exists" do
       let(:user) { build(:user, organisation: nil, email_address: "noinvite@example.com") }
 
+      before do
+        allow(TradeTariffDevHub).to receive(:self_service_org_creation_enabled?).and_return(false)
+      end
+
       it "raises an InvitationRequiredError" do
         expect { service.call(user) }.to raise_error(
           described_class::InvitationRequiredError,
@@ -80,6 +84,23 @@ RSpec.describe AssociateUserToOrganisation do
             nil
           end
         }.not_to change(Organisation, :count)
+      end
+    end
+
+    context "when the user does not have an organisation and no invitation exists but self-service org creation is enabled" do
+      let(:user) { build(:user, organisation: nil, email_address: "selfserve@example.com") }
+
+      before do
+        allow(TradeTariffDevHub).to receive(:self_service_org_creation_enabled?).and_return(true)
+      end
+
+      it "creates and associates an organisation without roles", :aggregate_failures do
+        expect { service.call(user) }.to change(Organisation, :count).by(1)
+
+        expect(user).to be_persisted
+        expect(user.organisation).to be_present
+        expect(user.organisation.organisation_name).to eq("selfserve@example.com")
+        expect(user.organisation.roles).to be_empty
       end
     end
 

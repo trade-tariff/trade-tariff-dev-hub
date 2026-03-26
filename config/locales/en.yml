@@ -15,3 +15,4 @@ en:
           attributes:
             organisation_name:
               blank: Enter an organisation name
+              email_like: Enter a name that is not an email address

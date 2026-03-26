@@ -37,7 +37,7 @@ class SessionsController < ApplicationController
   rescue Organisation::InvitationRequiredError => e
     Rails.logger.info("[Auth] User requires invitation: #{e.message}")
     clear_authentication!
-    redirect_to root_path, alert: "This service is currently in private beta. You need an invitation from an existing organisation to access it."
+    redirect_to root_path, alert: invitation_required_alert_message(result&.payload&.dig("email"))
   rescue StandardError => e
     Rails.logger.error("[Auth] Authentication error: #{e.class}: #{e.message}")
     Rails.logger.error("[Auth] Backtrace: #{e.backtrace&.first(5)&.join("\n")}")
@@ -115,5 +115,12 @@ private
 
   def refresh_token_cookie_name
     TradeTariffDevHub.refresh_token_cookie_name
+  end
+
+  def invitation_required_alert_message(email)
+    base_message = "This service is currently in private beta. You need an invitation from an existing organisation to access it."
+    return base_message unless email&.end_with?("@#{TradeTariffDevHub.admin_domain}")
+
+    "#{base_message} For access to the dev portal please talk to the admin account holders."
   end
 end

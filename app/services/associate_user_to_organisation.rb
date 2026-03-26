@@ -8,6 +8,8 @@ class AssociateUserToOrganisation
     invitation = find_pending_invitation(user)
 
     unless invitation
+      return create_and_associate_self_service_organisation(user) if TradeTariffDevHub.self_service_org_creation_enabled?
+
       raise InvitationRequiredError, "No pending invitation found for #{user.email_address}"
     end
 
@@ -27,6 +29,16 @@ private
     User.transaction do
       user.organisation = invitation.organisation
       invitation.accepted!
+      user.save!
+    end
+  end
+
+  def create_and_associate_self_service_organisation(user)
+    User.transaction do
+      user.organisation = Organisation.create!(
+        organisation_name: user.email_address,
+        description: "Self-service organisation for #{user.email_address}",
+      )
       user.save!
     end
   end
