@@ -41,7 +41,7 @@ RUN rm -rf node_modules log tmp && \
 FROM ruby:${RUBY_VERSION}-alpine${ALPINE_VERSION} AS production
 
 RUN apk add --update --no-cache \
-  postgresql-client
+  postgresql-client \
   bash \
   socat \
   tzdata && \

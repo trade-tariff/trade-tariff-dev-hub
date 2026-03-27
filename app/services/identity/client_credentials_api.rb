@@ -34,9 +34,9 @@ module Identity
 
         CreateResult.new(client_id: client_id, client_secret: client_secret)
       when 400, 401, 404, 422, 502, 503
-        raise Error, "Identity API error #{response.status}: #{response.body&.truncate(200)}"
+        raise Error, "Identity API error #{response.status}: #{error_body_excerpt(response.body)}"
       else
-        raise Error, "Identity API unexpected response #{response.status}: #{response.body&.truncate(200)}"
+        raise Error, "Identity API unexpected response #{response.status}: #{error_body_excerpt(response.body)}"
       end
     end
 
@@ -50,15 +50,32 @@ module Identity
       when 204, 404
         true
       when 400, 401, 422, 502
-        raise Error, "Identity API error #{response.status}: #{response.body&.truncate(200)}"
+        raise Error, "Identity API error #{response.status}: #{error_body_excerpt(response.body)}"
       else
-        raise Error, "Identity API unexpected response #{response.status}: #{response.body&.truncate(200)}"
+        raise Error, "Identity API unexpected response #{response.status}: #{error_body_excerpt(response.body)}"
       end
     end
 
     class Error < StandardError; end
 
   private
+
+    def error_body_excerpt(body, max_length = 200)
+      text = case body
+             when String
+               body
+             when Hash, Array
+               JSON.generate(body)
+             when nil
+               ""
+             else
+               body.to_s
+             end
+
+      text.truncate(max_length)
+    rescue StandardError
+      body.to_s.truncate(max_length)
+    end
 
     def http_client
       cert_path = "/tmp/backend.crt"
