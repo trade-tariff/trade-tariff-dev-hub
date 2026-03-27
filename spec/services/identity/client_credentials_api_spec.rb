@@ -56,6 +56,18 @@ RSpec.describe Identity::ClientCredentialsApi do
       end
     end
 
+    context "when API returns 400 with a hash body" do
+      let(:response) { instance_double(Faraday::Response, status: 400, body: { "error" => "scopes required" }) }
+
+      before do
+        allow(http_client).to receive(:post).and_return(response)
+      end
+
+      it "raises Error without crashing on truncate" do
+        expect { api.create!(scopes) }.to raise_error(Identity::ClientCredentialsApi::Error, /scopes required/)
+      end
+    end
+
     context "when API returns 201 but body missing client_id or client_secret" do
       let(:response) { instance_double(Faraday::Response, status: 201, body: { "client_id" => "id-123" }) }
 
@@ -103,6 +115,16 @@ RSpec.describe Identity::ClientCredentialsApi do
 
       it "raises Error" do
         expect { api.delete(client_id) }.to raise_error(Identity::ClientCredentialsApi::Error, /401/)
+      end
+    end
+
+    context "when API returns 401 with a hash body" do
+      before do
+        allow(http_client).to receive(:delete).and_return(instance_double(Faraday::Response, status: 401, body: { "error" => "Unauthorized" }))
+      end
+
+      it "raises Error without crashing on truncate" do
+        expect { api.delete(client_id) }.to raise_error(Identity::ClientCredentialsApi::Error, /Unauthorized/)
       end
     end
   end
