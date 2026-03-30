@@ -5,7 +5,8 @@ module Identity
     # Maps dev-hub scope names to identity/OAuth scope names.
     SCOPE_MAP = {
       "read" => "tariff/read",
-      "write" => "tariff/write",
+      "categorisation" => "tariff/categorisation",
+      "fpo" => "tariff/fpo"
     }.freeze
 
     CreateResult = Struct.new(:client_id, :client_secret, keyword_init: true)
