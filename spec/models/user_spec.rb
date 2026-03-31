@@ -46,7 +46,7 @@ RSpec.describe User, type: :model do
 
     context "when the user does not exist and has no pending invitation" do
       before do
-        allow(TradeTariffDevHub).to receive(:self_service_org_creation_enabled?).and_return(false)
+        allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(false)
       end
 
       it "raises an InvitationRequiredError" do
@@ -56,7 +56,7 @@ RSpec.describe User, type: :model do
 
     context "when the user does not exist and has no pending invitation but self-service org creation is enabled" do
       before do
-        allow(TradeTariffDevHub).to receive(:self_service_org_creation_enabled?).and_return(true)
+        allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(true)
       end
 
       it "creates a user and self-service organisation", :aggregate_failures do
@@ -118,7 +118,7 @@ RSpec.describe User, type: :model do
       let(:implicit_org) { create(:organisation, :implicit) }
 
       before do
-        allow(TradeTariffDevHub).to receive(:self_service_org_creation_enabled?).and_return(true)
+        allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(true)
         create(
           :user,
           user_id: decoded_token["sub"],

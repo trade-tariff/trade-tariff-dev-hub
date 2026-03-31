@@ -23,6 +23,13 @@ module TradeTariffDevHub
       ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] == "true"
     end
 
+    # Self-service signup is only allowed outside production, and only when explicitly enabled.
+    def allow_passwordless_self_service_org_creation?
+      return false unless self_service_org_creation_enabled?
+
+      !production_environment?
+    end
+
     def documentation_url
       ENV.fetch(
         "DOCUMENTATION_URL",
@@ -192,6 +199,11 @@ module TradeTariffDevHub
     # but RAILS_ENV may be production, is correctly treated as non-production.
     def production_environment?
       %w[production staging].include?(environment)
+    end
+
+    # Restrict non-FPO/non-admin org sessions after identity callback in production only.
+    def block_non_fpo_identity_sessions_in_production?
+      environment == "production"
     end
 
     def id_token_cookie_name

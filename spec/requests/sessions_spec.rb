@@ -30,7 +30,7 @@ RSpec.describe "Sessions", type: :request do
       let(:email_address) { "non-existing@bar.com" }
 
       before do
-        allow(TradeTariffDevHub).to receive(:self_service_org_creation_enabled?).and_return(false)
+        allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(false)
       end
 
       it "does not create a new user" do
@@ -48,7 +48,7 @@ RSpec.describe "Sessions", type: :request do
       let(:email_address) { "new.user@transformuk.com" }
 
       before do
-        allow(TradeTariffDevHub).to receive(:self_service_org_creation_enabled?).and_return(false)
+        allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(false)
       end
 
       it "shows the transform admin-holder guidance", :aggregate_failures do

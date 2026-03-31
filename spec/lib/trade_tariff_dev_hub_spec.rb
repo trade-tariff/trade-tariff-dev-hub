@@ -114,4 +114,57 @@ RSpec.describe TradeTariffDevHub do
       end
     end
   end
+
+  describe ".allow_passwordless_self_service_org_creation?" do
+    around do |example|
+      original_environment = ENV["ENVIRONMENT"]
+      original_flag = ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"]
+      example.run
+    ensure
+      ENV["ENVIRONMENT"] = original_environment
+      ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] = original_flag
+    end
+
+    it "returns false when flag is not enabled" do
+      ENV["ENVIRONMENT"] = "staging"
+      ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] = "false"
+
+      expect(described_class.allow_passwordless_self_service_org_creation?).to be(false)
+    end
+
+    it "returns true in staging when flag is enabled" do
+      ENV["ENVIRONMENT"] = "staging"
+      ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] = "true"
+
+      expect(described_class.allow_passwordless_self_service_org_creation?).to be(true)
+    end
+
+    it "returns false in production even when flag is enabled" do
+      ENV["ENVIRONMENT"] = "production"
+      ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] = "true"
+
+      expect(described_class.allow_passwordless_self_service_org_creation?).to be(false)
+    end
+  end
+
+  describe ".block_non_fpo_identity_sessions_in_production?" do
+    around do |example|
+      original_environment = ENV["ENVIRONMENT"]
+      example.run
+    ensure
+      ENV["ENVIRONMENT"] = original_environment
+    end
+
+    it "returns true in production" do
+      ENV["ENVIRONMENT"] = "production"
+
+      expect(described_class.block_non_fpo_identity_sessions_in_production?).to be(true)
+    end
+
+    it "returns false in staging" do
+      ENV["ENVIRONMENT"] = "staging"
+
+      expect(described_class.block_non_fpo_identity_sessions_in_production?).to be(false)
+    end
+  end
 end

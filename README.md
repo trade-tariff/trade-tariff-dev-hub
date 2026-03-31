@@ -35,6 +35,18 @@ When enabled, navigate to `/dev/login` and use:
 
 The dev bypass creates test users and organisations automatically on first login. This feature is only available when `DEV_BYPASS_AUTH=true` and should never be enabled in production.
 
+### Passwordless signup and role request flags
+
+Passwordless onboarding through the identity callback (without an invitation) is controlled by `FEATURE_FLAG_SELF_SERVICE_ORG_CREATION`.
+
+- Default (`false`/unset): no self-service org is created.
+- `true` in staging/development: allows creating an implicit organisation using the user's email as `organisation_name`.
+- `true` in production: ignored by policy (self-service creation remains blocked).
+
+Role request access is controlled by `FEATURE_FLAG_ROLE_REQUEST`.
+
+- Set `FEATURE_FLAG_ROLE_REQUEST=true` in staging/development to let newly onboarded organisations request roles such as `fpo:full` and `trade_tariff:full`.
+
 ### Trade Tariff keys (identity + API Gateway)
 
 To **create real Trade Tariff keys** (Cognito + API Gateway), set `IDENTITY_API_KEY` and `TRADE_TARIFF_USAGE_PLAN_ID` (see [docs/TRADE_TARIFF_KEYS_SETUP.md](docs/TRADE_TARIFF_KEYS_SETUP.md) for how to find the usage plan in AWS and per-environment setup).

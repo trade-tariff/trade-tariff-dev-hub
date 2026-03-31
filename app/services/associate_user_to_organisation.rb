@@ -8,7 +8,7 @@ class AssociateUserToOrganisation
     invitation = find_pending_invitation(user)
 
     unless invitation
-      return create_and_associate_self_service_organisation(user) if TradeTariffDevHub.self_service_org_creation_enabled?
+      return create_and_associate_self_service_organisation(user) if TradeTariffDevHub.allow_passwordless_self_service_org_creation?
 
       raise InvitationRequiredError, "No pending invitation found for #{user.email_address}"
     end

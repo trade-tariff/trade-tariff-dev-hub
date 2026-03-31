@@ -76,7 +76,7 @@ class User < ApplicationRecord
   private
 
     def block_implicit_organisation_sign_in?(organisation)
-      return false if TradeTariffDevHub.self_service_org_creation_enabled? && organisation.roles.empty?
+      return false if TradeTariffDevHub.allow_passwordless_self_service_org_creation? && organisation.roles.empty?
 
       true
     end

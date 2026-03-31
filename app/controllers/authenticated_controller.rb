@@ -118,6 +118,14 @@ protected
   # Any expired session needs to be redirected to the identity service to refresh the token
   # Any non-expired session with the fpo:full role can continue
   def handle_user_session
+    unless TradeTariffDevHub.block_non_fpo_identity_sessions_in_production?
+      return unless user_session.renew?
+
+      Rails.logger.info("[Auth] Session needs renewal, redirecting to identity service")
+      redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
+      return
+    end
+
     if organisation&.fpo? || organisation&.admin?
       return unless user_session.renew?
 
