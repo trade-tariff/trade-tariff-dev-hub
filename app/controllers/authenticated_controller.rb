@@ -20,8 +20,8 @@ protected
   def require_authentication
     # Check for identity authentication first (works in all environments)
     if authenticated?
-      # In production/staging, handle user session (checks FPO/admin roles, renewal, etc.)
-      if TradeTariffDevHub.production_environment?
+      # In deployed environments (staging/production), handle user session (checks FPO/admin roles, renewal, etc.)
+      if TradeTariffDevHub.deployed_environment?
         handle_user_session
         return
       end
@@ -34,13 +34,13 @@ protected
     clear_authentication! if user_session.present?
 
     # If dev bypass is enabled AND we're not in production, show dev bypass password page
-    if dev_bypass_enabled? && !TradeTariffDevHub.production_environment?
+    if dev_bypass_enabled? && !TradeTariffDevHub.deployed_environment?
       require_dev_bypass_authentication
       return
     end
 
-    # Dev bypass disabled or in production - redirect to identity service (production/staging only)
-    if TradeTariffDevHub.production_environment?
+    # Dev bypass disabled or in deployed envs - redirect to identity service (staging/production only)
+    if TradeTariffDevHub.deployed_environment?
       redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
     end
   end

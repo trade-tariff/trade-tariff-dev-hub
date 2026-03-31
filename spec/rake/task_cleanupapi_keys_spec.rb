@@ -90,7 +90,6 @@ RSpec.describe Rake::Task, "cleanup:api_keys" do
       allow(Rails.env).to receive(:development?).and_return(false)
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("CLEANUP_PLAYWRIGHT_KEYS_ENABLED").and_return("true")
-      allow(TradeTariffDevHub).to receive(:production_environment?).and_return(false)
     end
 
     it "runs cleanup for all organisations", :aggregate_failures do

@@ -37,15 +37,19 @@ The dev bypass creates test users and organisations automatically on first login
 
 ### Passwordless signup and role request flags
 
-Passwordless onboarding through the identity callback (without an invitation) is controlled by `FEATURE_FLAG_SELF_SERVICE_ORG_CREATION`.
+`ENVIRONMENT` (e.g. `production`, `staging`, `development`) is set per deploy; tests default it to `test`.
 
-- Default (`false`/unset): no self-service org is created.
-- `true` in staging/development: allows creating an implicit organisation using the user's email as `organisation_name`.
-- `true` in production: ignored by policy (self-service creation remains blocked).
+**Self-service org at sign-in (no invitation)** is gated in two steps:
 
-Role request access is controlled by `FEATURE_FLAG_ROLE_REQUEST`.
+1. `self_service_org_creation_enabled?` — if `FEATURE_FLAG_SELF_SERVICE_ORG_CREATION` is set, that value wins. If unset: enabled when `Rails.env.development?` or when `ENVIRONMENT` is `development` or `staging`; disabled when `ENVIRONMENT` is `production` (or anything else like `test`).
+2. `allow_passwordless_self_service_org_creation?` — additionally requires `ENVIRONMENT != "production"`. So the live production slot never creates a personal org from the callback, even if the feature flag is `true`.
 
-- Set `FEATURE_FLAG_ROLE_REQUEST=true` in staging/development to let newly onboarded organisations request roles such as `fpo:full` and `trade_tariff:full`.
+**Role requests** use `FEATURE_FLAG_ROLE_REQUEST`:
+
+- If the variable is set: `true` / `false` applies in every environment.
+- If unset: enabled in `development` and `test` only; disabled in deployed environments unless you set the flag (e.g. `FEATURE_FLAG_ROLE_REQUEST=true` on staging so new orgs can request `fpo:full` / `trade_tariff:full`).
+
+**API keys and Trade Tariff keys:** the per-organisation cap (3 active keys) applies only when `ENVIRONMENT=production`. Staging, development, and local/test do not enforce that limit.
 
 ### Trade Tariff keys (identity + API Gateway)
 

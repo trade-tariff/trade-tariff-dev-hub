@@ -3,7 +3,7 @@ RSpec.describe "ApiKeys", type: :request do
 
   before do
     current_user.organisation.assign_role!("fpo:full")
-    allow(TradeTariffDevHub).to receive(:production_environment?).and_return(true)
+    allow(TradeTariffDevHub).to receive(:live_production_environment?).and_return(true)
   end
 
   describe "POST /api_keys" do
@@ -39,7 +39,7 @@ RSpec.describe "ApiKeys", type: :request do
       before do
         create_list(:api_key, 2, organisation: current_user.organisation, enabled: true)
         create(:api_key, organisation: current_user.organisation, enabled: false)
-        allow(TradeTariffDevHub).to receive(:production_environment?).and_return(true)
+        allow(TradeTariffDevHub).to receive(:live_production_environment?).and_return(true)
         allow(CreateApiKey).to receive(:new).and_return(create_service)
         allow(create_service).to receive(:call) do |api_key|
           create(:api_key, organisation: api_key.organisation, description: api_key.description)
@@ -85,7 +85,7 @@ RSpec.describe "ApiKeys", type: :request do
     before do
       current_user.organisation.assign_role!("admin")
       current_user.organisation.assign_role!("fpo:full")
-      allow(TradeTariffDevHub).to receive(:production_environment?).and_return(true)
+      allow(TradeTariffDevHub).to receive(:live_production_environment?).and_return(true)
     end
 
     context "when admin organisation has 3 active API keys" do

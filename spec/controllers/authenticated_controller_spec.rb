@@ -28,7 +28,7 @@ RSpec.describe AuthenticatedController, type: :controller do
 
     context "when in development environment with dev bypass enabled" do
       before do
-        allow(TradeTariffDevHub).to receive_messages(production_environment?: false, dev_bypass_auth_enabled?: true)
+        allow(TradeTariffDevHub).to receive_messages(deployed_environment?: false, dev_bypass_auth_enabled?: true)
       end
 
       context "when user has valid identity session" do
@@ -67,7 +67,7 @@ RSpec.describe AuthenticatedController, type: :controller do
     context "when in production environment" do
       before do
         allow(TradeTariffDevHub).to receive_messages(
-          production_environment?: true,
+          deployed_environment?: true,
           block_non_fpo_identity_sessions_in_production?: true,
         )
       end
@@ -124,7 +124,7 @@ RSpec.describe AuthenticatedController, type: :controller do
 
       before do
         allow(TradeTariffDevHub).to receive_messages(
-          production_environment?: true,
+          deployed_environment?: true,
           block_non_fpo_identity_sessions_in_production?: false,
           dev_bypass_auth_enabled?: false,
         )

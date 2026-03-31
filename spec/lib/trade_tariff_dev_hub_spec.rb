@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe TradeTariffDevHub do
   describe ".base_domain" do
     before do
@@ -50,12 +52,7 @@ RSpec.describe TradeTariffDevHub do
   end
 
   describe ".id_token_cookie_name" do
-    around do |example|
-      original_environment = ENV["ENVIRONMENT"]
-      example.run
-    ensure
-      ENV["ENVIRONMENT"] = original_environment
-    end
+    include_context "with restored ENVIRONMENT"
 
     context "when environment is production" do
       before { ENV["ENVIRONMENT"] = "production" }
@@ -83,12 +80,7 @@ RSpec.describe TradeTariffDevHub do
   end
 
   describe ".refresh_token_cookie_name" do
-    around do |example|
-      original_environment = ENV["ENVIRONMENT"]
-      example.run
-    ensure
-      ENV["ENVIRONMENT"] = original_environment
-    end
+    include_context "with restored ENVIRONMENT"
 
     context "when environment is production" do
       before { ENV["ENVIRONMENT"] = "production" }
@@ -115,31 +107,82 @@ RSpec.describe TradeTariffDevHub do
     end
   end
 
-  describe ".allow_passwordless_self_service_org_creation?" do
-    around do |example|
-      original_environment = ENV["ENVIRONMENT"]
-      original_flag = ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"]
-      example.run
-    ensure
-      ENV["ENVIRONMENT"] = original_environment
-      ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] = original_flag
+  describe ".self_service_org_creation_enabled?" do
+    include_context "with restored ENVIRONMENT and self-service org creation flag"
+
+    before do
+      allow(Rails.env).to receive(:development?).and_return(false)
     end
 
-    it "returns false when flag is not enabled" do
+    context "when FEATURE_FLAG_SELF_SERVICE_ORG_CREATION is true" do
+      before do
+        ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] = "true"
+        ENV["ENVIRONMENT"] = "production"
+      end
+
+      it { expect(described_class.self_service_org_creation_enabled?).to be true }
+    end
+
+    context "when FEATURE_FLAG_SELF_SERVICE_ORG_CREATION is false" do
+      before do
+        ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] = "false"
+        ENV["ENVIRONMENT"] = "staging"
+      end
+
+      it { expect(described_class.self_service_org_creation_enabled?).to be false }
+    end
+
+    context "when the flag is unset and ENVIRONMENT is production" do
+      before do
+        ENV.delete("FEATURE_FLAG_SELF_SERVICE_ORG_CREATION")
+        ENV["ENVIRONMENT"] = "production"
+      end
+
+      it { expect(described_class.self_service_org_creation_enabled?).to be false }
+    end
+
+    context "when the flag is unset and ENVIRONMENT is staging" do
+      before do
+        ENV.delete("FEATURE_FLAG_SELF_SERVICE_ORG_CREATION")
+        ENV["ENVIRONMENT"] = "staging"
+      end
+
+      it { expect(described_class.self_service_org_creation_enabled?).to be true }
+    end
+
+    context "when the flag is unset and Rails.env.development? is true" do
+      before do
+        ENV.delete("FEATURE_FLAG_SELF_SERVICE_ORG_CREATION")
+        ENV["ENVIRONMENT"] = "production"
+        allow(Rails.env).to receive(:development?).and_return(true)
+      end
+
+      it { expect(described_class.self_service_org_creation_enabled?).to be true }
+    end
+  end
+
+  describe ".allow_passwordless_self_service_org_creation?" do
+    include_context "with restored ENVIRONMENT and self-service org creation flag"
+
+    before do
+      allow(Rails.env).to receive(:development?).and_return(false)
+    end
+
+    it "returns false when self-service is not enabled" do
       ENV["ENVIRONMENT"] = "staging"
       ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] = "false"
 
       expect(described_class.allow_passwordless_self_service_org_creation?).to be(false)
     end
 
-    it "returns true in staging when flag is enabled" do
+    it "returns true in staging when self-service is enabled" do
       ENV["ENVIRONMENT"] = "staging"
       ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] = "true"
 
       expect(described_class.allow_passwordless_self_service_org_creation?).to be(true)
     end
 
-    it "returns false in production even when flag is enabled" do
+    it "returns false in production even when self-service flag is enabled" do
       ENV["ENVIRONMENT"] = "production"
       ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] = "true"
 
@@ -148,12 +191,7 @@ RSpec.describe TradeTariffDevHub do
   end
 
   describe ".block_non_fpo_identity_sessions_in_production?" do
-    around do |example|
-      original_environment = ENV["ENVIRONMENT"]
-      example.run
-    ensure
-      ENV["ENVIRONMENT"] = original_environment
-    end
+    include_context "with restored ENVIRONMENT"
 
     it "returns true in production" do
       ENV["ENVIRONMENT"] = "production"
@@ -165,6 +203,44 @@ RSpec.describe TradeTariffDevHub do
       ENV["ENVIRONMENT"] = "staging"
 
       expect(described_class.block_non_fpo_identity_sessions_in_production?).to be(false)
+    end
+  end
+
+  describe ".development_deployment_environment?" do
+    include_context "with restored ENVIRONMENT"
+
+    it "returns true when ENVIRONMENT is development" do
+      ENV["ENVIRONMENT"] = "development"
+
+      expect(described_class.development_deployment_environment?).to be(true)
+    end
+
+    it "returns false when ENVIRONMENT is staging" do
+      ENV["ENVIRONMENT"] = "staging"
+
+      expect(described_class.development_deployment_environment?).to be(false)
+    end
+  end
+
+  describe ".live_production_environment?" do
+    include_context "with restored ENVIRONMENT"
+
+    it "returns true when ENVIRONMENT is production" do
+      ENV["ENVIRONMENT"] = "production"
+
+      expect(described_class.live_production_environment?).to be(true)
+    end
+
+    it "returns false when ENVIRONMENT is staging" do
+      ENV["ENVIRONMENT"] = "staging"
+
+      expect(described_class.live_production_environment?).to be(false)
+    end
+
+    it "returns false when ENVIRONMENT is test" do
+      ENV["ENVIRONMENT"] = "test"
+
+      expect(described_class.live_production_environment?).to be(false)
     end
   end
 end

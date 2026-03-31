@@ -15,7 +15,7 @@
 
 class Role < ApplicationRecord
   ADMIN_ROLE_NAME = "admin".freeze
-  SERVICE_ROLE_NAMES = %w[trade_tariff:full fpo:full spimm:full].freeze
+  SERVICE_ROLE_NAMES = %w[trade_tariff:full fpo:full].freeze
 
   validates :name, presence: true, uniqueness: true
   validates :description, presence: true
@@ -24,25 +24,10 @@ class Role < ApplicationRecord
   has_paper_trail
 
   scope :service_roles, -> { where(name: SERVICE_ROLE_NAMES) }
+  scope :not_assigned_to, ->(organisation) { where.not(id: organisation.roles.select(:id)) }
 
-  def self.assignable_service_roles
-    # Returns service roles available for assignment
-    # Excludes spimm:full in production/staging (staging uses RAILS_ENV=production)
-    roles = service_roles
-    if TradeTariffDevHub.production_environment?
-      spimm_role = find_by(name: "spimm:full")
-      roles = roles.where.not(id: spimm_role.id) if spimm_role
-    end
-    roles
-  end
-
-  def self.assignable_names
-    # Exclude spimm:full role in production/staging (staging uses RAILS_ENV=production)
-    if TradeTariffDevHub.production_environment?
-      SERVICE_ROLE_NAMES - ["spimm:full"]
-    else
-      SERVICE_ROLE_NAMES
-    end
+  def self.available_service_roles_for(organisation)
+    service_roles.not_assigned_to(organisation).order(:name)
   end
 
   def admin?

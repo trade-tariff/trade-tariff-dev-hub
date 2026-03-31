@@ -27,7 +27,7 @@ RSpec.describe "Identity authentication flow", type: :request do
   describe "full authentication flow from identity service callback" do
     context "when in development environment with dev bypass enabled" do
       before do
-        allow(TradeTariffDevHub).to receive_messages(production_environment?: false, dev_bypass_auth_enabled?: true)
+        allow(TradeTariffDevHub).to receive_messages(deployed_environment?: false, dev_bypass_auth_enabled?: true)
         Rails.application.reload_routes!
       end
 
@@ -71,7 +71,7 @@ RSpec.describe "Identity authentication flow", type: :request do
 
     context "when in production environment" do
       before do
-        allow(TradeTariffDevHub).to receive(:production_environment?).and_return(true)
+        allow(TradeTariffDevHub).to receive(:deployed_environment?).and_return(true)
       end
 
       context "when user authenticates via identity service" do
@@ -120,7 +120,7 @@ RSpec.describe "Identity authentication flow", type: :request do
   describe "when user authenticates then session expires" do
     context "when in development environment with dev bypass enabled" do
       before do
-        allow(TradeTariffDevHub).to receive_messages(production_environment?: false, dev_bypass_auth_enabled?: true)
+        allow(TradeTariffDevHub).to receive_messages(deployed_environment?: false, dev_bypass_auth_enabled?: true)
         Rails.application.reload_routes!
       end
 
