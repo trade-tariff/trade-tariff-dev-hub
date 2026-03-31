@@ -15,7 +15,7 @@ RSpec.describe TradeTariff::CreateTradeTariffKey do
       api_gateway_key_id: "agw-#{SecureRandom.hex(8)}",
     }
   end
-  let(:call_params) { { description: "Test Trade Tariff Key", scopes: %w[read write] } }
+  let(:call_params) { { description: "Test Trade Tariff Key", scopes: %w[read] } }
 
   before do
     allow(TradeTariffDevHub).to receive_messages(
@@ -58,7 +58,7 @@ RSpec.describe TradeTariff::CreateTradeTariffKey do
     it "calls identity API with scopes" do
       create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes])
 
-      expect(identity_client).to have_received(:create!).with(%w[read write])
+      expect(identity_client).to have_received(:create!).with(%w[read])
     end
 
     it "creates API Gateway key with value set to client_id" do
@@ -80,13 +80,13 @@ RSpec.describe TradeTariff::CreateTradeTariffKey do
     end
 
     it "uses default scopes if not provided" do
-      allow(identity_client).to receive(:create!).with(%w[read write]).and_return(
+      allow(identity_client).to receive(:create!).with(%w[read]).and_return(
         Identity::ClientCredentialsApi::CreateResult.new(client_id: stub_creds[:client_id], client_secret: stub_creds[:client_secret]),
       )
 
       result = create_trade_tariff_key.call(organisation.id, call_params[:description])
 
-      expect(result.trade_tariff_key.scopes).to eq(%w[read write])
+      expect(result.trade_tariff_key.scopes).to eq(%w[read])
     end
 
     it "generates a default description if not provided", :aggregate_failures do

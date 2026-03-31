@@ -2,6 +2,7 @@
 
 class TradeTariff::CreateTradeTariffKey
   API_KEY_TYPE = "API_KEY"
+  DEFAULT_SCOPES = %w[read].freeze
 
   CreateResult = Struct.new(:trade_tariff_key, :client_secret, keyword_init: true)
 
@@ -10,7 +11,7 @@ class TradeTariff::CreateTradeTariffKey
     @api_gateway_client = api_gateway_client || Aws::APIGateway::Client.new
   end
 
-  def call(organisation_id, description = nil, scopes = %w[read write])
+  def call(organisation_id, description = nil, scopes = DEFAULT_SCOPES)
     usage_plan_id = TradeTariffDevHub.trade_tariff_usage_plan_id
     identity_token = TradeTariffDevHub.identity_api_key
     if usage_plan_id.blank? || identity_token.blank?
