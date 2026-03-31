@@ -119,24 +119,25 @@ protected
   # Any non-expired session with the fpo:full role can continue
   def handle_user_session
     unless TradeTariffDevHub.block_non_fpo_identity_sessions_in_production?
-      return unless user_session.renew?
-
-      Rails.logger.info("[Auth] Session needs renewal, redirecting to identity service")
-      redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
+      renew_identity_session_if_needed
       return
     end
 
     if organisation&.fpo? || organisation&.admin?
-      return unless user_session.renew?
-
-      Rails.logger.info("[Auth] Session needs renewal, redirecting to identity service")
-      redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
+      renew_identity_session_if_needed
     else
       # NOTE:  Non-FPO orgs should not have an identity session - destroy it
       Rails.logger.info("[Auth] Non-FPO org detected, clearing authentication")
       clear_authentication!
       redirect_to root_path, alert: "This service is not yet open to the public. If you have any questions please contact us on hmrc-trade-tariff-support-g@digital.hmrc.gov.uk"
     end
+  end
+
+  def renew_identity_session_if_needed
+    return unless user_session.renew?
+
+    Rails.logger.info("[Auth] Session needs renewal, redirecting to identity service")
+    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
   end
 
   helper_method :current_user, :organisation, :user_session
