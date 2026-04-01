@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get "healthcheck" => "healthcheck#check", as: :healthcheck
   get "healthcheckz" => "rails/health#show", as: :rails_health_check
 
   root "homepage#index"
