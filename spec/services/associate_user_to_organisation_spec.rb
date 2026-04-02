@@ -60,7 +60,7 @@ RSpec.describe AssociateUserToOrganisation do
       let(:user) { build(:user, organisation: nil, email_address: "noinvite@example.com") }
 
       before do
-        allow(TradeTariffDevHub).to receive(:self_service_org_creation_enabled?).and_return(false)
+        allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(false)
       end
 
       it "raises an InvitationRequiredError" do
@@ -91,7 +91,7 @@ RSpec.describe AssociateUserToOrganisation do
       let(:user) { build(:user, organisation: nil, email_address: "selfserve@example.com") }
 
       before do
-        allow(TradeTariffDevHub).to receive(:self_service_org_creation_enabled?).and_return(true)
+        allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(true)
       end
 
       it "creates and associates an organisation without roles", :aggregate_failures do

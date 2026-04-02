@@ -37,11 +37,11 @@ RSpec.describe "Role Requests", type: :request do
         current_user.organisation.assign_role!("fpo:full")
       end
 
-      it "does not display FPO-specific information in inset box or hint", :aggregate_failures do
+      it "redirects when there are no additional roles to request", :aggregate_failures do
         get new_role_request_path
-        expect(response).to have_http_status(:ok)
-        expect(response.body).not_to include("FPO (Fast Parcel Operator) API access")
-        expect(response.body).not_to include("fpo-hint-content")
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
+        follow_redirect!
+        expect(response.body).to include("No additional roles available to request.")
       end
     end
 
@@ -61,7 +61,6 @@ RSpec.describe "Role Requests", type: :request do
     context "when no available roles" do
       before do
         current_user.organisation.assign_role!("fpo:full")
-        current_user.organisation.assign_role!("spimm:full")
       end
 
       it "redirects to organisation page", :aggregate_failures do
@@ -238,12 +237,13 @@ RSpec.describe "Role Requests", type: :request do
         create(:role_request, organisation: current_user.organisation, user: current_user, role_name: "fpo:full", status: "pending")
       end
 
-      it "does not create a duplicate request", :aggregate_failures do
+      it "does not create a duplicate request and redirects when no roles remain", :aggregate_failures do
         expect { post role_requests_path, params: params }
           .not_to change(RoleRequest, :count)
 
-        expect(response).to have_http_status(:ok)
-        expect(response.body).to include("has already been requested and is pending")
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
+        follow_redirect!
+        expect(response.body).to include("No additional roles available to request.")
       end
     end
 

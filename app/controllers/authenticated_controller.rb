@@ -20,8 +20,8 @@ protected
   def require_authentication
     # Check for identity authentication first (works in all environments)
     if authenticated?
-      # In production/staging, handle user session (checks FPO/admin roles, renewal, etc.)
-      if TradeTariffDevHub.production_environment?
+      # In deployed environments (staging/production), handle user session (checks FPO/admin roles, renewal, etc.)
+      if TradeTariffDevHub.deployed_environment?
         handle_user_session
         return
       end
@@ -34,13 +34,13 @@ protected
     clear_authentication! if user_session.present?
 
     # If dev bypass is enabled AND we're not in production, show dev bypass password page
-    if dev_bypass_enabled? && !TradeTariffDevHub.production_environment?
+    if dev_bypass_enabled? && !TradeTariffDevHub.deployed_environment?
       require_dev_bypass_authentication
       return
     end
 
-    # Dev bypass disabled or in production - redirect to identity service (production/staging only)
-    if TradeTariffDevHub.production_environment?
+    # Dev bypass disabled or in deployed envs - redirect to identity service (staging/production only)
+    if TradeTariffDevHub.deployed_environment?
       redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
     end
   end
@@ -118,17 +118,26 @@ protected
   # Any expired session needs to be redirected to the identity service to refresh the token
   # Any non-expired session with the fpo:full role can continue
   def handle_user_session
-    if organisation&.fpo? || organisation&.admin?
-      return unless user_session.renew?
+    unless TradeTariffDevHub.block_non_fpo_identity_sessions_in_production?
+      renew_identity_session_if_needed
+      return
+    end
 
-      Rails.logger.info("[Auth] Session needs renewal, redirecting to identity service")
-      redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
+    if organisation&.fpo? || organisation&.admin?
+      renew_identity_session_if_needed
     else
       # NOTE:  Non-FPO orgs should not have an identity session - destroy it
       Rails.logger.info("[Auth] Non-FPO org detected, clearing authentication")
       clear_authentication!
       redirect_to root_path, alert: "This service is not yet open to the public. If you have any questions please contact us on hmrc-trade-tariff-support-g@digital.hmrc.gov.uk"
     end
+  end
+
+  def renew_identity_session_if_needed
+    return unless user_session.renew?
+
+    Rails.logger.info("[Auth] Session needs renewal, redirecting to identity service")
+    redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
   end
 
   helper_method :current_user, :organisation, :user_session

@@ -39,7 +39,7 @@ class Organisation < ApplicationRecord
       Organisation.joins(:roles).where(roles: { id: admin_role.id }).first
     end
 
-    def find_or_associate_implicit_organisation_to(user)
+    def associate_organisation_to_user(user)
       AssociateUserToOrganisation.new.call(user)
     rescue AssociateUserToOrganisation::InvitationRequiredError => e
       raise InvitationRequiredError, e.message
@@ -50,11 +50,6 @@ class Organisation < ApplicationRecord
 
   def admin?
     has_role?("admin")
-  end
-
-  def implicitly_created?
-    role_names = roles.pluck(:name)
-    role_names.empty? || role_names == ["trade_tariff:full"]
   end
 
   def fpo?
@@ -104,8 +99,7 @@ class Organisation < ApplicationRecord
   end
 
   def available_service_roles
-    assigned_service_role_ids = roles.service_roles.pluck(:id)
-    Role.assignable_service_roles.where.not(id: assigned_service_role_ids).order(:name)
+    Role.available_service_roles_for(self)
   end
 
   def pending_request_for?(role_name)

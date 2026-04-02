@@ -14,8 +14,8 @@ private
   def limit_keys_per_organisation
     return if organisation.nil?
     return unless enabled? # Skip validation when key is disabled (only limit active keys)
-    return unless TradeTariffDevHub.production_environment? # Skip limit in development/test
     return if organisation.admin? # Skip limit for admin organisations
+    return unless TradeTariffDevHub.live_production_environment?
 
     # Count only active (non-revoked) keys so revoked keys don't block creating new ones
     existing_count = organisation.send(association_name).active.count

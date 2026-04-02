@@ -35,6 +35,22 @@ When enabled, navigate to `/dev/login` and use:
 
 The dev bypass creates test users and organisations automatically on first login. This feature is only available when `DEV_BYPASS_AUTH=true` and should never be enabled in production.
 
+### Passwordless signup and role request flags
+
+`ENVIRONMENT` (e.g. `production`, `staging`, `development`) is set per deploy; tests default it to `test`.
+
+**Self-service org at sign-in (no invitation)** is gated in two steps:
+
+1. `self_service_org_creation_enabled?` — if `FEATURE_FLAG_SELF_SERVICE_ORG_CREATION` is set, that value wins. If unset: enabled when `Rails.env.development?` or when `ENVIRONMENT` is `development` or `staging`; disabled when `ENVIRONMENT` is `production` (or anything else like `test`).
+2. `allow_passwordless_self_service_org_creation?` — additionally requires `ENVIRONMENT != "production"`. So the live production slot never creates a personal org from the callback, even if the feature flag is `true`.
+
+**Role requests** use `FEATURE_FLAG_ROLE_REQUEST`:
+
+- If the variable is set: `true` / `false` applies in every environment.
+- If unset: enabled in `development` and `test` only; disabled in deployed environments unless you set the flag (e.g. `FEATURE_FLAG_ROLE_REQUEST=true` on staging so new orgs can request `fpo:full` / `trade_tariff:full`).
+
+**API keys and Trade Tariff keys:** the per-organisation cap (3 active keys) applies only when `ENVIRONMENT=production`. Staging, development, and local/test do not enforce that limit.
+
 ### Trade Tariff keys (identity + API Gateway)
 
 To **create real Trade Tariff keys** (Cognito + API Gateway), set `IDENTITY_API_KEY` and `TRADE_TARIFF_USAGE_PLAN_ID` (see [docs/TRADE_TARIFF_KEYS_SETUP.md](docs/TRADE_TARIFF_KEYS_SETUP.md) for how to find the usage plan in AWS and per-environment setup).

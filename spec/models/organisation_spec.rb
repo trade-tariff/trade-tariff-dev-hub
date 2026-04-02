@@ -62,34 +62,17 @@ RSpec.describe Organisation, type: :model do
     end
   end
 
-  describe ".find_or_associate_implicit_organisation_to" do
+  describe ".associate_organisation_to_user" do
     context "when the user already has an organisation" do
-      subject(:find_or_associate_implicit_organisation_to) { described_class.find_or_associate_implicit_organisation_to(user) }
+      subject(:associate_organisation_to_user) { described_class.associate_organisation_to_user(user) }
 
       let!(:user) { create(:user, organisation: create(:organisation)) }
 
-      it { expect { find_or_associate_implicit_organisation_to }.not_to change(described_class, :count) }
+      it { expect { associate_organisation_to_user }.not_to change(described_class, :count) }
     end
 
-    # context "when the user does not have an organisation" do
-    #   subject(:find_or_associate_implicit_organisation_to) { described_class.find_or_associate_implicit_organisation_to(user) }
-    #
-    #   let!(:user) { build(:user, organisation: nil) }
-    #
-    #   it "creates and associates a new implicit organisation to the user", :aggregate_failures do
-    #     expect { find_or_associate_implicit_organisation_to }.to change(described_class, :count).by(1)
-    #     expect(user.organisation.organisation_name).to eq(user.email_address)
-    #     expect(user.organisation.description).to include("Default implicit organisation for initial user #{user.email_address}")
-    #   end
-    #
-    #   it "assigns the correct roles" do
-    #     find_or_associate_implicit_organisation_to
-    #     expect(user.organisation.roles.pluck(:name)).to eq(%w[trade_tariff:full])
-    #   end
-    # end
-
     context "when the user does not have an organisation but an invitation exists for the user's email address" do
-      subject(:find_or_associate_implicit_organisation_to) { described_class.find_or_associate_implicit_organisation_to(user) }
+      subject(:associate_organisation_to_user) { described_class.associate_organisation_to_user(user) }
 
       let!(:user) { build(:user, organisation: nil, email_address: "foo@bar.com") }
       let(:existing_user) { create(:user, email_address: "baz@bar.com") }
@@ -105,25 +88,25 @@ RSpec.describe Organisation, type: :model do
       end
 
       it "accepts the invitation" do
-        expect { find_or_associate_implicit_organisation_to }.to change { Invitation.accepted.count }.by(1)
+        expect { associate_organisation_to_user }.to change { Invitation.accepted.count }.by(1)
       end
 
       it "associates the existing organisation to the new user", :aggregate_failures do
-        expect { find_or_associate_implicit_organisation_to }.not_to change(described_class, :count)
+        expect { associate_organisation_to_user }.not_to change(described_class, :count)
         expect(user.organisation).to eq(existing_user.organisation)
       end
 
       it "does not assign any new roles" do
-        expect { find_or_associate_implicit_organisation_to }.not_to change(existing_user.organisation.roles, :count)
+        expect { associate_organisation_to_user }.not_to change(existing_user.organisation.roles, :count)
       end
 
       it "does not create any new organisations" do
-        expect { find_or_associate_implicit_organisation_to }.not_to change(described_class, :count)
+        expect { associate_organisation_to_user }.not_to change(described_class, :count)
       end
     end
 
     context "when the user does not have an organisation but an invitation exists with a non-pending status" do
-      subject(:find_or_associate_implicit_organisation_to) { described_class.find_or_associate_implicit_organisation_to(user) }
+      subject(:associate_organisation_to_user) { described_class.associate_organisation_to_user(user) }
 
       let!(:user) { build(:user, organisation: nil, email_address: "foo@bar.com") }
       let(:existing_user) { create(:user, email_address: "baz@bar.com") }
@@ -139,7 +122,7 @@ RSpec.describe Organisation, type: :model do
       end
 
       it "raises an InvitationRequiredError" do
-        expect { find_or_associate_implicit_organisation_to }.to raise_error(
+        expect { associate_organisation_to_user }.to raise_error(
           Organisation::InvitationRequiredError,
           /No pending invitation found/,
         )
@@ -147,12 +130,12 @@ RSpec.describe Organisation, type: :model do
     end
 
     context "when the user does not have an organisation and no invitation exists" do
-      subject(:find_or_associate_implicit_organisation_to) { described_class.find_or_associate_implicit_organisation_to(user) }
+      subject(:associate_organisation_to_user) { described_class.associate_organisation_to_user(user) }
 
       let!(:user) { build(:user, organisation: nil, email_address: "new@user.com") }
 
       it "raises an InvitationRequiredError" do
-        expect { find_or_associate_implicit_organisation_to }.to raise_error(
+        expect { associate_organisation_to_user }.to raise_error(
           Organisation::InvitationRequiredError,
           /No pending invitation found/,
         )
@@ -174,58 +157,19 @@ RSpec.describe Organisation, type: :model do
     end
   end
 
-  describe "#implicitly_created?" do
-    context "when the organisation has no roles" do
-      subject(:organisation) { create(:organisation, :implicit) }
-
-      it { is_expected.to be_implicitly_created }
-    end
-
-    context "when the organisation only has trade_tariff:full role" do
-      subject(:organisation) { create(:organisation, :trade_tariff_only) }
-
-      it { is_expected.to be_implicitly_created }
-    end
-
-    context "when the organisation has admin role" do
-      subject(:organisation) { create(:organisation, :admin) }
-
-      it { is_expected.not_to be_implicitly_created }
-    end
-
-    context "when the organisation has fpo:full role" do
-      subject(:organisation) { create(:organisation, :fpo) }
-
-      it { is_expected.not_to be_implicitly_created }
-    end
-
-    context "when the organisation has multiple roles including trade_tariff:full" do
-      subject(:organisation) do
-        create(:organisation, :fpo).tap { |o| o.assign_role!("trade_tariff:full") }
-      end
-
-      it { is_expected.not_to be_implicitly_created }
-    end
-  end
-
   describe "#available_service_roles" do
     context "when organisation has no service roles" do
-      let(:organisation) { create(:organisation, :implicit) }
-
-      before do
-        allow(TradeTariffDevHub).to receive(:production_environment?).and_return(false)
-      end
+      let(:organisation) { create(:organisation, :without_roles) }
 
       it "returns all service roles that are not taken" do
-        expect(organisation.available_service_roles.pluck(:name)).to contain_exactly("fpo:full", "spimm:full", "trade_tariff:full")
+        expect(organisation.available_service_roles.pluck(:name)).to contain_exactly("fpo:full", "trade_tariff:full")
       end
     end
 
     context "when organisation has all service roles" do
-      let(:organisation) { create(:organisation, :implicit) }
+      let(:organisation) { create(:organisation, :without_roles) }
 
       before do
-        allow(TradeTariffDevHub).to receive(:production_environment?).and_return(false)
         organisation.roles << organisation.available_service_roles
         organisation.save!
       end

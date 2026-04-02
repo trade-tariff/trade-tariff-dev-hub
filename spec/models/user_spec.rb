@@ -46,7 +46,7 @@ RSpec.describe User, type: :model do
 
     context "when the user does not exist and has no pending invitation" do
       before do
-        allow(TradeTariffDevHub).to receive(:self_service_org_creation_enabled?).and_return(false)
+        allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(false)
       end
 
       it "raises an InvitationRequiredError" do
@@ -56,7 +56,7 @@ RSpec.describe User, type: :model do
 
     context "when the user does not exist and has no pending invitation but self-service org creation is enabled" do
       before do
-        allow(TradeTariffDevHub).to receive(:self_service_org_creation_enabled?).and_return(true)
+        allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(true)
       end
 
       it "creates a user and self-service organisation", :aggregate_failures do
@@ -73,7 +73,7 @@ RSpec.describe User, type: :model do
       let(:inviting_user) { create(:user) }
 
       before do
-        inviting_user.organisation.assign_role!("spimm:full")
+        inviting_user.organisation.assign_role!("fpo:full")
         create(
           :invitation,
           invitee_email: decoded_token["email"],
@@ -97,33 +97,34 @@ RSpec.describe User, type: :model do
       end
     end
 
-    context "when the user exists but their organisation was implicitly created" do
-      let(:implicit_org) { create(:organisation, :trade_tariff_only) }
+    context "when the user exists and their organisation has no API roles yet (e.g. self-service org)" do
+      let(:minimal_org) { create(:organisation, :without_roles) }
 
       before do
         create(
           :user,
           user_id: decoded_token["sub"],
           email_address: decoded_token["email"],
-          organisation: implicit_org,
+          organisation: minimal_org,
         )
       end
 
-      it "raises an InvitationRequiredError" do
-        expect { from_passwordless_payload! }.to raise_error(Organisation::InvitationRequiredError)
+      it "allows sign-in; access to products is gated by roles and role requests" do
+        expect { from_passwordless_payload! }.not_to raise_error
       end
     end
 
-    context "when the user exists in a role-less organisation and self-service org creation is enabled" do
-      let(:implicit_org) { create(:organisation, :implicit) }
+    context "when the user exists with only trade_tariff:full on the organisation" do
+      let(:trade_tariff_org) { create(:organisation, :trade_tariff_only) }
 
       before do
-        allow(TradeTariffDevHub).to receive(:self_service_org_creation_enabled?).and_return(true)
+        allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(true)
+
         create(
           :user,
           user_id: decoded_token["sub"],
           email_address: decoded_token["email"],
-          organisation: implicit_org,
+          organisation: trade_tariff_org,
         )
       end
 

@@ -34,7 +34,7 @@ private
   end
 
   def validate_role_name
-    return if Role.assignable_names.include?(role_name)
+    return if Role::SERVICE_ROLE_NAMES.include?(role_name)
 
     redirect_to admin_organisation_path(@organisation), alert: "Invalid role"
   end
