@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_02_120001) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_02_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -120,7 +120,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_02_120001) do
     t.uuid "organisation_id", null: false
     t.datetime "revoked_at"
     t.jsonb "scopes", default: []
-    t.string "secret"
     t.datetime "updated_at", null: false
     t.string "usage_plan_id"
     t.index ["client_id"], name: "index_trade_tariff_keys_on_client_id", unique: true

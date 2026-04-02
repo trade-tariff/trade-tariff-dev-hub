@@ -4,7 +4,6 @@
 #
 #  id              :uuid             not null, primary key
 #  client_id       :string           not null
-#  secret          :string
 #  scopes          :jsonb            default("[]")
 #  organisation_id :uuid             not null
 #  description     :text

@@ -115,6 +115,7 @@
              headers: { description: 'Description', identifier: 'Client ID' },
              identifier_callable: ->(key) { key.client_id },
              secret_prefix: 'trade-tariff-key',
+             secret_display: :not_stored,
              status_text_callable: ->(key) { key.active? ? 'Active' : 'Revoked' },
              status_colour_callable: ->(key) { key.active? ? :active : :revoked },
              actions_callable: ->(key) { render('shared/trade_tariff_key_actions', key:) } %>
