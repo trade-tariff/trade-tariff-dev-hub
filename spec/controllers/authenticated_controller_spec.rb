@@ -28,7 +28,7 @@ RSpec.describe AuthenticatedController, type: :controller do
 
     context "when in development environment with dev bypass enabled" do
       before do
-        allow(TradeTariffDevHub).to receive_messages(production_environment?: false, dev_bypass_auth_enabled?: true)
+        allow(TradeTariffDevHub).to receive_messages(deployed_environment?: false, dev_bypass_auth_enabled?: true)
       end
 
       context "when user has valid identity session" do
@@ -66,7 +66,10 @@ RSpec.describe AuthenticatedController, type: :controller do
 
     context "when in production environment" do
       before do
-        allow(TradeTariffDevHub).to receive(:production_environment?).and_return(true)
+        allow(TradeTariffDevHub).to receive_messages(
+          deployed_environment?: true,
+          block_non_fpo_identity_sessions_in_production?: true,
+        )
       end
 
       context "when dev bypass is enabled without identity session" do
@@ -113,6 +116,29 @@ RSpec.describe AuthenticatedController, type: :controller do
           get :test_action
           expect(response).to have_http_status(:ok)
         end
+      end
+    end
+
+    context "when in staging environment" do
+      let(:valid_verify_result) { VerifyToken::Result.new(valid: true, payload: {}, reason: nil) }
+
+      before do
+        allow(TradeTariffDevHub).to receive_messages(
+          deployed_environment?: true,
+          block_non_fpo_identity_sessions_in_production?: false,
+          dev_bypass_auth_enabled?: false,
+        )
+        create(:session, user: current_user, token: plain_token, id_token: id_token_value)
+        session[:token] = plain_token
+        cookies[TradeTariffDevHub.id_token_cookie_name] = id_token_value
+        allow(VerifyToken).to receive(:new).with(id_token_value).and_return(
+          instance_double(VerifyToken, call: valid_verify_result),
+        )
+      end
+
+      it "allows non-FPO users with a valid identity session" do
+        get :test_action
+        expect(response).to have_http_status(:ok)
       end
     end
   end

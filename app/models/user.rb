@@ -48,12 +48,7 @@ class User < ApplicationRecord
 
       user.user_id = user_id
 
-      Organisation.find_or_associate_implicit_organisation_to(user) if user.organisation.blank?
-
-      if user.organisation&.implicitly_created? && block_implicit_organisation_sign_in?(user.organisation)
-        raise Organisation::InvitationRequiredError,
-              "Organisation for #{user.email_address} was implicitly created and requires a valid invitation"
-      end
+      Organisation.associate_organisation_to_user(user) if user.organisation.blank?
 
       user.save!
 
@@ -71,14 +66,6 @@ class User < ApplicationRecord
         end
         user.save!
       end
-    end
-
-  private
-
-    def block_implicit_organisation_sign_in?(organisation)
-      return false if TradeTariffDevHub.self_service_org_creation_enabled? && organisation.roles.empty?
-
-      true
     end
   end
 

@@ -1,6 +1,6 @@
 require "spec_helper"
 ENV["RAILS_ENV"] ||= "test"
-ENV["ENVIRONMENT"] ||= "test" # So production_environment? is false in test (matches previous Rails.env.production? behaviour)
+ENV["ENVIRONMENT"] ||= "test" # Not live production; key limits and deploy-specific behaviour stay off in test
 
 # Stub dev_bypass_auth_enabled? before loading environment so routes are available
 # This allows the conditional routes in config/routes.rb to be loaded in test
@@ -14,7 +14,6 @@ begin
 
   Role.find_or_create_by!(name: "trade_tariff:full") { |role| role.description = "foo" }
   Role.find_or_create_by!(name: "fpo:full") { |role| role.description = "foo" }
-  Role.find_or_create_by!(name: "spimm:full") { |role| role.description = "foo" }
   Role.find_or_create_by!(name: "admin") { |role| role.description = "foo" }
 rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip

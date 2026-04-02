@@ -2,8 +2,6 @@
 
 class SessionsController < ApplicationController
   def handle_redirect
-    log_authentication_context
-
     if already_authenticated?
       user_organisation = user_session&.user&.organisation
       return redirect_to organisation_path(user_organisation)
@@ -37,7 +35,7 @@ class SessionsController < ApplicationController
   rescue Organisation::InvitationRequiredError => e
     Rails.logger.info("[Auth] User requires invitation: #{e.message}")
     clear_authentication!
-    redirect_to root_path, alert: invitation_required_alert_message(result&.payload&.dig("email"))
+    redirect_to root_path, alert: private_beta_sign_in_alert(result&.payload&.dig("email"))
   rescue StandardError => e
     Rails.logger.error("[Auth] Authentication error: #{e.class}: #{e.message}")
     Rails.logger.error("[Auth] Backtrace: #{e.backtrace&.first(5)&.join("\n")}")
@@ -94,21 +92,6 @@ private
     user_session.cookie_token_match_for?(cookie_token)
   end
 
-  def log_authentication_context
-    Rails.logger.info("[Auth] Authentication attempt started")
-    Rails.logger.info("[Auth] Environment: #{TradeTariffDevHub.environment}")
-    Rails.logger.info("[Auth] Cookie domain: #{TradeTariffDevHub.identity_cookie_domain}")
-    Rails.logger.info("[Auth] Expected id_token cookie name: #{id_token_cookie_name}")
-    Rails.logger.info("[Auth] Expected refresh_token cookie name: #{refresh_token_cookie_name}")
-    Rails.logger.info("[Auth] id_token cookie present: #{cookies[id_token_cookie_name].present?}")
-    Rails.logger.info("[Auth] refresh_token cookie present: #{cookies[refresh_token_cookie_name].present?}")
-
-    # Log all cookie names (without values) for debugging mismatches
-    cookie_names = cookies.to_h.keys
-    token_related = cookie_names.select { |name| name.to_s.include?("token") }
-    Rails.logger.info("[Auth] All token-related cookies received: #{token_related.inspect}")
-  end
-
   def id_token_cookie_name
     TradeTariffDevHub.id_token_cookie_name
   end
@@ -117,7 +100,7 @@ private
     TradeTariffDevHub.refresh_token_cookie_name
   end
 
-  def invitation_required_alert_message(email)
+  def private_beta_sign_in_alert(email)
     base_message = "This service is currently in private beta. You need an invitation from an existing organisation to access it."
     return base_message unless email&.end_with?("@#{TradeTariffDevHub.admin_domain}")
 

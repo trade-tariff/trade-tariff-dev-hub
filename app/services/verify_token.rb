@@ -15,18 +15,10 @@ class VerifyToken
 
   # Verify the token and return a Result object.
   def call
-    Rails.logger.info("[Auth] Starting token verification")
-    Rails.logger.info("[Auth] Token present: #{token.present?}")
-    Rails.logger.info("[Auth] Token length: #{token&.length || 0}")
-
     return log_reason(:no_token) if token.blank?
     return log_reason(:no_keys) unless has_keys?
 
-    Rails.logger.info("[Auth] Decrypting token...")
     decrypted = DecryptToken.new(token).call
-    Rails.logger.info("[Auth] Token decrypted, length: #{decrypted&.length || 0}")
-
-    Rails.logger.info("[Auth] Decoding JWT...")
     decoded = DecodeJwt.new(decrypted).call
 
     if decoded.nil?
@@ -34,13 +26,9 @@ class VerifyToken
       return log_reason(:decode_failed)
     end
 
-    Rails.logger.info("[Auth] JWT decoded successfully, sub: #{decoded['sub']}")
     groups = decoded&.fetch("cognito:groups", []) || []
-    Rails.logger.info("[Auth] User groups: #{groups.inspect}")
-    Rails.logger.info("[Auth] Required group: #{TradeTariffDevHub.identity_consumer}")
 
     if TradeTariffDevHub.identity_consumer.in?(groups)
-      Rails.logger.info("[Auth] Token verification successful")
       Result.new(valid: true, payload: decoded, reason: nil)
     else
       log_reason(:not_in_group, nil, groups)
@@ -94,8 +82,6 @@ private
   def has_keys?
     return true if Rails.env.development?
 
-    keys_present = identity_cognito_jwks_keys.present?
-    Rails.logger.info("[Auth] JWKS keys available: #{keys_present}")
-    keys_present
+    identity_cognito_jwks_keys.present?
   end
 end

@@ -12,10 +12,6 @@
     name: 'trade_tariff:full',
     description: 'Full access to Trade Tariff public API keys',
   },
-  {
-    name: 'spimm:full',
-    description: 'Full access to Categorisation API keys.'
-  }
 ].each do |role_attrs|
   Role.find_or_create_by(name: role_attrs[:name]) do |role|
     role.description = role_attrs[:description]

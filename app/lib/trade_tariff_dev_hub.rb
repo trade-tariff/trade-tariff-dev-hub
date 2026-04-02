@@ -19,8 +19,26 @@ module TradeTariffDevHub
       Rails.env.development? || Rails.env.test?
     end
 
+    # When true, new users without an invitation get a personal organisation at sign-in.
+    # Production defaults to false (invitation-only). Staging, deployed development, and local
+    # Rails development default to true. Set FEATURE_FLAG_SELF_SERVICE_ORG_CREATION explicitly
+    # to override (e.g. false on staging, true on production during a pilot).
     def self_service_org_creation_enabled?
-      ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] == "true"
+      if ENV.key?("FEATURE_FLAG_SELF_SERVICE_ORG_CREATION")
+        return ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] == "true"
+      end
+
+      return true if Rails.env.development?
+      return true if %w[development staging].include?(environment)
+
+      false
+    end
+
+    # Allowed when self-service is enabled and this is not the live production slot.
+    def allow_passwordless_self_service_org_creation?
+      return false unless self_service_org_creation_enabled?
+
+      environment != "production"
     end
 
     def documentation_url
@@ -187,11 +205,27 @@ module TradeTariffDevHub
       ENV.fetch("ENVIRONMENT", "production")
     end
 
-    # Returns true for production/staging environments only.
+    # Returns true for deployed environments (staging + production).
     # Uses ENVIRONMENT (not Rails.env) so that AWS development, where ENVIRONMENT=development
-    # but RAILS_ENV may be production, is correctly treated as non-production.
-    def production_environment?
+    # but RAILS_ENV may be production, is correctly treated as non-deployed.
+    def deployed_environment?
       %w[production staging].include?(environment)
+    end
+
+    # True only for the live production slot (ENVIRONMENT=production). Not staging, dev, or test.
+    def live_production_environment?
+      environment == "production"
+    end
+
+    # Returns true for the deployed development environment in AWS.
+    # This intentionally keys off ENVIRONMENT, not Rails.env.
+    def development_deployment_environment?
+      environment == "development"
+    end
+
+    # Restrict non-FPO/non-admin org sessions after identity callback in production only.
+    def block_non_fpo_identity_sessions_in_production?
+      environment == "production"
     end
 
     def id_token_cookie_name

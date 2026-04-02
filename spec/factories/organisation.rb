@@ -17,7 +17,7 @@ FactoryBot.define do
       roles { [Role.find_by(name: "admin")] }
     end
 
-    trait :implicit do
+    trait :without_roles do
       roles { [] }
     end
 

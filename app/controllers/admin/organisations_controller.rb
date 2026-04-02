@@ -30,7 +30,7 @@ class Admin::OrganisationsController < AuthenticatedController
     @admin_role = @roles.find(&:admin?)
     @service_roles = @roles.reject(&:admin?)
     assigned_service_role_ids = @service_roles.map(&:id)
-    @available_role_options = Role.assignable_service_roles
+    @available_role_options = Role.service_roles
                                   .where.not(id: assigned_service_role_ids)
                                   .order(:name)
     @users = @organisation.users
