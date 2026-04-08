@@ -145,7 +145,7 @@ RSpec.describe "Invitations", type: :request do
 
     context "when an error occurs during revocation" do
       before do
-        allow(Invitation).to receive(:find_by).with(id: invitation.id.to_s, organisation: current_user.organisation).and_return(invitation)
+        allow(Invitation).to receive(:find_by).with(id: invitation.id.to_s, organisation_id: current_user.organisation_id).and_return(invitation)
 
         allow(invitation).to receive(:update!).and_raise(StandardError, "Some error")
       end

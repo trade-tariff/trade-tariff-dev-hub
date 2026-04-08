@@ -1,4 +1,6 @@
 class InvitationsController < AuthenticatedController
+  include RecordOwnershipAuthorization
+
   before_action :set_invitation, only: %i[edit update resend delete]
 
   def new
@@ -103,13 +105,7 @@ class InvitationsController < AuthenticatedController
 private
 
   def set_invitation
-    @invitation = if organisation&.admin?
-                    # Admins can access any invitation
-                    Invitation.find_by(id: params[:id])
-                  else
-                    # Regular users can only access their organisation's invitations
-                    Invitation.find_by(id: params[:id], organisation:)
-                  end
+    @invitation = find_owned_record(Invitation)
 
     unless @invitation
       redirect_to redirect_path_after_action, alert: "Invitation not found."
@@ -122,13 +118,7 @@ private
   end
 
   def redirect_path_after_action
-    # If user is an admin and the invitation belongs to a different organisation,
-    # redirect to that organisation's admin page
-    if @invitation && organisation&.admin? && @invitation.organisation_id != organisation.id
-      admin_organisation_path(@invitation.organisation_id)
-    else
-      organisation_path(organisation)
-    end
+    redirect_path_for_owned_record(@invitation, default_path: organisation_path(organisation))
   end
 
   def invitation_params
