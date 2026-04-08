@@ -1,5 +1,4 @@
-class Admin::OrganisationRolesController < AuthenticatedController
-  before_action :ensure_admin
+class Admin::OrganisationRolesController < Admin::BaseController
   before_action :set_organisation
   before_action :validate_role_name
 
@@ -24,10 +23,6 @@ class Admin::OrganisationRolesController < AuthenticatedController
   end
 
 private
-
-  def ensure_admin
-    redirect_to root_path, alert: "Access denied" unless organisation.admin?
-  end
 
   def set_organisation
     @organisation = Organisation.find(params[:organisation_id])

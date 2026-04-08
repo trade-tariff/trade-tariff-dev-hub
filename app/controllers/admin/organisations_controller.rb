@@ -1,7 +1,5 @@
-class Admin::OrganisationsController < AuthenticatedController
+class Admin::OrganisationsController < Admin::BaseController
   include Pagy::Backend
-
-  before_action :ensure_admin
 
   def index
     @sort_column = params[:sort].presence || "created_at"
@@ -37,21 +35,5 @@ class Admin::OrganisationsController < AuthenticatedController
     @api_keys = @organisation.api_keys
     @trade_tariff_keys = @organisation.trade_tariff_keys
     @invitations = @organisation.invitations.reject(&:accepted?)
-  end
-
-private
-
-  def ensure_admin
-    redirect_to root_path, alert: "Access denied" unless organisation.admin?
-  end
-
-  def allowed?
-    # Override to check for admin role
-    organisation.admin?
-  end
-
-  def allowed_roles
-    # Empty to allow any role, we check admin in allowed?
-    %w[admin]
   end
 end

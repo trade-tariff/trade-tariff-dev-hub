@@ -200,7 +200,7 @@ RSpec.describe "Admin Role Requests", type: :request do
         get admin_role_requests_path
         expect(response).to redirect_to(root_path)
         follow_redirect!
-        expect(response.body).to include("Access denied")
+        expect(response.body).to include("does not have the required permissions to access this section")
       end
     end
 

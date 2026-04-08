@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
-class Admin::RoleRequestsController < AuthenticatedController
+class Admin::RoleRequestsController < Admin::BaseController
   include Pagy::Backend
 
   before_action :ensure_role_request_enabled
-  before_action :ensure_admin
   before_action :set_role_request, only: %i[approve reject]
 
   def index
@@ -49,16 +48,10 @@ class Admin::RoleRequestsController < AuthenticatedController
     redirect_to admin_role_requests_path, alert: "There was an unexpected problem rejecting the role request. Please try again."
   end
 
-private
-
   def ensure_role_request_enabled
     return if TradeTariffDevHub.role_request_enabled?
 
     redirect_to root_path, alert: "This feature is currently disabled."
-  end
-
-  def ensure_admin
-    redirect_to root_path, alert: "Access denied" unless organisation.admin?
   end
 
   def set_role_request
