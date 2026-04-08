@@ -6,7 +6,7 @@
   },
   {
     name: 'fpo:full',
-    description: 'Full access to FPO (Fast Parcel Operator) API keys'
+    description: 'Full access to FPO (Fast Parcel Operator) API keys',
   },
   {
     name: 'trade_tariff:full',
@@ -85,9 +85,15 @@ if Rails.env.development?
   )
 
   if localstack_running
-    CreateApiKey.new.call("local-development", "development API key")
-    CreateApiKey.new.call("local-development", "staging API key")
-    CreateApiKey.new.call("local-development", "production API key")
+    %w[development staging production].each do |env|
+      CreateApiKey.new.call(
+        ApiKey.new(
+          organisation_id: organisation.id,
+          description: "#{env} API key",
+          enabled: true,
+        ),
+      )
+    end
   else
     ApiKey.find_or_create_by!(
       organisation_id: organisation.id,
@@ -115,7 +121,7 @@ if Rails.env.development?
     )
   end
 
-  api_key = ApiKey.find_by(description: "staging API key")
+  api_key = organisation.api_keys.find_by!(description: "staging API key")
 
   if localstack_running
     RevokeApiKey.new.call(api_key)
@@ -127,25 +133,25 @@ if Rails.env.development?
   # Create Trade Tariff keys for testing
   TradeTariffKey.find_or_create_by!(
     organisation_id: organisation.id,
-    description: "development Trade Tariff key",
     client_id: "TTDEVELOPMENT0000001",
-    secret: "dev-trade-tariff-secret-key-1234567890abcdef",
-    scopes: %w[read write],
-  )
+  ) do |key|
+    key.description = "development Trade Tariff key"
+    key.scopes = %w[read write]
+  end
   TradeTariffKey.find_or_create_by!(
     organisation_id: organisation.id,
-    description: "staging Trade Tariff key",
     client_id: "TTSTAGING0000000001",
-    secret: "staging-trade-tariff-secret-key-1234567890abcdef",
-    scopes: %w[read],
-  )
+  ) do |key|
+    key.description = "staging Trade Tariff key"
+    key.scopes = %w[read]
+  end
   TradeTariffKey.find_or_create_by!(
     organisation_id: organisation.id,
-    description: "production Trade Tariff key",
     client_id: "TTPRODUCTION00000001",
-    secret: "prod-trade-tariff-secret-key-1234567890abcdef",
-    scopes: %w[read write],
-  )
+  ) do |key|
+    key.description = "production Trade Tariff key"
+    key.scopes = %w[read write]
+  end
 
   # Create Admin Dev Org with admin role
   admin_dev_org = Organisation.find_or_create_by!(organisation_name: "Admin Dev Org") do |org|
@@ -157,7 +163,13 @@ if Rails.env.development?
 
   # Create 1 FPO key for Admin Dev Org
   if localstack_running
-    CreateApiKey.new.call(admin_dev_org.id, "Admin Dev Org FPO Key")
+    CreateApiKey.new.call(
+      ApiKey.new(
+        organisation_id: admin_dev_org.id,
+        description: "Admin Dev Org FPO Key",
+        enabled: true,
+      ),
+    )
   else
     ApiKey.find_or_create_by!(
       organisation_id: admin_dev_org.id,
@@ -178,10 +190,9 @@ if Rails.env.development?
     # Stub key for local dev only (.env.development); not for use in AWS dev—AWS uses secrets and real provisioning.
     TradeTariffKey.find_or_create_by!(
       organisation_id: admin_dev_org.id,
-      description: "Admin Dev Org Trade Tariff Key"
+      description: "Admin Dev Org Trade Tariff Key",
     ) do |key|
       key.client_id = "TT-seed-#{SecureRandom.alphanumeric(12)}"
-      key.secret = "admin-dev-trade-tariff-secret"
       key.scopes = %w[read write]
       key.enabled = true
     end
@@ -200,7 +211,6 @@ if Rails.env.development?
   dev_user = User.find_or_create_by!(email_address: "dev@transformuk.com") do |user|
     user.organisation = dev_user_org
     user.user_id = "dev-user-id"
-    user.save!
   end
 
   # Make sure the dev user is associated with the non-admin organisation
@@ -219,19 +229,16 @@ if Rails.env.development?
   alice = User.find_or_create_by!(email_address: "alice.white@acmelogistics.example.com") do |u|
     u.organisation = trade_tariff_only_org
     u.user_id = "alice-white-acme"
-    u.save!
   end
 
   User.find_or_create_by!(email_address: "bob.smith@acmelogistics.example.com") do |u|
     u.organisation = trade_tariff_only_org
     u.user_id = "bob-smith-acme"
-    u.save!
   end
 
   User.find_or_create_by!(email_address: "carol.jones@acmelogistics.example.com") do |u|
     u.organisation = trade_tariff_only_org
     u.user_id = "carol-jones-acme"
-    u.save!
   end
 
   # Create invitations for Trade Tariff only org
@@ -253,7 +260,6 @@ if Rails.env.development?
   TradeTariffKey.find_or_create_by!(
     organisation_id: trade_tariff_only_org.id,
     client_id: "TTACME000000000001",
-    secret: "acme-trade-tariff-secret-key-abcdefghijklmnop"
   ) do |key|
     key.scopes = %w[read write]
     key.description = "Acme Production Trade Tariff Key"
@@ -262,7 +268,6 @@ if Rails.env.development?
   TradeTariffKey.find_or_create_by!(
     organisation_id: trade_tariff_only_org.id,
     client_id: "TTACME000000000002",
-    secret: "acme-trade-tariff-test-secret-abcdefghijklm"
   ) do |key|
     key.scopes = %w[read]
     key.description = "Acme Test Trade Tariff Key"
@@ -278,19 +283,16 @@ if Rails.env.development?
   dave = User.find_or_create_by!(email_address: "dave.brown@globalexpress.example.com") do |u|
     u.organisation = fpo_only_org
     u.user_id = "dave-brown-global"
-    u.save!
   end
 
   User.find_or_create_by!(email_address: "eve.wilson@globalexpress.example.com") do |u|
     u.organisation = fpo_only_org
     u.user_id = "eve-wilson-global"
-    u.save!
   end
 
   User.find_or_create_by!(email_address: "frank.taylor@globalexpress.example.com") do |u|
     u.organisation = fpo_only_org
     u.user_id = "frank-taylor-global"
-    u.save!
   end
 
   # Create invitations for FPO only org
@@ -351,19 +353,16 @@ if Rails.env.development?
   grace = User.find_or_create_by!(email_address: "grace.martin@techfreight.example.com") do |u|
     u.organisation = both_org
     u.user_id = "grace-martin-tech"
-    u.save!
   end
 
   User.find_or_create_by!(email_address: "henry.clark@techfreight.example.com") do |u|
     u.organisation = both_org
     u.user_id = "henry-clark-tech"
-    u.save!
   end
 
   User.find_or_create_by!(email_address: "ivy.lewis@techfreight.example.com") do |u|
     u.organisation = both_org
     u.user_id = "ivy-lewis-tech"
-    u.save!
   end
 
   # Create invitations for both org
@@ -392,7 +391,6 @@ if Rails.env.development?
   TradeTariffKey.find_or_create_by!(
     organisation_id: both_org.id,
     client_id: "TTTECH000000000001",
-    secret: "tech-trade-tariff-secret-key-123456789abcdef"
   ) do |key|
     key.scopes = %w[read write]
     key.description = "TechFreight Production Trade Tariff Key"
@@ -401,7 +399,6 @@ if Rails.env.development?
   TradeTariffKey.find_or_create_by!(
     organisation_id: both_org.id,
     client_id: "TTTECH000000000002",
-    secret: "tech-trade-tariff-dev-secret-key-987654321"
   ) do |key|
     key.scopes = %w[read]
     key.description = "TechFreight Development Trade Tariff Key"

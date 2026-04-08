@@ -41,12 +41,12 @@ RSpec.describe TradeTariff::CreateTradeTariffKey do
       expect(result.client_secret).to eq(stub_creds[:client_secret])
     end
 
-    it "creates a Trade Tariff key with identity client_id and no stored secret", :aggregate_failures do
+    it "creates a Trade Tariff key with identity client_id (client secret not persisted)", :aggregate_failures do
       result = create_trade_tariff_key.call(organisation.id, call_params[:description], call_params[:scopes])
       key = result.trade_tariff_key
 
       expect(key.client_id).to eq(stub_creds[:client_id])
-      expect(key.secret).to be_nil
+      expect(key.attributes).not_to have_key("secret")
       expect(key.organisation_id).to eq(organisation.id)
       expect(key.description).to eq(call_params[:description])
       expect(key.scopes).to eq(call_params[:scopes])
