@@ -18,27 +18,6 @@
   end
 end
 
-ClientRateLimitTier.find_or_create_by!(
-  name: "free",
-  refill_rate: 10,
-  refill_interval: 60,
-  refill_max: 50,
-)
-
-ClientRateLimitTier.find_or_create_by!(
-  name: "standard",
-  refill_rate: 200,
-  refill_interval: 60,
-  refill_max: 500,
-)
-
-ClientRateLimitTier.find_or_create_by!(
-  name: "premium",
-  refill_rate: 500,
-  refill_interval: 60,
-  refill_max: 1000,
-)
-
 if Rails.env.development?
   # Default to localhost if LOCALSTACK_HOST is not set
   localstack_host = ENV['LOCALSTACK_HOST'] || 'localhost'
