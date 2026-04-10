@@ -159,6 +159,9 @@ GEM
       reline (>= 0.4.2)
     jmespath (1.6.2)
     json (2.19.3)
+    json-schema (6.2.0)
+      addressable (~> 2.8)
+      bigdecimal (>= 3.1, < 5)
     jsonapi-serializer (2.2.0)
       activesupport (>= 4.2)
     jwt (3.1.2)
@@ -217,6 +220,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.19.2-x86_64-linux-musl)
       racc (~> 1.4)
+    ostruct (0.6.3)
     pagy (9.4.0)
     paper_trail (17.0.0)
       activerecord (>= 7.1)
@@ -332,6 +336,17 @@ GEM
       rspec-mocks (~> 3.13)
       rspec-support (~> 3.13)
     rspec-support (3.13.6)
+    rswag-api (2.17.0)
+      activesupport (>= 5.2, < 8.2)
+      railties (>= 5.2, < 8.2)
+    rswag-specs (2.17.0)
+      activesupport (>= 5.2, < 8.2)
+      json-schema (>= 2.2, < 7.0)
+      railties (>= 5.2, < 8.2)
+      rspec-core (>= 2.14)
+    rswag-ui (2.17.0)
+      actionpack (>= 5.2, < 8.2)
+      railties (>= 5.2, < 8.2)
     rubocop (1.82.1)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
@@ -431,6 +446,7 @@ DEPENDENCIES
   lograge
   logstash-event
   newrelic_rpm
+  ostruct
   pagy
   paper_trail
   pg
@@ -442,6 +458,9 @@ DEPENDENCIES
   rails-controller-testing
   rspec-json_expectations
   rspec-rails
+  rswag-api
+  rswag-specs
+  rswag-ui
   rubocop-govuk
   ruby-lsp-rails
   shoulda-matchers

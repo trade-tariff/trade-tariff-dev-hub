@@ -1,0 +1,47 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Trade Tariff Dev Hub API",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "{defaultHost}",
+      "variables": {
+        "defaultHost": {
+          "default": "http://localhost:3004"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/healthcheck": {
+      "get": {
+        "summary": "Returns the app revision",
+        "tags": [
+          "Healthcheck"
+        ],
+        "responses": {
+          "200": {
+            "description": "healthcheck response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "git_sha1": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "git_sha1"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

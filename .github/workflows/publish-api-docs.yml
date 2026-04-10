@@ -1,0 +1,60 @@
+name: Publish API docs
+#This is a template to copy api doc file to trade-tariff-api-docs repo
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  publish-api-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Generate OpenAPI docs
+        run: bundle exec rake rswag:specs:swaggerize
+
+      - name: Clone target docs repository
+        env:
+          API_DOCS_REPO: ${{ secrets.API_DOCS_REPO }}
+          API_DOCS_TOKEN: ${{ secrets.API_DOCS_TOKEN }}
+        run: |
+          test -n "$API_DOCS_REPO"
+          test -n "$API_DOCS_TOKEN"
+          git clone "https://x-access-token:${API_DOCS_TOKEN}@github.com/${API_DOCS_REPO}.git" target-docs-repo
+
+      - name: Copy generated OpenAPI file
+        env:
+          API_DOCS_TARGET_PATH: ${{ secrets.API_DOCS_TARGET_PATH }}
+        run: |
+          test -n "$API_DOCS_TARGET_PATH"
+          mkdir -p "target-docs-repo/$(dirname "$API_DOCS_TARGET_PATH")"
+          cp "swagger/v1/openapi.json" "target-docs-repo/$API_DOCS_TARGET_PATH"
+
+      - name: Commit and push docs update
+        working-directory: target-docs-repo
+        env:
+          API_DOCS_TARGET_BRANCH: ${{ secrets.API_DOCS_TARGET_BRANCH }}
+        run: |
+          branch="${API_DOCS_TARGET_BRANCH:-main}"
+          git checkout "$branch"
+
+          if git diff --quiet; then
+            echo "No API doc changes to publish."
+            exit 0
+          fi
+
+          git add .
+          git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" \
+            commit -m "Update API docs from ${GITHUB_REPOSITORY}@${GITHUB_SHA}"
+          git push origin "$branch"
