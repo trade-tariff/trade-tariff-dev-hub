@@ -88,8 +88,4 @@ private
   def trade_tariff_key_params
     params.permit(:trade_tariff_key_description)
   end
-
-  def allowed_roles
-    ["trade_tariff:full"]
-  end
 end
