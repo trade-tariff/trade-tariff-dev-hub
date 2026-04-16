@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class TradeTariffKeysController < AuthenticatedController
+  include RecordOwnershipAuthorization
+
   before_action :set_trade_tariff_key, only: %i[confirm_action revoke delete]
 
   def index
@@ -65,11 +67,7 @@ class TradeTariffKeysController < AuthenticatedController
 private
 
   def set_trade_tariff_key
-    @trade_tariff_key = if organisation&.admin?
-                          TradeTariffKey.find_by(id: params[:id])
-                        else
-                          TradeTariffKey.find_by(id: params[:id], organisation_id:)
-                        end
+    @trade_tariff_key = find_owned_record(TradeTariffKey)
 
     unless @trade_tariff_key
       redirect_to redirect_path_after_action, alert: "Trade Tariff key not found"
@@ -78,11 +76,7 @@ private
   end
 
   def redirect_path_after_action
-    if organisation&.admin? && @trade_tariff_key && @trade_tariff_key.organisation_id != organisation.id
-      admin_organisation_path(@trade_tariff_key.organisation_id)
-    else
-      trade_tariff_keys_path
-    end
+    redirect_path_for_owned_record(@trade_tariff_key, default_path: trade_tariff_keys_path)
   end
 
   def trade_tariff_key_params
