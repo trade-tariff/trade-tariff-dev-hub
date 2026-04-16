@@ -4,10 +4,10 @@ class ErrorsController < ApplicationController
     render_error(status: :not_found, header: "Page not found", message:, json_error: "Resource not found")
   end
 
-  def unprocessable_entity
+  def unprocessable_content
     message = "We're sorry, but we cannot process your request at this time.<br>
                Please contact support for assistance or try a different request.".html_safe
-    render_error(status: :unprocessable_content, header: "Unprocessable entity", message:)
+    render_error(status: :unprocessable_content, message:)
   end
 
   def internal_server_error
@@ -46,7 +46,7 @@ class ErrorsController < ApplicationController
 
   def too_many_requests
     message = "You have made too many requests. Please try again later."
-    render_error(status: :too_many_requests, header: "Too many requests", message:)
+    render_error(status: :too_many_requests, message:)
   end
 
 private
