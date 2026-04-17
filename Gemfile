@@ -10,11 +10,14 @@ gem "importmap-rails"
 gem "jsonapi-serializer"
 gem "jwt"
 gem "newrelic_rpm"
+gem "ostruct"
 gem "paper_trail"
 gem "pg"
 gem "propshaft"
 gem "puma"
 gem "rack-cors"
+gem "rswag-api"
+gem "rswag-ui"
 
 gem "pagy"
 
@@ -27,6 +30,7 @@ gem "bootsnap", require: false
 group :development, :test do
   gem "dotenv-rails"
   gem "pry-rails"
+  gem "rswag-specs"
 end
 
 group :development do

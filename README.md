@@ -2,6 +2,79 @@
 
 Ruby app giving FPO operators the ability to manage their own API credentials.
 
+## Swagger / OpenAPI docs
+
+Generate the OpenAPI spec from request specs:
+
+```bash
+bundle exec rspec spec/integration --format documentation
+bundle exec rails rswag:specs:swaggerize
+```
+
+Then start the app and view Swagger UI at `/api-docs`.
+
+### Publish OpenAPI docs to another repository
+
+This repo includes a GitHub Actions workflow at `.github/workflows/publish-api-docs.yml`.
+It generates `swagger/v1/openapi.json` and copies it into a separate GitHub repository.
+
+The workflow runs on:
+
+- push to `main`
+- manual run (`workflow_dispatch`)
+
+Configure these GitHub Actions secrets in this repository:
+
+- `API_DOCS_REPO`: target repository in `owner/repo` format
+- `API_DOCS_TOKEN`: token with write access to the target repository
+- `API_DOCS_TARGET_PATH`: destination file path in target repository (for example `openapi/dev-hub/openapi.json`)
+- `API_DOCS_TARGET_BRANCH`: target branch (optional, defaults to `main`)
+
+You can run it manually from the GitHub Actions tab by selecting **Publish API docs** and clicking **Run workflow**.
+
+### Define Swagger manually in Ruby DSL (`swagger-blocks`)
+
+If you want to describe an endpoint manually (instead of generating from request specs), you can use `swagger-blocks` style DSL:
+
+```ruby
+class HealthcheckSwagger
+  include Swagger::Blocks
+
+  swagger_root do
+    key :openapi, "3.0.1"
+    info do
+      key :title, "Trade Tariff Dev Hub API"
+      key :version, "v1"
+    end
+    key :paths, {}
+  end
+
+  swagger_path "/healthcheck" do
+    operation :get do
+      key :summary, "Returns application revision"
+      key :operationId, "getHealthcheck"
+      key :produces, ["application/json"]
+
+      response 200 do
+        key :description, "healthcheck response"
+        schema do
+          key :type, :object
+          property :git_sha1 do
+            key :type, :string
+          end
+          key :required, ["git_sha1"]
+        end
+      end
+    end
+  end
+end
+
+openapi_hash = Swagger::Blocks.build_root_json([HealthcheckSwagger])
+File.write(Rails.root.join("swagger/v1/openapi.json"), JSON.pretty_generate(openapi_hash))
+```
+
+In this project we currently use `rswag` (`spec/integration/*`) as the source of truth, but this is useful when you want fully hand-written contract definitions.
+
 ## Getting started
 
 ### Localstack

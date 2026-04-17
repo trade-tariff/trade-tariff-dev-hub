@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  # Mounts the Swagger UI web app at /api-docs
+  mount Rswag::Ui::Engine => "/api-docs"
+  # Mounts the endpoint that serves raw OpenAPI JSON under the same base path
+  mount Rswag::Api::Engine => "/api-docs"
+
   get "healthcheck" => "healthcheck#check", as: :healthcheck
   get "healthcheckz" => "rails/health#show", as: :rails_health_check
 
