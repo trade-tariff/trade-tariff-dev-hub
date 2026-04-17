@@ -13,6 +13,7 @@ RSpec.describe AuthenticatedController, type: :controller do
       get "test_action" => "organisations#test_action"
       get "/dev/login", to: "dev_auth#new", as: :dev_login
       get "/organisations/:id", to: "organisations#show", as: :organisation
+      root to: "homepage#index"
     end
   end
 
@@ -115,6 +116,45 @@ RSpec.describe AuthenticatedController, type: :controller do
         it "allows access" do
           get :test_action
           expect(response).to have_http_status(:ok)
+        end
+      end
+
+      context "when the user's org only has the trade_tariff:full role" do
+        let(:valid_verify_result) { VerifyToken::Result.new(valid: true, payload: {}, reason: nil) }
+        let(:current_user) { create(:user, organisation: create(:organisation, :trade_tariff_only)) }
+
+        before do
+          create(:session, user: current_user, token: plain_token, id_token: id_token_value)
+          session[:token] = plain_token
+          cookies[TradeTariffDevHub.id_token_cookie_name] = id_token_value
+          allow(VerifyToken).to receive(:new).with(id_token_value).and_return(
+            instance_double(VerifyToken, call: valid_verify_result),
+          )
+        end
+
+        it "allows access" do
+          get :test_action
+          expect(response).to have_http_status(:ok)
+        end
+      end
+
+      context "when the user's org has no permitted roles" do
+        let(:valid_verify_result) { VerifyToken::Result.new(valid: true, payload: {}, reason: nil) }
+        let(:current_user) { create(:user, organisation: create(:organisation, :without_roles)) }
+
+        before do
+          create(:session, user: current_user, token: plain_token, id_token: id_token_value)
+          session[:token] = plain_token
+          cookies[TradeTariffDevHub.id_token_cookie_name] = id_token_value
+          allow(VerifyToken).to receive(:new).with(id_token_value).and_return(
+            instance_double(VerifyToken, call: valid_verify_result),
+          )
+        end
+
+        it "clears authentication and redirects with a 'not yet open' alert", :aggregate_failures do
+          get :test_action
+          expect(response).to redirect_to("/")
+          expect(flash[:alert]).to include("not yet open to the public")
         end
       end
     end

@@ -114,20 +114,19 @@ protected
     redirect_to root_path, alert: "Your user <strong>#{current_user&.email_address}</strong> does not have the required permissions to access this section"
   end
 
-  # Any organisation that DOES NOT have the fpo:full or admin roles needs to be redirected to the start with a flash
+  # Any organisation that DOES NOT have the fpo:full, trade_tariff:full, or admin roles needs to be redirected to the start with a flash
   # Any expired session needs to be redirected to the identity service to refresh the token
-  # Any non-expired session with the fpo:full role can continue
+  # Any non-expired session with one of the allowed roles can continue
   def handle_user_session
     unless TradeTariffDevHub.block_non_fpo_identity_sessions_in_production?
       renew_identity_session_if_needed
       return
     end
 
-    if organisation&.fpo? || organisation&.admin?
+    if organisation&.fpo? || organisation&.admin? || organisation&.trade_tariff_access?
       renew_identity_session_if_needed
     else
-      # NOTE:  Non-FPO orgs should not have an identity session - destroy it
-      Rails.logger.info("[Auth] Non-FPO org detected, clearing authentication")
+      Rails.logger.info("[Auth] Non-permitted org detected, clearing authentication")
       clear_authentication!
       redirect_to root_path, alert: "This service is not yet open to the public. If you have any questions please contact us on hmrc-trade-tariff-support-g@digital.hmrc.gov.uk"
     end

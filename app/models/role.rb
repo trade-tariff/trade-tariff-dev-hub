@@ -15,7 +15,9 @@
 
 class Role < ApplicationRecord
   ADMIN_ROLE_NAME = "admin".freeze
-  SERVICE_ROLE_NAMES = %w[trade_tariff:full fpo:full].freeze
+  TRADE_TARIFF_ROLE_NAME = "trade_tariff:full".freeze
+  FPO_ROLE_NAME = "fpo:full".freeze
+  SERVICE_ROLE_NAMES = [TRADE_TARIFF_ROLE_NAME, FPO_ROLE_NAME].freeze
 
   validates :name, presence: true, uniqueness: true
   validates :description, presence: true

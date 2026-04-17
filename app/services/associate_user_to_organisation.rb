@@ -35,10 +35,12 @@ private
 
   def create_and_associate_self_service_organisation(user)
     User.transaction do
-      user.organisation = Organisation.create!(
+      organisation = Organisation.create!(
         organisation_name: user.email_address,
         description: "Self-service organisation for #{user.email_address}",
       )
+      organisation.assign_role!(Role::TRADE_TARIFF_ROLE_NAME)
+      user.organisation = organisation
       user.save!
     end
   end
