@@ -53,7 +53,7 @@ WORKDIR /app
 
 ENV RAILS_SERVE_STATIC_FILES=true \
   RAILS_ENV=production \
-  PORT=8080
+  SSL_PORT=8443
 
 RUN bundle config set without 'development test'
 
@@ -66,9 +66,8 @@ RUN addgroup -S tariff && \
   chown -R tariff:tariff /app && \
   chown -R tariff:tariff /usr/local/bundle
 
-HEALTHCHECK CMD nc -z 0.0.0.0 $PORT
+HEALTHCHECK CMD nc -z 0.0.0.0 $SSL_PORT
 
 USER tariff
 
-#CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
 CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
