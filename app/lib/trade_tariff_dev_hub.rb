@@ -34,11 +34,11 @@ module TradeTariffDevHub
       false
     end
 
-    # Allowed when self-service is enabled and this is not the live production slot.
+    # Allowed purely based on the self-service org creation feature flag.
+    # Production remains gated because self_service_org_creation_enabled? defaults to false there
+    # unless FEATURE_FLAG_SELF_SERVICE_ORG_CREATION=true is set explicitly.
     def allow_passwordless_self_service_org_creation?
-      return false unless self_service_org_creation_enabled?
-
-      environment != "production"
+      self_service_org_creation_enabled?
     end
 
     def documentation_url

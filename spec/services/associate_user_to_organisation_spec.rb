@@ -94,13 +94,32 @@ RSpec.describe AssociateUserToOrganisation do
         allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(true)
       end
 
-      it "creates and associates an organisation without roles", :aggregate_failures do
+      it "creates and associates an organisation with the trade_tariff:full role", :aggregate_failures do
         expect { service.call(user) }.to change(Organisation, :count).by(1)
 
         expect(user).to be_persisted
         expect(user.organisation).to be_present
         expect(user.organisation.organisation_name).to eq("selfserve@example.com")
-        expect(user.organisation.roles).to be_empty
+        expect(user.organisation.roles.pluck(:name)).to eq(["trade_tariff:full"])
+      end
+    end
+
+    context "when the user joins an existing organisation via invitation" do
+      let(:user) { build(:user, organisation: nil, email_address: "invited@example.com") }
+      let(:inviter) { create(:user) }
+
+      before do
+        create(
+          :invitation,
+          invitee_email: user.email_address,
+          organisation: inviter.organisation,
+          status: :pending,
+          user: inviter,
+        )
+      end
+
+      it "does not mutate the existing organisation's roles" do
+        expect { service.call(user) }.not_to(change { inviter.organisation.reload.roles.pluck(:name).sort })
       end
     end
 
