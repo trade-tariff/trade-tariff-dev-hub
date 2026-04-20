@@ -26,7 +26,7 @@
         row.with_cell do
           if trade_tariff_key.active?
             link_to 'Revoke', revoke_trade_tariff_key_path(trade_tariff_key.id), class: 'govuk-link'
-          else
+          elsif TradeTariffDevHub.deletion_enabled?
             link_to 'Delete', delete_trade_tariff_key_path(trade_tariff_key.id), class: 'govuk-link'
           end
         end
