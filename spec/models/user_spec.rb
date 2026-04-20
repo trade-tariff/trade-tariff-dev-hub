@@ -65,7 +65,7 @@ RSpec.describe User, type: :model do
 
         user = described_class.find_by!(email_address: decoded_token["email"])
         expect(user.organisation.organisation_name).to eq(decoded_token["email"])
-        expect(user.organisation.roles).to be_empty
+        expect(user.organisation.roles.pluck(:name)).to eq(["trade_tariff:full"])
       end
     end
 

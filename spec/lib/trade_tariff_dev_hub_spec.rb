@@ -182,11 +182,18 @@ RSpec.describe TradeTariffDevHub do
       expect(described_class.allow_passwordless_self_service_org_creation?).to be(true)
     end
 
-    it "returns false in production even when self-service flag is enabled" do
+    it "returns false in production when the self-service flag is unset" do
+      ENV["ENVIRONMENT"] = "production"
+      ENV.delete("FEATURE_FLAG_SELF_SERVICE_ORG_CREATION")
+
+      expect(described_class.allow_passwordless_self_service_org_creation?).to be(false)
+    end
+
+    it "returns true in production when the self-service flag is enabled" do
       ENV["ENVIRONMENT"] = "production"
       ENV["FEATURE_FLAG_SELF_SERVICE_ORG_CREATION"] = "true"
 
-      expect(described_class.allow_passwordless_self_service_org_creation?).to be(false)
+      expect(described_class.allow_passwordless_self_service_org_creation?).to be(true)
     end
   end
 
