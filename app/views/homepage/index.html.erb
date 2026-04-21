@@ -9,7 +9,7 @@
     <h3 class="govuk-heading-m">What you can do</h3>
 
     <p class="govuk-body">
-      The Trade Tariff APIs offer structured, reliable access to official tariff information, which includes commodity codes, duty rates, VAT, quotas, and trade measures.
+      The Trade Tariff APIs offer structured, reliable access to official trade tariff information, which includes commodity codes, duty rates, VAT, quotas and trade measures.
     </p>
 
     <p class="govuk-body">
@@ -24,13 +24,16 @@
 
     <%= govuk_list type: :bullet  do %>
       <%= tag.li do %>
+        <%= tag.strong("Trade Tariff API") %> – Access UK Trade Tariff data for imports and exports.
+      <% end %>
+      <%= tag.li do %>
         <%= tag.strong("Fast Parcel Operator (FPO) API") %> – Identify likely commodity codes from product descriptions to support rapid customs processing.
       <% end %>
     <% end %>
 
     <%= govuk_start_button(text: "Start now", href: api_keys_path) %>
 
-    <h3 class="govuk-heading-m">Who this service is for</h3>
+    <h3 class="govuk-heading-m">Who is this service for</h3>
     <p class="govuk-body">
       Anyone who needs access to UK Trade Tariff data — including:
     </p>
@@ -45,6 +48,11 @@
     <p class="govuk-body">
       Whether you are a large enterprise or an independent trader, the APIs
       provide consistent and authoritative data from HMRC’s Online Trade Tariff.
+    </p>
+
+    <h3 class="govuk-heading-m">Help using the APIs</h3>
+    <p class="govuk-body">
+      For information, guidance and examples of using the Trade Tariff API can be found in the <%= documentation_link %>.
     </p>
   </div>
 </div>
