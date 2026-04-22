@@ -1,0 +1,32 @@
+<h1 class="govuk-heading-xl">Change your cookie settings</h1>
+
+<p class="govuk-body">We use cookies to collect information about how you use the Developer Portal. We use this information to improve the service.</p>
+
+<%= form_with url: cookies_policy_path, method: :post, local: true, html: { novalidate: true } do |form| %>
+  <div class="govuk-form-group">
+    <fieldset class="govuk-fieldset" aria-describedby="usage-hint">
+      <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+        <h2 class="govuk-fieldset__heading">Cookies that measure website use</h2>
+      </legend>
+      <div id="usage-hint" class="govuk-hint">
+        We use Google Tag Manager and Google Analytics to measure how you use the Developer Portal so we can improve it.
+      </div>
+      <div class="govuk-radios" data-module="govuk-radios">
+        <div class="govuk-radios__item">
+          <%= form.radio_button :usage, "true", class: "govuk-radios__input", id: "usage-yes", checked: @current_usage_choice == true %>
+          <%= form.label :usage, "Use cookies that measure my website use", value: "true", class: "govuk-label govuk-radios__label", for: "usage-yes" %>
+        </div>
+        <div class="govuk-radios__item">
+          <%= form.radio_button :usage, "false", class: "govuk-radios__input", id: "usage-no", checked: @current_usage_choice == false %>
+          <%= form.label :usage, "Do not use cookies that measure my website use", value: "false", class: "govuk-label govuk-radios__label", for: "usage-no" %>
+        </div>
+      </div>
+    </fieldset>
+  </div>
+
+  <%= form.govuk_submit "Save cookie settings" %>
+<% end %>
+
+<p class="govuk-body">
+  <%= link_to "View cookies information", cookies_path, class: "govuk-link" %>
+</p>

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html class="govuk-template--rebranded app-html-class">
   <head>
+    <% if analytics_allowed? && TradeTariffDevHub.google_tag_manager_container_id.present? %>
+      <%= render "shared/gtm", part: "head" %>
+    <% end %>
     <title><%= content_for(:title) || "UK Trade Tariff Developer Portal" %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -9,6 +12,11 @@
     <meta name="theme-color" content="#1d70b8">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+
+    <meta name="analytics-policy-cookie" content="<%= TradeTariffDevHub::POLICY_COOKIE_NAME %>">
+    <meta name="analytics-preferences-cookie" content="<%= TradeTariffDevHub::PREFERENCES_SET_COOKIE_NAME %>">
+    <meta name="analytics-cookie-prefixes" content="<%= TradeTariffDevHub::ANALYTICS_COOKIE_PREFIXES.join(',') %>">
+    <meta name="analytics-cookie-delete-domains" content="<%= TradeTariffDevHub.analytics_cookie_delete_domains(request.host).join(',') %>">
 
     <%= favicon_link_tag 'favicon.ico' %>
     <%= favicon_link_tag 'favicon.svg' %>
@@ -26,6 +34,10 @@
   <% end %>
 
   <body class="govuk-template__body app-body-class">
+    <% if analytics_allowed? && TradeTariffDevHub.google_tag_manager_container_id.present? %>
+      <%= render "shared/gtm", part: "body" %>
+    <% end %>
+    <%= render "layouts/cookies_consent" %>
     <div class="govuk-width-container app-width-container">
     <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
     <%= govuk_phase_banner(tag: { text: "Beta" }) do %>This is a new service, your

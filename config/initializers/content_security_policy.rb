@@ -8,9 +8,21 @@ Rails.application.configure do
   config.content_security_policy do |policy|
     policy.default_src :self, :https
     policy.font_src    :self, :https, :data
-    policy.img_src     :self, :https, :data
+    policy.img_src     :self, :https, :data,
+                       "https://www.googletagmanager.com",
+                       "https://www.google-analytics.com",
+                       "https://*.google-analytics.com",
+                       "https://*.analytics.google.com"
     policy.object_src  :none
-    policy.script_src  :self, :https
+    policy.script_src  :self, :https,
+                       "https://www.googletagmanager.com",
+                       "https://www.google-analytics.com"
+    policy.connect_src :self,
+                       "https://www.google-analytics.com",
+                       "https://*.analytics.google.com",
+                       "https://*.googletagmanager.com",
+                       "https://*.google-analytics.com"
+    policy.frame_src   :self, "https://www.googletagmanager.com"
     policy.style_src   :self, :https
     # Specify URI for violation reports
     policy.report_uri "/csp-violation-report"
