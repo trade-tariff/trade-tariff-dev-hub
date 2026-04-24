@@ -56,6 +56,8 @@ private
         conn.response :json
         conn.ssl.verify = false
         conn.ssl.ca_file = cert_path
+        conn.options.open_timeout = 5
+        conn.options.timeout = 5
         conn.headers["User-Agent"] = user_agent
         conn.headers["Accept"] = ACCEPT
         conn.headers["Authorization"] = "Bearer #{TradeTariffDevHub.uk_backend_bearer_token}"
