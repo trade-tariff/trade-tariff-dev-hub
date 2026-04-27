@@ -246,7 +246,7 @@ module TradeTariffDevHub
     end
 
     def uk_backend_url
-      @uk_backend_url ||= ENV.fetch("UK_BACKEND_URL", "http://backend-uk.tariff.internal:8080/uk/api")
+      @uk_backend_url ||= ENV.fetch("UK_BACKEND_URL", "https://backend-uk.tariff.internal:8443/uk/api")
     end
 
     def uk_backend_bearer_token
