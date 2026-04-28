@@ -79,7 +79,9 @@ Rails.application.routes.draw do
   end
 
   get :privacy, to: "pages#privacy"
-  get :cookies, to: "pages#cookies"
+  get :cookies, to: "pages#cookies_info"
+  get "/cookies-policy", to: "pages#cookies_policy", as: :cookies_policy
+  post "/cookies-policy", to: "pages#update_cookies_policy"
 
   post "/csp-violation-report", to: "csp_reports#create"
 

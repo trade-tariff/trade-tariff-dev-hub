@@ -1,4 +1,17 @@
 module TradeTariffDevHub
+  # Name of the cookie that stores the user's analytics consent choice as JSON.
+  # Must stay in sync with the meta tag emitted in app/views/layouts/application.html.erb
+  # and the JS cookie banner in app/javascript/application.js.
+  POLICY_COOKIE_NAME = "cookies_policy".freeze
+
+  # Name of the cookie that tracks whether the user has dismissed the post-choice
+  # confirmation banner ("You have accepted/rejected additional cookies").
+  PREFERENCES_SET_COOKIE_NAME = "cookies_preferences_set".freeze
+
+  # Cookie name prefixes set by Google Analytics / Google Tag Manager. When a user
+  # revokes consent we clear any cookie whose name starts with one of these.
+  ANALYTICS_COOKIE_PREFIXES = %w[_ga _gat _gid].freeze
+
   class << self
     def govuk_app_domain
       @govuk_app_domain ||= ENV.fetch(
@@ -60,6 +73,19 @@ module TradeTariffDevHub
         "TERMS_AND_CONDITIONS_URL",
         "https://api.trade-tariff.service.gov.uk/fpo/terms-and-conditions.html",
       )
+    end
+
+    def google_tag_manager_container_id
+      ENV.fetch("GOOGLE_TAG_MANAGER_CONTAINER_ID", "")
+    end
+
+    def analytics_cookie_delete_domains(host)
+      return [] if host.blank?
+
+      domains = [host, ".#{host}"]
+      registrable_domain = host.split(".").last(2).join(".")
+      domains << ".#{registrable_domain}" if registrable_domain.present?
+      domains.uniq
     end
 
     def govuk_notifier_api_key

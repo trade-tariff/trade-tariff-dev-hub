@@ -229,6 +229,40 @@ RSpec.describe TradeTariffDevHub do
     end
   end
 
+  describe ".google_tag_manager_container_id" do
+    before do
+      allow(ENV).to receive(:fetch).and_call_original
+    end
+
+    it "returns the GOOGLE_TAG_MANAGER_CONTAINER_ID env var when set" do
+      allow(ENV).to receive(:fetch).with("GOOGLE_TAG_MANAGER_CONTAINER_ID", "").and_return("GTM-KPM7NRDG")
+
+      expect(described_class.google_tag_manager_container_id).to eq("GTM-KPM7NRDG")
+    end
+
+    it "returns a blank string when GOOGLE_TAG_MANAGER_CONTAINER_ID is unset" do
+      allow(ENV).to receive(:fetch).with("GOOGLE_TAG_MANAGER_CONTAINER_ID", "").and_return("")
+
+      expect(described_class.google_tag_manager_container_id).to eq("")
+    end
+  end
+
+  describe ".analytics_cookie_delete_domains" do
+    it "returns host and domain variants for deleting analytics cookies" do
+      expect(described_class.analytics_cookie_delete_domains("hub.dev.trade-tariff.service.gov.uk")).to eq(
+        [
+          "hub.dev.trade-tariff.service.gov.uk",
+          ".hub.dev.trade-tariff.service.gov.uk",
+          ".gov.uk",
+        ],
+      )
+    end
+
+    it "returns an empty array when host is blank" do
+      expect(described_class.analytics_cookie_delete_domains(nil)).to eq([])
+    end
+  end
+
   describe ".live_production_environment?" do
     include_context "with restored ENVIRONMENT"
 
