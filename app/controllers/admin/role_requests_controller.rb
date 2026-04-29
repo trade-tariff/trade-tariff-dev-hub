@@ -12,7 +12,7 @@ class Admin::RoleRequestsController < Admin::BaseController
                   .includes(:organisation, :user)
                   .order(created_at: :desc),
       page: params[:page],
-      items: 20,
+      limit: TradeTariffDevHub::ADMIN_PAGY_PAGE_SIZE,
     )
   end
 
