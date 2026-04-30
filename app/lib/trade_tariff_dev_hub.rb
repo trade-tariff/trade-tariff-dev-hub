@@ -1,4 +1,8 @@
 module TradeTariffDevHub
+  # Page size for Pagy-backed admin lists. Passed explicitly to `pagy(..., limit: ...)` so it
+  # cannot silently fall back to Pagy’s built-in default (20 on Pagy 9).
+  ADMIN_PAGY_PAGE_SIZE = 10
+
   # Name of the cookie that stores the user's analytics consent choice as JSON.
   # Must stay in sync with the meta tag emitted in app/views/layouts/application.html.erb
   # and the JS cookie banner in app/javascript/application.js.

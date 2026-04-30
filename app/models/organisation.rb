@@ -17,6 +17,14 @@
 class Organisation < ApplicationRecord
   ORGANISATION_NAME_EMAIL_LIKE_FORMAT = /\A#{URI::MailTo::EMAIL_REGEXP.source}\z/io
 
+  scope :matching_name, lambda { |term|
+    stripped = term.to_s.strip
+    next all if stripped.blank?
+
+    pattern = "%#{sanitize_sql_like(stripped)}%"
+    where("organisation_name ILIKE ?", pattern)
+  }
+
   has_paper_trail
 
   has_many :users, dependent: :destroy

@@ -43,7 +43,7 @@
           end
         end %>
 
-        <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+        <%= govuk_pagy_nav(@pagy) if @pagy.pages > 1 %>
       <% else %>
         <p class="govuk-body">There are no pending access requests.</p>
       <% end %>

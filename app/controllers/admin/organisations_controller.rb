@@ -2,6 +2,8 @@ class Admin::OrganisationsController < Admin::BaseController
   include Pagy::Backend
 
   def index
+    @search_query = params[:q].to_s.strip
+
     @sort_column = params[:sort].presence || "created_at"
     @sort_direction = params[:direction].presence || "desc"
 
@@ -12,11 +14,15 @@ class Admin::OrganisationsController < Admin::BaseController
     # Map 'name' to 'organisation_name' for the database column
     db_column = @sort_column == "name" ? "organisation_name" : @sort_column
 
+    scope = Organisation.includes(:users, :api_keys, :trade_tariff_keys, :invitations, :roles)
+    scope = scope.matching_name(@search_query) if @search_query.present?
+    scope = scope.order(db_column => @sort_direction.to_sym)
+
     @pagy, @organisations = pagy(
-      Organisation.includes(:users, :api_keys, :trade_tariff_keys, :invitations, :roles)
-                  .order(db_column => @sort_direction.to_sym),
+      scope,
       page: params[:page],
-      items: 20,
+      limit: TradeTariffDevHub::ADMIN_PAGY_PAGE_SIZE,
+      params: pagy_index_params,
     )
   end
 
@@ -35,5 +41,15 @@ class Admin::OrganisationsController < Admin::BaseController
     @api_keys = @organisation.api_keys
     @trade_tariff_keys = @organisation.trade_tariff_keys
     @invitations = @organisation.invitations.reject(&:accepted?)
+  end
+
+private
+
+  def pagy_index_params
+    {
+      q: @search_query.presence,
+      sort: params[:sort].presence_in(%w[name created_at]),
+      direction: params[:direction].presence_in(%w[asc desc]),
+    }.compact
   end
 end
