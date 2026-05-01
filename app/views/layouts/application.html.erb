@@ -38,25 +38,42 @@
       <%= render 'layouts/navigation', header: nav %>
     <% end %>
     <div class="govuk-width-container app-width-container">
-    <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
-    <%= govuk_phase_banner(tag: { text: "Beta" }) do %>This is a new service, your
-      <%= govuk_link_to("feedback (Opens in new tab)", ENV["FEEDBACK_URL"] || 'https://www.trade-tariff.service.gov.uk/feedback', target: "_blank", rel: "noreferrer noopener") %>
-      will help us improve it.
-    <% end %>
-    <% if content_for?(:back_link) %>
-      <%= yield :back_link %>
-    <% end %>
-    <main class="govuk-main-wrapper app-main-class" id="main-content">
-      <%= render 'flashes' %>
-      <%= yield %>
-    </main>
-  </div>
-  <%= govuk_footer(meta_items_title: "Helpful links", meta_items: {
-    "API Documentation" => TradeTariffDevHub.documentation_url,
-    "Feedback" =>  TradeTariffDevHub.feedback_url,
-    "Privacy policy" => privacy_path,
-    "Cookies" => cookies_path,
-    "Terms and conditions" => TradeTariffDevHub.terms_and_conditions_url,
-  }) %>
+      <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+      <%= govuk_phase_banner(tag: { text: "Beta" }) do %>This is a new service, your
+        <%= govuk_link_to("feedback (Opens in new tab)", ENV["FEEDBACK_URL"] || 'https://www.trade-tariff.service.gov.uk/feedback', target: "_blank", rel: "noreferrer noopener") %>
+        will help us improve it.
+      <% end %>
+      <% if content_for?(:back_link) %>
+        <%= yield :back_link %>
+      <% end %>
+      <main class="govuk-main-wrapper app-main-class" id="main-content">
+        <%= render 'flashes' %>
+        <%= yield %>
+      </main>
+    </div>
+    <%= govuk_footer(meta_items: [
+      {
+        text: "API Documentation",
+        href: TradeTariffDevHub.documentation_url,
+        attr: { target: "_blank", rel: "noreferrer noopener" },
+      },
+      {
+        text: "Enquiry form",
+        href: TradeTariffDevHub.enquiry_form_url,
+        attr: { target: "_blank", rel: "noreferrer noopener" },
+      },
+      {
+        text: "Feedback",
+        href: TradeTariffDevHub.feedback_url,
+        attr: { target: "_blank", rel: "noreferrer noopener" },
+      },
+      { text: "Privacy policy", href: privacy_path },
+      { text: "Cookies", href: cookies_path },
+      {
+        text: "Terms and conditions",
+        href: TradeTariffDevHub.terms_and_conditions_url,
+        attr: { target: "_blank", rel: "noreferrer noopener" },
+      },
+    ]) %>
   </body>
 </html>

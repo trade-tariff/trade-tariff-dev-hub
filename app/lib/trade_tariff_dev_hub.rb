@@ -1,4 +1,11 @@
 module TradeTariffDevHub
+  def self.enquiry_form_url
+    ENV.fetch(
+      "ENQUIRY_FORM_URL",
+      "https://www.trade-tariff.service.gov.uk/enquiry_form",
+    )
+  end
+
   # Page size for Pagy-backed admin lists. Passed explicitly to `pagy(..., limit: ...)` so it
   # cannot silently fall back to Pagy’s built-in default (20 on Pagy 9).
   ADMIN_PAGY_PAGE_SIZE = 10
