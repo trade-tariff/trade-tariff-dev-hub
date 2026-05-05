@@ -17,6 +17,13 @@ module TradeTariffDevHub
   ANALYTICS_COOKIE_PREFIXES = %w[_ga _gat _gid].freeze
 
   class << self
+    def enquiry_form_url
+      ENV.fetch(
+        "ENQUIRY_FORM_URL",
+        "https://www.trade-tariff.service.gov.uk/enquiry_form",
+      )
+    end
+
     def govuk_app_domain
       @govuk_app_domain ||= ENV.fetch(
         "GOVUK_APP_DOMAIN",
@@ -68,7 +75,7 @@ module TradeTariffDevHub
     def feedback_url
       ENV.fetch(
         "FEEDBACK_URL",
-        "http://localhost:3001/feedback",
+        "https://www.trade-tariff.service.gov.uk/feedback",
       )
     end
 
