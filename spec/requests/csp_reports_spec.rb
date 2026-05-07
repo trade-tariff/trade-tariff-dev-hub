@@ -10,11 +10,9 @@ RSpec.describe "CspReports", type: :request do
   describe "POST /csp-violation-report" do
     let(:payload) { '{"csp-report":{"document-uri":"https://example.com"}}' }
 
-    before do
-      allow(NewRelic::Agent).to receive(:notice_error)
-    end
+    it "accepts a CSP report without a CSRF token and logs it" do
+      allow(Rails.logger).to receive(:warn)
 
-    it "accepts a CSP report without a CSRF token", :aggregate_failures do
       post "/csp-violation-report",
            params: payload,
            headers: {
@@ -22,8 +20,8 @@ RSpec.describe "CspReports", type: :request do
              "ACCEPT" => "application/json",
            }
 
-      expect(response).to have_http_status(:ok)
-      expect(NewRelic::Agent).to have_received(:notice_error).with("CSP Violation: #{payload}")
+      expect(response).to have_http_status(:no_content)
+      expect(Rails.logger).to have_received(:warn).with("CSP Violation: #{payload}")
     end
   end
 end
