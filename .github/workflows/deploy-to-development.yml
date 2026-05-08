@@ -24,6 +24,7 @@ jobs:
       app-name: tariff-dev-hub
       environment: development
       test-flavour: fpo
+      migrate: true
     secrets:
       slack-webhook: ${{ secrets.SLACK_WEBHOOK }}
       ssh-key: ${{ secrets.PRIVATE_SSH_KEY }}
