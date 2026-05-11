@@ -1,6 +1,11 @@
 # ECS job for scheduled tasks (e.g. daily API key cleanup).
 # EventBridge triggers the job with a command override to run the rake task.
 
+moved {
+  from = module.dev-hub-job[0]
+  to   = module.dev-hub-job
+}
+
 module "dev-hub-job" {
   source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v3.0.1"
 
