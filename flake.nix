@@ -82,6 +82,7 @@
             lint
             postgresql
             postgresql-start
+            pkgs.terraform-docs
             ruby
             update-providers
           ];

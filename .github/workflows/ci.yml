@@ -34,6 +34,8 @@ jobs:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
       - uses: trade-tariff/trade-tariff-tools/.github/actions/setup-tflint@main
       - uses: trade-tariff/trade-tariff-tools/.github/actions/setup-terraform-docs@main
+        with:
+          terraform_docs_version: 0.22.0
       - uses: trade-tariff/trade-tariff-tools/.github/actions/setup-ssh@main
         with:
           ssh-key: ${{ secrets.PRIVATE_SSH_KEY }}
