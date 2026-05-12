@@ -16,10 +16,8 @@ class ApiKeysController < AuthenticatedController
   def update
     if @api_key.enabled
       render "revoke"
-    elsif deletion_enabled?
-      render "delete"
     else
-      raise NotImplementedError, "API key deletion is not implemented"
+      render "delete"
     end
   end
 
@@ -74,6 +72,4 @@ private
   def api_key_params
     params.require(:api_key).permit(:description)
   end
-
-  delegate :deletion_enabled?, to: TradeTariffDevHub
 end

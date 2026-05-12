@@ -36,10 +36,8 @@ Rails.application.routes.draw do
       get :revoke, to: "api_keys#update", as: :revoke
       patch :revoke
 
-      if TradeTariffDevHub.deletion_enabled?
-        get :delete, to: "api_keys#update", as: :delete
-        delete :delete
-      end
+      get :delete, to: "api_keys#update", as: :delete
+      delete :delete
     end
   end
 
@@ -48,10 +46,8 @@ Rails.application.routes.draw do
       get :revoke, to: 'trade_tariff_keys#confirm_action', as: :revoke
       patch :revoke
 
-      if TradeTariffDevHub.deletion_enabled?
-        get :delete, to: 'trade_tariff_keys#confirm_action', as: :delete
-        delete :delete
-      end
+      get :delete, to: 'trade_tariff_keys#confirm_action', as: :delete
+      delete :delete
     end
   end
 

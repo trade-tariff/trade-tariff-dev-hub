@@ -31,10 +31,6 @@ module TradeTariffDevHub
       )
     end
 
-    def deletion_enabled?
-      ENV.fetch("DELETION_ENABLED", "false") == "true"
-    end
-
     def role_request_enabled?
       # Allow explicit override via environment variable
       return ENV["FEATURE_FLAG_ROLE_REQUEST"] == "true" if ENV.key?("FEATURE_FLAG_ROLE_REQUEST")
