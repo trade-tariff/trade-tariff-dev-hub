@@ -47,4 +47,5 @@ variable "memory" {
 variable "enable_alarms" {
   description = "Whether to enable high CPU alarms for the service"
   type        = bool
+  default     = false
 }
