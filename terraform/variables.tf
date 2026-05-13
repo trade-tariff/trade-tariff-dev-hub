@@ -43,3 +43,9 @@ variable "memory" {
   description = "Memory to allocate in MB. Powers of 2 only."
   type        = number
 }
+
+variable "enable_alarms" {
+  description = "Whether to enable high CPU alarms for the service"
+  type        = bool
+  default     = false
+}

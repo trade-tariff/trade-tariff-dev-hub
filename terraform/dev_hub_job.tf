@@ -1,9 +1,13 @@
 # ECS job for scheduled tasks (e.g. daily API key cleanup).
 # EventBridge triggers the job with a command override to run the rake task.
 
+moved {
+  from = module.dev-hub-job[0]
+  to   = module.dev-hub-job
+}
+
 module "dev-hub-job" {
-  source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v1.21.0"
-  count  = var.enable_cleanup_job ? 1 : 0
+  source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v3.0.1"
 
   region = var.region
 
@@ -17,10 +21,11 @@ module "dev-hub-job" {
   security_groups           = [data.aws_security_group.this.id]
   cloudwatch_log_group_name = "platform-logs-${var.environment}"
 
-  docker_image = "382373577178.dkr.ecr.eu-west-2.amazonaws.com/tariff-dev-hub-production"
-  docker_tag   = var.docker_tag
-  cpu          = var.cpu
-  memory       = var.memory
+  docker_image  = "382373577178.dkr.ecr.eu-west-2.amazonaws.com/tariff-dev-hub-production"
+  docker_tag    = var.docker_tag
+  cpu           = var.cpu
+  memory        = var.memory
+  enable_alarms = false
 
   task_role_policy_arns      = [aws_iam_policy.task.arn]
   execution_role_policy_arns = [aws_iam_policy.exec.arn]
@@ -105,8 +110,8 @@ data "aws_iam_policy_document" "eventbridge_pass_role" {
   statement {
     actions = ["iam:PassRole"]
     resources = [
-      module.dev-hub-job[0].task_execution_role_arn,
-      module.dev-hub-job[0].task_role_arn,
+      module.dev-hub-job.task_execution_role_arn,
+      module.dev-hub-job.task_role_arn,
     ]
   }
 }

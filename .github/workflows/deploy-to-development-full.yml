@@ -40,6 +40,7 @@ jobs:
           }
         ]
       test-flavour: fpo
+      migrate: true
     secrets:
       ssh-key: ${{ secrets.PRIVATE_SSH_KEY }}
       slack-webhook: ${{ secrets.SLACK_WEBHOOK }}
