@@ -143,6 +143,8 @@
               WT_ID=$(${worktree.id})
               export GEM_HOME="$HOME/.local/share/gem/worktrees/$WT_ID"
               export BUNDLE_PATH=".bundle"
+              export BUNDLE_APP_CONFIG=".bundle"
+              export BUNDLE_IGNORE_CONFIG=1
               mkdir -p "$GEM_HOME" ".bundle"
               echo "Worktree Bundler isolation enabled (ID: $WT_ID)"
             else
@@ -173,9 +175,11 @@
               if [ ! -f "$MARKER" ]; then
                 echo ""
                 echo "==> First time in this worktree (ID: $WT_ID)"
-                echo "    Initializing databases (db:create + db:structure:load + db:test:prepare)..."
+                echo "    Installing gems + initializing databases..."
                 echo ""
 
+                rm -rf .bundle
+                bundle install 2>&1 | tail -5 || true
                 bundle exec rails db:create 2>&1 | tail -3 || true
                 bundle exec rails db:structure:load 2>&1 | tail -5 || true
 
