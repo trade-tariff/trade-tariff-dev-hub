@@ -44,10 +44,13 @@
         ];
 
         # Worktree detection hook (per-flake, reusable pattern)
+        # Disable Git fsmonitor for hook-local probes. If these git commands start
+        # fsmonitor--daemon inside direnv's shellHook, the daemon can inherit a
+        # nix-direnv pipe and keep the first `direnv exec ...` blocked after setup.
         worktree = rec {
           isWorktree = ''
-            if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-              if [ "$(git rev-parse --git-dir 2>/dev/null)" != "$(git rev-parse --git-common-dir 2>/dev/null)" ]; then
+            if git -c core.fsmonitor=false rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+              if [ "$(git -c core.fsmonitor=false rev-parse --git-dir 2>/dev/null)" != "$(git -c core.fsmonitor=false rev-parse --git-common-dir 2>/dev/null)" ]; then
                 echo "true"
               else
                 echo "false"
@@ -59,7 +62,7 @@
 
           id = ''
             if [ "$(${isWorktree})" = "true" ]; then
-              git rev-parse --show-toplevel | md5sum | cut -c1-8
+              git -c core.fsmonitor=false rev-parse --show-toplevel | md5sum | cut -c1-8
             else
               echo "main"
             fi
@@ -146,12 +149,13 @@
             # Worktree-aware Bundler/Ruby isolation
             if [ "$(${worktree.isWorktree})" = "true" ]; then
               WT_ID=$(${worktree.id})
+              WT_ROOT=$(git -c core.fsmonitor=false rev-parse --show-toplevel)
+              WT_BUNDLE_PATH="$WT_ROOT/.bundle"
               export GEM_HOME="$HOME/.local/share/gem/worktrees/$WT_ID"
-              export BUNDLE_PATH=".bundle"
-              export BUNDLE_APP_CONFIG=".bundle"
+              export BUNDLE_PATH="$WT_BUNDLE_PATH"
+              export BUNDLE_APP_CONFIG="$WT_BUNDLE_PATH"
               export BUNDLE_IGNORE_CONFIG=1
-              export BUNDLE_FORCE_RUBY_PLATFORM=1
-              mkdir -p "$GEM_HOME" ".bundle"
+              mkdir -p "$GEM_HOME" "$WT_BUNDLE_PATH"
               echo "Worktree Bundler isolation enabled (ID: $WT_ID)"
             else
               export GEM_HOME=$PWD/.nix/ruby/$(${ruby}/bin/ruby -e "puts RUBY_VERSION")
@@ -194,7 +198,11 @@
                   log_file="/tmp/worktree-$WT_ID-$(echo "$label" | tr '[:upper:] /:' '[:lower:]---').log"
 
                   echo "    $label..."
-                  if "$@" >"$log_file" 2>&1; then
+                  # Setup commands may spawn daemon helpers, such as git fsmonitor. Close
+                  # inherited nix-direnv pipe fds so those helpers cannot block `direnv exec`.
+                  if "$@" >"$log_file" 2>&1 \
+                    3>&- 4>&- 5>&- \
+                    6>&- 7>&- 8>&- 9>&-; then
                     echo "      ok (log: $log_file)"
                   else
                     status=$?
@@ -213,7 +221,18 @@
                     run_setup_step "Initialising Postgres data directory" ${postgresql}/bin/initdb "$PGDATA" --auth=trust || fail_worktree_setup
                   fi
                   rm -f "$PIDFILE"
-                  if ! ${postgresql}/bin/pg_ctl start -D "$PGDATA" -l "/tmp/pg-$WT_ID.log" -o "-k $PGHOST -c listen_addresses= -c external_pid_file=$PIDFILE" -w -t 60; then
+                  # pg_ctl daemonises Postgres from inside direnv's shellHook. File descriptors
+                  # 3+ are extra handles opened by the parent process; `>&-` closes them for this
+                  # command. Without this, Postgres inherits a nix-direnv pipe and the first
+                  # `direnv exec ...` stays blocked after setup instead of running its command.
+                  if ! ${postgresql}/bin/pg_ctl start \
+                    -D "$PGDATA" \
+                    -l "/tmp/pg-$WT_ID.log" \
+                    -o "-k $PGHOST -c listen_addresses= -c external_pid_file=$PIDFILE" \
+                    -w \
+                    -t 60 \
+                    3>&- 4>&- 5>&- \
+                    6>&- 7>&- 8>&- 9>&-; then
                     echo "      failed to start Postgres (log: /tmp/pg-$WT_ID.log)"
                     echo "      last 80 log lines:"
                     tail -80 "/tmp/pg-$WT_ID.log" | sed 's/^/        /' || true
@@ -232,11 +251,9 @@
                   fi
                 fi
 
-                rm -rf .bundle
-                export BUNDLE_PATH=".bundle"
-                export BUNDLE_APP_CONFIG=".bundle"
+                rm -rf "$BUNDLE_PATH"
+                mkdir -p "$BUNDLE_PATH"
                 export BUNDLE_IGNORE_CONFIG=1
-                export BUNDLE_FORCE_RUBY_PLATFORM=1
                 run_setup_step "Installing gems" bundle install --jobs=4 --retry=3 || fail_worktree_setup
                 run_setup_step "Preparing development database" bundle exec rails db:prepare || fail_worktree_setup
                 run_setup_step "Preparing test database" env RAILS_ENV=test bundle exec rails db:prepare || fail_worktree_setup
@@ -247,10 +264,7 @@
                 echo "==> Worktree first-time setup complete."
                 echo ""
               else
-                export BUNDLE_PATH=".bundle"
-                export BUNDLE_APP_CONFIG=".bundle"
                 export BUNDLE_IGNORE_CONFIG=1
-                export BUNDLE_FORCE_RUBY_PLATFORM=1
               fi
             fi
           '';
