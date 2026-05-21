@@ -7,6 +7,10 @@ module BackLinkHelper
     back_link_path_for_organisation_record(api_key, fallback_path: api_keys_path)
   end
 
+  def back_link_path_for_user(user)
+    back_link_path_for_organisation_record(user, fallback_path: organisation_path(organisation))
+  end
+
 private
 
   def back_link_path_for_organisation_record(record, fallback_path:)
