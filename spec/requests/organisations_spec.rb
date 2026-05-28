@@ -13,6 +13,8 @@ RSpec.describe "Organisations", type: :request do
       get organisation_path(current_user.organisation)
       expect(response).to have_http_status(:ok)
       expect(response.body).to include(current_user.organisation.organisation_name)
+      expect(response.body).to include("Your organisation")
+      expect(response.body).not_to include("Your Organisation Account")
     end
 
     context "when accessing another organisation as a non-admin user" do

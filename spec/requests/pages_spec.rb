@@ -6,7 +6,7 @@ RSpec.describe "Pages", type: :request do
       get "/cookies"
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include("Cookies on the UK Trade Tariff Developer Portal")
+      expect(response.body).to include("Cookies on the Trade Tariff Developer Portal")
       expect(response.body).to include("Cookies that measure website use")
     end
   end
