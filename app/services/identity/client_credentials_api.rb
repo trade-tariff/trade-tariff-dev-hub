@@ -8,14 +8,14 @@ module Identity
       "write" => "tariff/write",
     }.freeze
 
-    CreateResult = Struct.new(:client_id, :client_secret, keyword_init: true)
+    CreateResult = Data.define(:client_id, :client_secret)
 
     def initialize(http_client: nil)
       @http_client = http_client
     end
 
     # @param scopes [Array<String>] e.g. %w[read write]
-    # @return [CreateResult] struct with client_id and client_secret from identity service
+    # @return [CreateResult] data object with client_id and client_secret from identity service
     # @raise [Identity::ClientCredentialsApi::Error] on 4xx/5xx API errors
     def create!(scopes)
       identity_scopes = scopes.map { |s| SCOPE_MAP[s] || s }

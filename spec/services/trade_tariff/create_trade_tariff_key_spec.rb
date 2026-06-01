@@ -27,7 +27,7 @@ RSpec.describe TradeTariff::CreateTradeTariffKey do
       Identity::ClientCredentialsApi::CreateResult.new(client_id: stub_creds[:client_id], client_secret: stub_creds[:client_secret]),
     )
     allow(api_gateway_client).to receive(:create_api_key).and_return(
-      Struct.new(:id).new(stub_creds[:api_gateway_key_id]),
+      Data.define(:id).new(stub_creds[:api_gateway_key_id]),
     )
     allow(api_gateway_client).to receive(:create_usage_plan_key)
   end
