@@ -26,7 +26,4 @@
   end
 %>
 
-<div class="govuk-button-group">
-  <%= govuk_button_to 'Delete', delete_trade_tariff_key_path(@trade_tariff_key), method: :delete, class: 'govuk-button govuk-button--warning' %>
-  <%= govuk_link_to 'Cancel', trade_tariff_keys_path, class: 'govuk-link' %>
-</div>
+<%= govuk_button_group_form_to 'Delete', delete_trade_tariff_key_path(@trade_tariff_key), method: :delete, cancel_path: trade_tariff_keys_path, warning: true %>

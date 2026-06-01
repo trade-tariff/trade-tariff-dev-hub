@@ -25,7 +25,4 @@
     end
 %>
 
-<div class="govuk-button-group">
-  <%= govuk_button_to 'Delete', delete_invitation_path(@invitation), method: :delete, class: 'govuk-button govuk-button--warning' %>
-  <%= govuk_link_to 'Cancel', organisation_path(@invitation.organisation_id), class: 'govuk-link' %>
-</div>
+<%= govuk_button_group_form_to 'Delete', delete_invitation_path(@invitation), method: :delete, cancel_path: organisation_path(@invitation.organisation_id), warning: true %>
