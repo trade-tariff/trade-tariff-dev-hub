@@ -28,7 +28,4 @@
     end
 %>
 
-<div class="govuk-button-group">
-  <%= govuk_button_to 'Revoke', revoke_api_key_path, method: :patch, class: 'govuk-button govuk-button--warning' %>
-  <%= govuk_link_to 'Cancel', api_keys_path, class: 'govuk-link' %>
-</div>
+<%= govuk_button_group_form_to 'Revoke', revoke_api_key_path, method: :patch, cancel_path: api_keys_path, warning: true %>

@@ -16,7 +16,4 @@
     end
 %>
 
-<div class="govuk-button-group">
-  <%= govuk_button_to 'Remove', user_path(@user), method: :delete, warning: true %>
-  <%= govuk_button_to 'Cancel', organisation_path(current_user.organisation), method: :get, secondary: true %>
-</div>
+<%= govuk_button_group_form_to 'Remove', user_path(@user), method: :delete, cancel_path: organisation_path(current_user.organisation), warning: true %>

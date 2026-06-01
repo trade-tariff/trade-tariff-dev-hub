@@ -21,7 +21,4 @@
     end
 %>
 
-<div class="govuk-button-group">
-  <%= govuk_button_to 'Revoke', invitation_path(@invitation), method: :patch, warning: true %>
-  <%= govuk_link_to 'Cancel', organisation_path(organisation.id) %>
-</div>
+<%= govuk_button_group_form_to 'Revoke', invitation_path(@invitation), method: :patch, cancel_path: organisation_path(organisation.id), warning: true %>
