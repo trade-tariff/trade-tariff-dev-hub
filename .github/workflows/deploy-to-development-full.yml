@@ -10,6 +10,10 @@ on:
       - labeled
       - unlabeled
 
+concurrency:
+  group: deploy-dev-hub-development-full-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   id-token: write
