@@ -4,7 +4,7 @@
     <% if analytics_allowed? && TradeTariffDevHub.google_tag_manager_container_id.present? %>
       <%= render "shared/gtm", part: "head" %>
     <% end %>
-    <title><%= content_for(:title) || "Trade Tariff Developer Portal" %></title>
+    <title><%= content_for(:title) || "Trade Tariff developer portal" %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -34,7 +34,7 @@
       <%= render "shared/gtm", part: "body" %>
     <% end %>
     <%= govuk_header(homepage_url: ENV.fetch("GOVUK_APP_DOMAIN", "http://localhost:3000")) %>
-    <%= govuk_service_navigation(service_name: 'Trade Tariff Developer Portal', service_url: "#") do |nav| %>
+    <%= govuk_service_navigation(service_name: 'Trade Tariff developer portal', service_url: "#") do |nav| %>
       <%= render 'layouts/navigation', header: nav %>
     <% end %>
     <div class="govuk-width-container app-width-container">
