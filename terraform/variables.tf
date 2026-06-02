@@ -49,3 +49,9 @@ variable "enable_alarms" {
   type        = bool
   default     = false
 }
+
+variable "enable_observability_alerts" {
+  description = "Whether to enable observability alerts for the service"
+  type        = bool
+  default     = false
+}
