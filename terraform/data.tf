@@ -44,11 +44,15 @@ data "aws_secretsmanager_secret_version" "ecs_tls_certificate" {
 }
 
 data "aws_secretsmanager_secret" "job" {
+  count = 1
+
   name = "dev-hub-job-configuration"
 }
 
 data "aws_secretsmanager_secret_version" "job" {
-  secret_id = data.aws_secretsmanager_secret.job.id
+  count = 1
+
+  secret_id = data.aws_secretsmanager_secret.job[0].id
 }
 
 data "aws_sns_topic" "slack_topic" {
