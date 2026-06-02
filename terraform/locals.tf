@@ -28,12 +28,12 @@ locals {
 
   devhub_service_env_vars = concat(local.secret_env_vars, local.ecs_tls_env_vars)
 
-  job_secret_value = var.enable_cleanup_job ? try(data.aws_secretsmanager_secret_version.job[0].secret_string, "{}") : "{}"
+  job_secret_value = try(data.aws_secretsmanager_secret_version.job[0].secret_string, "{}")
   job_secret_map   = jsondecode(local.job_secret_value)
-  job_secret_env_vars = var.enable_cleanup_job ? [
+  job_secret_env_vars = [
     for key, value in local.job_secret_map : {
       name  = key
       value = value
     }
-  ] : []
+  ]
 }

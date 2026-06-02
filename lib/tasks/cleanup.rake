@@ -3,11 +3,6 @@
 namespace :cleanup do
   desc "Delete API keys with description starting with 'playwright-' (dev only, all orgs)"
   task api_keys: :environment do
-    allowed = Rails.env.development? || ENV["CLEANUP_PLAYWRIGHT_KEYS_ENABLED"] == "true"
-    unless allowed
-      next
-    end
-
     scope = ApiKey.where("description LIKE ?", "playwright-%")
     count = scope.count
 
