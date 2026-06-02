@@ -63,7 +63,7 @@ Terraform to deploy the service into AWS.
 | <a name="input_docker_tag"></a> [docker\_tag](#input\_docker\_tag) | Image tag to use. | `string` | n/a | yes |
 | <a name="input_enable_alarms"></a> [enable\_alarms](#input\_enable\_alarms) | Whether to enable high CPU alarms for the service | `bool` | `false` | no |
 | <a name="input_enable_cleanup_job"></a> [enable\_cleanup\_job](#input\_enable\_cleanup\_job) | Whether to provision the scheduled ECS job (e.g. Playwright API key cleanup). Set per environment in config\_*.tfvars. | `bool` | `false` | no |
-| <a name="input_enable_observability_alerts"></a> [enable\_observability\_alerts](#input\_enable\_observability\_alerts) | n/a | `bool` | `false` | no |
+| <a name="input_enable_observability_alerts"></a> [enable\_observability\_alerts](#input\_enable\_observability\_alerts) | Whether to enable observability alerts for the service | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Deployment environment. | `string` | n/a | yes |
 | <a name="input_max_capacity"></a> [max\_capacity](#input\_max\_capacity) | Largest number of tasks the service can scale-out to. | `number` | n/a | yes |
 | <a name="input_memory"></a> [memory](#input\_memory) | Memory to allocate in MB. Powers of 2 only. | `number` | n/a | yes |
