@@ -43,22 +43,18 @@ data "aws_secretsmanager_secret_version" "ecs_tls_certificate" {
   secret_id = data.aws_secretsmanager_secret.ecs_tls_certificate.id
 }
 
+data "aws_secretsmanager_secret" "job" {
+  name = "dev-hub-job-configuration"
+}
+
+data "aws_secretsmanager_secret_version" "job" {
+  secret_id = data.aws_secretsmanager_secret.job.id
+}
+
 data "aws_sns_topic" "slack_topic" {
   name = "slack-topic"
 }
 
 data "aws_ecs_cluster" "this" {
   cluster_name = "trade-tariff-cluster-${var.environment}"
-}
-
-data "aws_secretsmanager_secret" "job" {
-  count = var.enable_cleanup_job ? 1 : 0
-
-  name = "dev-hub-job-configuration"
-}
-
-data "aws_secretsmanager_secret_version" "job" {
-  count = var.enable_cleanup_job ? 1 : 0
-
-  secret_id = data.aws_secretsmanager_secret.job[0].id
 }
