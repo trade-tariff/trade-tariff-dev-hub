@@ -35,12 +35,13 @@
         '';
 
         postgresql = pkgs.postgresql_18;
+        pgConfig = postgresql.pg_config;
         psychBuildFlags = with pkgs; [
           "--with-libyaml-include=${libyaml.dev}/include"
           "--with-libyaml-lib=${libyaml.out}/lib"
         ];
-        postgresqlBuildFlags = with pkgs; [
-          "--with-pg-config=${lib.getDev postgresql.pg_config}/bin/pg_config"
+        postgresqlBuildFlags = [
+          "--with-pg-config=${pgConfig}/bin/pg_config"
         ];
 
         # Worktree detection hook (per-flake, reusable pattern)
@@ -274,6 +275,7 @@
             lint
             pkgs.pre-commit
             postgresql
+            pgConfig
             postgresql-start
             pkgs.terraform-docs
             ruby
