@@ -200,6 +200,8 @@ RSpec.describe "Admin Role Requests", type: :request do
         get admin_role_requests_path
         expect(response).to redirect_to(root_path)
         follow_redirect!
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
+        follow_redirect!
         expect(response.body).to include("does not have the required permissions to access this section")
       end
     end
@@ -213,6 +215,8 @@ RSpec.describe "Admin Role Requests", type: :request do
         get admin_role_requests_path
         expect(response).to redirect_to(root_path)
         follow_redirect!
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
+        follow_redirect!
         expect(response.body).to include("This feature is currently disabled")
       end
 
@@ -221,6 +225,8 @@ RSpec.describe "Admin Role Requests", type: :request do
         post approve_admin_role_request_path(role_request)
         expect(response).to redirect_to(root_path)
         follow_redirect!
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
+        follow_redirect!
         expect(response.body).to include("This feature is currently disabled")
       end
 
@@ -228,6 +234,8 @@ RSpec.describe "Admin Role Requests", type: :request do
         role_request = create(:role_request, status: "pending")
         post reject_admin_role_request_path(role_request)
         expect(response).to redirect_to(root_path)
+        follow_redirect!
+        expect(response).to redirect_to(organisation_path(current_user.organisation))
         follow_redirect!
         expect(response.body).to include("This feature is currently disabled")
       end
