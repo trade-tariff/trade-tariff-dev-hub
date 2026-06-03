@@ -26,6 +26,7 @@ jobs:
         [
           {
             "name": "tariff-dev-hub",
+            "migrate": true,
             "service-names": ["dev-hub"]
           },
           {
@@ -35,6 +36,7 @@ jobs:
           },
           {
             "name": "tariff-backend",
+            "migrate": true,
             "repo": "trade-tariff/trade-tariff-backend",
             "service-names": ["backend-uk", "worker-uk"]
           }
