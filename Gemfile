@@ -43,6 +43,7 @@ group :test do
   gem "rspec-json_expectations"
   gem "rspec-rails"
   gem "shoulda-matchers"
+  gem "simplecov"
   gem "webmock"
 end
 
