@@ -1,6 +1,12 @@
 require "spec_helper"
 ENV["RAILS_ENV"] ||= "test"
 ENV["ENVIRONMENT"] ||= "test" # Not live production; key limits and deploy-specific behaviour stay off in test
+ENV["DISABLE_BOOTSNAP_COMPILE_CACHE"] ||= "1" # SimpleCov starts Ruby coverage before Rails boots
+
+require "simplecov"
+
+SimpleCov.start "rails"
+SimpleCov.formatters = SimpleCov::Formatter::HTMLFormatter
 
 # Stub dev_bypass_auth_enabled? before loading environment so routes are available
 # This allows the conditional routes in config/routes.rb to be loaded in test
