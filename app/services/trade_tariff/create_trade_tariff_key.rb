@@ -4,7 +4,7 @@ class TradeTariff::CreateTradeTariffKey
   API_KEY_TYPE = "API_KEY"
   DEFAULT_SCOPES = %w[read].freeze
 
-  CreateResult = Struct.new(:trade_tariff_key, :client_secret, keyword_init: true)
+  CreateResult = Data.define(:trade_tariff_key, :client_secret)
 
   def initialize(identity_client: nil, api_gateway_client: nil)
     @identity_client = identity_client || Identity::ClientCredentialsApi.new

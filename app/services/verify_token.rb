@@ -1,5 +1,5 @@
 class VerifyToken
-  Result = Struct.new(:valid, :payload, :reason, keyword_init: true) do
+  Result = Data.define(:valid, :payload, :reason) do
     def valid?
       valid
     end
