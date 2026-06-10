@@ -52,5 +52,26 @@ RSpec.describe "Admin::Organisations", type: :request do
       expect(response.body).to include('class="govuk-back-link"')
       expect(response.body).to include("href=\"#{admin_organisations_path}\"")
     end
+
+    it "renders member actions with remove links for other users", :aggregate_failures do
+      other_user = create(:user, email_address: "member@example.com", organisation: other_organisation)
+
+      get admin_organisation_path(other_organisation)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Remove")
+      expect(response.body).to include(remove_user_path(other_user))
+    end
+
+    it "shows You for the current user on their own admin organisation page", :aggregate_failures do
+      fellow_admin = create(:user, email_address: "fellow@example.com", organisation: admin_organisation)
+
+      get admin_organisation_path(admin_organisation)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("You")
+      expect(response.body).to include(remove_user_path(fellow_admin))
+      expect(response.body).not_to include(remove_user_path(current_user))
+    end
   end
 end
