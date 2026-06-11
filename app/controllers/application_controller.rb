@@ -2,6 +2,18 @@ class ApplicationController < ActionController::Base
   default_form_builder GOVUKDesignSystemFormBuilder::FormBuilder
   allow_browser versions: :modern
 
+  # Override handling CSRF verification failures, marking security scanner probes as expected
+  def handle_unverified_request
+    if request.referer&.include?("detectify.com/bot") && request.delete?
+      # Mark as expected error for Detectify scanner probes
+      NewRelic::Agent.set_notice_error(
+        ActionController::InvalidAuthenticityToken.new("Can't verify CSRF token authenticity."),
+        { expected: true },
+      )
+    end
+    super
+  end
+
   # NOTE: Cleanup of all authentication state:
   # 1. Database Session record
   # 2. Rails session variables
