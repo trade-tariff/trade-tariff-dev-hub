@@ -1,15 +1,15 @@
 # Pull Request
 
-## What:
+## What
 <!-- A brief description of what this PR does -->
 
-## Why:
+## Why
 <!-- The reasoning or context behind this change -->
 
-## Ticket:
+## Ticket
 <!-- Link to the relevant Jira/ticket, or 'N/A' if not applicable -->
 
-## Risk:
+## Risk
 
 **Risk level:** 🟢 / 🟠 / 🔴 <!-- delete as appropriate -->
 
@@ -30,6 +30,7 @@ Rate the overall risk of deploying this change:
 
 🟢 GREEN – things that are typically low risk:
 ───────────────────────────────────────────────────
+
 - New tests or improved test coverage with no production code changes
 - Dependency bumps with no API changes (minor/patch gems)
 - Copy or content changes to UI labels, hint text, or page titles with no logic change
@@ -42,6 +43,7 @@ Rate the overall risk of deploying this change:
 
 🟠 AMBER – things that need a team conversation first:
 ───────────────────────────────────────────────────
+
 - Changes to the operator sign-up, sign-in, or role request flows
 - Modifications to how API keys or Trade Tariff keys are created, listed, or revoked
 - Changes to organisation management logic (creation, membership, caps)
@@ -55,6 +57,7 @@ Rate the overall risk of deploying this change:
 
 🔴 RED – requires explicit approval from Thor or Neil:
 ───────────────────────────────────────────────────
+
 - Changes to how Cognito user pools, app clients, or identity attributes are managed
 - Modifications to API Gateway usage plans, API key scoping, or the per-org key cap in production
 - Changes to authentication or session handling (JWT validation, JWKS, encryption secrets)
