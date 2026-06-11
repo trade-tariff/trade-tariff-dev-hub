@@ -1,4 +1,6 @@
 class ErrorsController < ApplicationController
+  skip_forgery_protection only: %i[not_found bad_request not_implemented]
+
   def not_found
     message = "If you typed the web address, check it is correct."
     render_error(status: :not_found, header: "Page not found", message:, json_error: "Resource not found")
