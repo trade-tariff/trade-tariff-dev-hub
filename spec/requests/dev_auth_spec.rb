@@ -73,6 +73,8 @@ RSpec.describe "Dev Auth", type: :request do
       expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include("Dev Login")
       expect(response.body).to include("Invalid password")
+      expect(response.body.scan("Invalid password").count).to eq(1)
+      expect(response.body.index("Invalid password")).to be > response.body.index("Dev Login")
     end
 
     it "does not set session for invalid password" do
@@ -80,6 +82,21 @@ RSpec.describe "Dev Auth", type: :request do
       # Verify session is not set by trying to access a protected page
       get api_keys_path
       expect(response).to redirect_to(dev_login_path)
+    end
+
+    it "does not show a previous invalid password error after successful login", :aggregate_failures do
+      post dev_login_path, params: { password: "wrong-password" }
+      expect(response.body).to include("Invalid password")
+
+      post dev_login_path, params: { password: "user-password" }
+      user = User.find_by(email_address: "dev@transformuk.com")
+
+      expect(response).to redirect_to(organisation_path(user.organisation))
+      expect(flash[:alert]).to be_nil
+
+      follow_redirect!
+      expect(response).to have_http_status(:ok)
+      expect(response.body).not_to include("Invalid password")
     end
 
     it "renders new template with error for blank password", :aggregate_failures do

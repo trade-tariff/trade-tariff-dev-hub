@@ -47,7 +47,7 @@
         <%= yield :back_link %>
       <% end %>
       <main class="govuk-main-wrapper app-main-class" id="main-content">
-        <%= render 'flashes' %>
+        <%= render 'flashes' unless content_for?(:hide_layout_flashes) %>
         <%= yield %>
       </main>
     </div>

@@ -15,7 +15,7 @@ class DevAuthController < ApplicationController
       session.delete(:return_to) # Clear return_to but don't use it
       redirect_to default_redirect_path(user_type)
     else
-      flash[:alert] = "Invalid password"
+      flash.now[:alert] = "Invalid password"
       render :new, status: :unprocessable_content
     end
   end
