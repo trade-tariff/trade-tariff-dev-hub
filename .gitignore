@@ -75,5 +75,6 @@ yarn-debug.log*
 
 /.direnv
 /.envrc
+/.pre-commit-config-nix.yaml
 /.nix
 /.ruby-lsp

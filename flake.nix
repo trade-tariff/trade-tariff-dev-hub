@@ -2,6 +2,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    pre-commit-hooks = {
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixpkgs-ruby = {
       url = "github:bobvanderlinden/nixpkgs-ruby";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -11,16 +15,17 @@
 
   outputs =
     {
-      self,
       nixpkgs,
       flake-utils,
+      pre-commit-hooks,
       nixpkgs-ruby,
+      ...
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
         pkgs = import nixpkgs {
-          system = system;
+          inherit system;
           config.allowUnfree = true;
           overlays = [ nixpkgs-ruby.overlays.default ];
         };
@@ -92,8 +97,97 @@
 
           ${postgresql}/bin/postgres -k "$PGHOST" -c listen_addresses=''' -c unix_socket_directories="$PGHOST"
         '';
-        init = pkgs.writeShellScriptBin "init" ''cd terraform && terraform init -backend=false'';
-        update-providers = pkgs.writeShellScriptBin "update-providers" ''cd terraform && terraform init -backend=false -reconfigure -upgrade'';
+        init = pkgs.writeShellScriptBin "init" "cd terraform && terraform init -backend=false";
+        update-providers = pkgs.writeShellScriptBin "update-providers" "cd terraform && terraform init -backend=false -reconfigure -upgrade";
+
+        preCommitCheck = pre-commit-hooks.lib.${system}.run {
+          src = ./.;
+          configPath = ".pre-commit-config-nix.yaml";
+          default_stages = [ "pre-commit" ];
+          hooks = {
+            actionlint = {
+              enable = true;
+              stages = [ "pre-commit" ];
+            };
+            check-added-large-files = {
+              enable = true;
+              stages = [ "pre-commit" ];
+            };
+            check-case-conflicts = {
+              enable = true;
+              stages = [ "pre-commit" ];
+            };
+            check-merge-conflicts = {
+              enable = true;
+              stages = [ "pre-commit" ];
+            };
+            check-yaml = {
+              enable = true;
+              stages = [ "pre-commit" ];
+            };
+            deadnix = {
+              enable = true;
+              stages = [ "pre-commit" ];
+            };
+            detect-private-keys = {
+              enable = true;
+              stages = [ "pre-commit" ];
+            };
+            end-of-file-fixer = {
+              enable = true;
+              stages = [ "pre-commit" ];
+            };
+            markdownlint = {
+              enable = true;
+              excludes = [ "^terraform/" ];
+              settings.configuration.MD013 = false;
+              stages = [ "pre-commit" ];
+            };
+            nixfmt-rfc-style = {
+              enable = true;
+              stages = [ "pre-commit" ];
+            };
+            sort-file-contents = {
+              enable = true;
+              files = "^\\.env\\.(development|test)$";
+              stages = [ "pre-commit" ];
+            };
+            statix = {
+              enable = true;
+              settings.ignore = [ ".worktrees" ];
+              stages = [ "pre-commit" ];
+            };
+            terraform-format = {
+              enable = true;
+              stages = [ "pre-commit" ];
+            };
+            terraform-validate = {
+              enable = true;
+              stages = [ "pre-commit" ];
+            };
+            tflint = {
+              enable = true;
+              stages = [ "pre-commit" ];
+            };
+            trim-trailing-whitespace = {
+              enable = true;
+              stages = [ "pre-commit" ];
+            };
+            trufflehog = {
+              enable = true;
+              stages = [ "pre-commit" ];
+            };
+
+            rubocop = {
+              enable = true;
+              name = "rubocop";
+              description = "Run RuboCop through Bundler";
+              entry = "bundle exec rubocop --autocorrect";
+              files = "\\.(rb|rake)$|^(Gemfile|Rakefile|config\\.ru)$";
+              stages = [ "pre-commit" ];
+            };
+          };
+        };
 
         worktree-info = pkgs.writeShellScriptBin "worktree-info" ''
           if [ "$(${worktree.isWorktree})" = "true" ]; then
@@ -258,7 +352,6 @@
                 run_setup_step "Installing gems" bundle install --jobs=4 --retry=3 || fail_worktree_setup
                 run_setup_step "Preparing development database" bundle exec rails db:prepare || fail_worktree_setup
                 run_setup_step "Preparing test database" env RAILS_ENV=test bundle exec rails db:prepare || fail_worktree_setup
-                run_setup_step "Installing pre-commit hooks" pre-commit install --install-hooks || fail_worktree_setup
 
                 touch "$MARKER"
                 echo ""
@@ -268,12 +361,13 @@
                 export BUNDLE_IGNORE_CONFIG=1
               fi
             fi
+
+            ${preCommitCheck.shellHook}
           '';
 
-          buildInputs = [
+          buildInputs = preCommitCheck.enabledPackages ++ [
             init
             lint
-            pkgs.pre-commit
             postgresql
             pgConfig
             postgresql-start
