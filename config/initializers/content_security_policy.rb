@@ -14,14 +14,16 @@ Rails.application.configure do
                        "https://*.google-analytics.com",
                        "https://*.analytics.google.com"
     policy.object_src  :none
-    policy.script_src  :self, :https,
+    # unsafe-eval is required by Google Tag Manager
+    policy.script_src  :self, :https, :unsafe_eval,
                        "https://www.googletagmanager.com",
                        "https://www.google-analytics.com"
     policy.connect_src :self,
                        "https://www.google-analytics.com",
                        "https://*.analytics.google.com",
                        "https://*.googletagmanager.com",
-                       "https://*.google-analytics.com"
+                       "https://*.google-analytics.com",
+                       "https://*.nr-data.net"
     policy.frame_src   :self, "https://www.googletagmanager.com"
     policy.style_src   :self, :https
     # Specify URI for violation reports
