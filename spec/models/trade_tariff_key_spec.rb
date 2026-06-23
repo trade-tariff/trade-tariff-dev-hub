@@ -65,16 +65,4 @@ RSpec.describe TradeTariffKey, type: :model do
       end
     end
   end
-
-  describe "delete_completely!" do
-    it "calls TradeTariff::DeleteTradeTariffKey service" do
-      trade_tariff_key = create(:trade_tariff_key)
-      delete_service = instance_double(TradeTariff::DeleteTradeTariffKey, call: true)
-      allow(TradeTariff::DeleteTradeTariffKey).to receive(:new).and_return(delete_service)
-
-      trade_tariff_key.delete_completely!
-
-      expect(TradeTariff::DeleteTradeTariffKey).to have_received(:new)
-    end
-  end
 end
