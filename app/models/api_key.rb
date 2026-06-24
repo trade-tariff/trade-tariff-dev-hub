@@ -28,10 +28,6 @@ class ApiKey < ApplicationRecord
 
   scope :active, -> { where(enabled: true) }
 
-  def delete_completely!
-    DeleteApiKey.new.call(self)
-  end
-
 private
 
   def association_name

@@ -112,6 +112,10 @@ GEM
       rexml
     crass (1.0.6)
     date (3.5.1)
+    debride (1.15.2)
+      path_expander (~> 2.0)
+      prism (~> 1.7)
+      sexp_processor (~> 4.17)
     diff-lcs (1.6.2)
     docile (1.4.1)
     dotenv (3.2.0)
@@ -227,6 +231,7 @@ GEM
     parser (3.3.10.1)
       ast (~> 2.4.1)
       racc
+    path_expander (2.0.1)
     pg (1.6.3)
     pg (1.6.3-aarch64-linux)
     pg (1.6.3-aarch64-linux-musl)
@@ -378,6 +383,7 @@ GEM
       ruby-lsp (>= 0.26.0, < 0.27.0)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
+    sexp_processor (4.17.5)
     shoulda-matchers (8.0.1)
       activesupport (>= 7.2)
     simplecov (0.22.0)
@@ -429,6 +435,7 @@ DEPENDENCIES
   aws-sdk-apigateway
   bootsnap
   brakeman
+  debride (~> 1.15)
   dotenv-rails
   factory_bot_rails
   faraday

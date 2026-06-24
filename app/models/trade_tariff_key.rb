@@ -32,10 +32,6 @@ class TradeTariffKey < ApplicationRecord
   attribute :enabled, :boolean, default: true
   scope :active, -> { where(enabled: true) }
 
-  def delete_completely!
-    TradeTariff::DeleteTradeTariffKey.new.call(self)
-  end
-
   def revoke!
     update!(enabled: false, revoked_at: Time.current)
   end

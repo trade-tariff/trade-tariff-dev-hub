@@ -98,10 +98,6 @@ class Organisation < ApplicationRecord
     save!
   end
 
-  def fpo_access?
-    has_role?("fpo:full")
-  end
-
   def trade_tariff_access?
     has_role?("trade_tariff:full")
   end

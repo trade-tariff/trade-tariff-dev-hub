@@ -38,6 +38,7 @@ group :development do
 end
 
 group :test do
+  gem "debride", "~> 1.15", require: false
   gem "factory_bot_rails"
   gem "rails-controller-testing"
   gem "rspec-json_expectations"
