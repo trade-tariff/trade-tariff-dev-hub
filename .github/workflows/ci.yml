@@ -45,7 +45,7 @@ jobs:
       - uses: actions/setup-python@v6.2.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - uses: ruby/setup-ruby@v1.313.0
+      - uses: ruby/setup-ruby@v1.314.0
         with:
           bundler-cache: true
       - uses: hashicorp/setup-terraform@v4
@@ -77,7 +77,7 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v7.0.0
-      - uses: ruby/setup-ruby@v1.313.0
+      - uses: ruby/setup-ruby@v1.314.0
         with:
           bundler-cache: true
       - run: bundle exec rspec
