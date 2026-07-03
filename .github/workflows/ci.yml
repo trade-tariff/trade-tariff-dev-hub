@@ -61,6 +61,8 @@ jobs:
       - run: cd terraform/ && terraform init -backend=false -reconfigure
       - run: pip install pre-commit
       - run: pre-commit run --all-files --hook-stage pre-commit
+        env:
+          RUBOCOP_OPTS: --format github
       - run: pre-commit run --all-files --hook-stage pre-push
       - run: bundle exec brakeman
 
