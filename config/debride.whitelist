@@ -20,13 +20,6 @@ BackLinkHelper#back_link_path_for_api_key
 BackLinkHelper#back_link_path_for_invitation
 BackLinkHelper#back_link_path_for_user
 CspReportsController#create
-DevAuthController#create
-DevAuthController#default_redirect_path
-DevAuthController#identity_service_url
-DevAuthController#new
-DevBypassAuthentication#dev_bypass_user?
-DevBypassAuthentication#organisation_with_dev_bypass
-DevBypassAuthentication#require_dev_bypass_authentication
 ErrorsController#bad_request
 ErrorsController#internal_server_error
 ErrorsController#maintenance
@@ -72,7 +65,6 @@ SessionsController#handle_redirect
 SessionsController#invalid
 TradeTariffDevHub#PREFERENCES_SET_COOKIE_NAME
 TradeTariffDevHub#cors_host
-TradeTariffDevHub#development_deployment_environment?
 TradeTariffDevHub#enquiry_form_url
 TradeTariffDevHub#feedback_url
 TradeTariffDevHub#google_tag_manager_container_id

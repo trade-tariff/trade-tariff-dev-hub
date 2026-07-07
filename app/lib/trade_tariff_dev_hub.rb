@@ -250,12 +250,6 @@ module TradeTariffDevHub
       environment == "production"
     end
 
-    # Returns true for the deployed development environment in AWS.
-    # This intentionally keys off ENVIRONMENT, not Rails.env.
-    def development_deployment_environment?
-      environment == "development"
-    end
-
     # Restrict non-FPO/non-admin org sessions after identity callback in production only.
     def block_non_fpo_identity_sessions_in_production?
       environment == "production"
@@ -288,18 +282,6 @@ module TradeTariffDevHub
 
     def admin_domain
       @admin_domain ||= ENV.fetch("ADMIN_DOMAIN", "transformuk.com")
-    end
-
-    def dev_bypass_auth_enabled?
-      ENV.fetch("DEV_BYPASS_AUTH", "false") == "true"
-    end
-
-    def dev_bypass_user_password
-      ENV.fetch("DEV_BYPASS_USER_PASSWORD", "dev")
-    end
-
-    def dev_bypass_admin_password
-      ENV.fetch("DEV_BYPASS_ADMIN_PASSWORD", "admin")
     end
   end
 end

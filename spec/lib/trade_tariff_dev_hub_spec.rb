@@ -213,22 +213,6 @@ RSpec.describe TradeTariffDevHub do
     end
   end
 
-  describe ".development_deployment_environment?" do
-    include_context "with restored ENVIRONMENT"
-
-    it "returns true when ENVIRONMENT is development" do
-      ENV["ENVIRONMENT"] = "development"
-
-      expect(described_class.development_deployment_environment?).to be(true)
-    end
-
-    it "returns false when ENVIRONMENT is staging" do
-      ENV["ENVIRONMENT"] = "staging"
-
-      expect(described_class.development_deployment_environment?).to be(false)
-    end
-  end
-
   describe ".google_tag_manager_container_id" do
     before do
       allow(ENV).to receive(:fetch).and_call_original
