@@ -42,7 +42,7 @@ RSpec.describe "Identity authentication flow", type: :request do
           expect(response).to have_http_status(:ok)
 
           get api_keys_path
-          expect(response.status).to be_between(200, 399)
+          expect(response).to have_http_status(:ok)
         end
 
         it "maintains authentication across multiple protected route accesses", :aggregate_failures do
@@ -51,10 +51,10 @@ RSpec.describe "Identity authentication flow", type: :request do
           follow_redirect!
 
           get api_keys_path
-          expect(response.status).to be_between(200, 399)
+          expect(response).to have_http_status(:ok)
 
           get organisations_path
-          expect(response.status).to be_between(200, 399)
+          expect(response).to redirect_to(organisation_path(current_user.organisation))
         end
       end
 

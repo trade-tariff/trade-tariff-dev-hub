@@ -64,6 +64,25 @@ RSpec.describe AuthenticatedController, type: :controller do
           expect(response).to redirect_to(identity_consumer_url)
         end
       end
+
+      context "when user has a Rails session but no identity cookie" do
+        let(:valid_verify_result) { VerifyToken::Result.new(valid: true, payload: {}, reason: nil) }
+
+        before do
+          create(:session, user: current_user, token: plain_token, id_token: id_token_value)
+          session[:token] = plain_token
+          cookies.delete(TradeTariffDevHub.id_token_cookie_name)
+          allow(VerifyToken).to receive(:new).with(id_token_value).and_return(
+            instance_double(VerifyToken, call: valid_verify_result),
+          )
+        end
+
+        it "clears the stale Rails session and redirects to identity service", :aggregate_failures do
+          get :test_action
+          expect(response).to redirect_to(identity_consumer_url)
+          expect(Session.find_by_token(plain_token)).to be_nil
+        end
+      end
     end
 
     context "when in production environment" do
