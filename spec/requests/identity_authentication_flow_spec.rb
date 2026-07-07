@@ -25,14 +25,14 @@ RSpec.describe "Identity authentication flow", type: :request do
   end
 
   describe "full authentication flow from identity service callback" do
-    context "when in development environment with dev bypass enabled" do
+    context "when in development environment" do
       before do
-        allow(TradeTariffDevHub).to receive_messages(deployed_environment?: false, dev_bypass_auth_enabled?: true)
+        allow(TradeTariffDevHub).to receive_messages(deployed_environment?: false)
         Rails.application.reload_routes!
       end
 
       context "when user authenticates via identity service" do
-        it "allows user to access protected routes without redirecting to dev login", :aggregate_failures do
+        it "allows user to access protected routes", :aggregate_failures do
           cookies[TradeTariffDevHub.id_token_cookie_name] = id_token_value
 
           expect { get auth_redirect_path }.to change(Session, :count).by(1)
@@ -42,7 +42,6 @@ RSpec.describe "Identity authentication flow", type: :request do
           expect(response).to have_http_status(:ok)
 
           get api_keys_path
-          expect(response).not_to redirect_to(dev_login_path)
           expect(response.status).to be_between(200, 399)
         end
 
@@ -52,19 +51,17 @@ RSpec.describe "Identity authentication flow", type: :request do
           follow_redirect!
 
           get api_keys_path
-          expect(response).not_to redirect_to(dev_login_path)
           expect(response.status).to be_between(200, 399)
 
           get organisations_path
-          expect(response).not_to redirect_to(dev_login_path)
           expect(response.status).to be_between(200, 399)
         end
       end
 
       context "when user has no identity session" do
-        it "redirects to dev login page as fallback" do
+        it "redirects to identity service" do
           get api_keys_path
-          expect(response).to redirect_to(dev_login_path)
+          expect(response).to redirect_to(identity_consumer_url)
         end
       end
     end
@@ -88,27 +85,10 @@ RSpec.describe "Identity authentication flow", type: :request do
           follow_redirect!
           get api_keys_path
           expect(response).to have_http_status(:ok)
-          expect(response).not_to redirect_to(dev_login_path)
         end
       end
 
-      context "when user has no identity session and dev bypass is enabled" do
-        before do
-          allow(TradeTariffDevHub).to receive(:dev_bypass_auth_enabled?).and_return(true)
-        end
-
-        it "redirects to identity service, NOT dev login", :aggregate_failures do
-          get api_keys_path
-          expect(response).to redirect_to(identity_consumer_url)
-          expect(response).not_to redirect_to(dev_login_path)
-        end
-      end
-
-      context "when user has no identity session and dev bypass is disabled" do
-        before do
-          allow(TradeTariffDevHub).to receive(:dev_bypass_auth_enabled?).and_return(false)
-        end
-
+      context "when user has no identity session" do
         it "redirects to identity service" do
           get api_keys_path
           expect(response).to redirect_to(identity_consumer_url)
@@ -118,13 +98,13 @@ RSpec.describe "Identity authentication flow", type: :request do
   end
 
   describe "when user authenticates then session expires" do
-    context "when in development environment with dev bypass enabled" do
+    context "when in development environment" do
       before do
-        allow(TradeTariffDevHub).to receive_messages(deployed_environment?: false, dev_bypass_auth_enabled?: true)
+        allow(TradeTariffDevHub).to receive_messages(deployed_environment?: false)
         Rails.application.reload_routes!
       end
 
-      it "redirects to dev login when identity session expires" do
+      it "redirects to identity service when identity session expires" do
         cookies[TradeTariffDevHub.id_token_cookie_name] = id_token_value
         get auth_redirect_path
         follow_redirect!
@@ -134,7 +114,7 @@ RSpec.describe "Identity authentication flow", type: :request do
         cookies.delete(TradeTariffDevHub.id_token_cookie_name)
 
         get api_keys_path
-        expect(response).to redirect_to("/dev/login")
+        expect(response).to redirect_to(identity_consumer_url)
       end
     end
   end

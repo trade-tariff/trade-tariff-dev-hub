@@ -8,10 +8,6 @@ require "simplecov"
 SimpleCov.start "rails"
 SimpleCov.formatters = SimpleCov::Formatter::HTMLFormatter
 
-# Stub dev_bypass_auth_enabled? before loading environment so routes are available
-# This allows the conditional routes in config/routes.rb to be loaded in test
-allow(TradeTariffDevHub).to receive(:dev_bypass_auth_enabled?).and_return(true) if defined?(TradeTariffDevHub)
-
 require_relative "../config/environment"
 require "rspec/rails"
 

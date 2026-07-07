@@ -2,7 +2,7 @@ RSpec.describe "Role Requests", type: :request do
   include_context "with authenticated user"
 
   before do
-    # NOTE: Identity authentication is always enabled, but dev bypass takes precedence in tests
+    # NOTE: Identity authentication is always enabled in tests.
     allow(TradeTariffDevHub).to receive_messages(role_request_enabled?: true)
     Rails.application.reload_routes!
     # Remove default fpo:full role from factory, then assign trade_tariff:full

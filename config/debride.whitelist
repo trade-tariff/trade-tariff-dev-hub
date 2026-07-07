@@ -20,11 +20,6 @@ BackLinkHelper#back_link_path_for_api_key
 BackLinkHelper#back_link_path_for_invitation
 BackLinkHelper#back_link_path_for_user
 CspReportsController#create
-DevAuthController#create
-DevAuthController#default_redirect_path
-DevAuthController#identity_service_url
-DevAuthController#new
-DevBypassAuthentication#dev_bypass_user?
 ErrorsController#bad_request
 ErrorsController#internal_server_error
 ErrorsController#maintenance

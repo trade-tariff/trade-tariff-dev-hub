@@ -54,18 +54,5 @@ RSpec.describe HomepageController, type: :controller do
         expect(session[:token]).to be_nil
       end
     end
-
-    context "when user is logged in via dev bypass" do
-      before do
-        allow(TradeTariffDevHub).to receive(:dev_bypass_auth_enabled?).and_return(true)
-        session[:dev_bypass] = DevBypassAuthentication::USER_TYPE_USER
-      end
-
-      it "redirects to the dev user's organisation page" do
-        get :index
-        user = User.find_by!(email_address: DevBypassAuthentication::DEV_BYPASS_USER_EMAIL)
-        expect(response).to redirect_to(organisation_path(user.organisation))
-      end
-    end
   end
 end
