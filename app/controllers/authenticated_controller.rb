@@ -24,7 +24,7 @@ protected
       return
     end
 
-    # No valid identity session - clear any invalid session before checking fallbacks
+    # No valid identity session - clear any invalid session before redirecting to Identity.
     # (authenticated? handles cookie matching, so if it returned false, session is invalid)
     clear_authentication! if user_session.present?
 
