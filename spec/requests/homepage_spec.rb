@@ -47,24 +47,5 @@ RSpec.describe "Homepage", type: :request do
         expect(Session.find_by_token(plain_token)).to be_nil
       end
     end
-
-    context "when user is logged in via dev bypass" do
-      before do
-        allow(TradeTariffDevHub).to receive_messages(
-          dev_bypass_auth_enabled?: true,
-          dev_bypass_admin_password: "admin-password",
-          dev_bypass_user_password: "user-password",
-        )
-        Rails.application.reload_routes!
-        post dev_login_path, params: { password: "user-password" }
-        follow_redirect!
-      end
-
-      it "redirects to the dev user's organisation page" do
-        get root_path
-        user = User.find_by!(email_address: DevBypassAuthentication::DEV_BYPASS_USER_EMAIL)
-        expect(response).to redirect_to(organisation_path(user.organisation))
-      end
-    end
   end
 end

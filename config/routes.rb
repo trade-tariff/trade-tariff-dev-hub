@@ -9,12 +9,6 @@ Rails.application.routes.draw do
   get "/auth/logout", to: "sessions#destroy", as: :logout
   get "/auth/signed_out", to: "sessions#signed_out", as: :signed_out
 
-  if TradeTariffDevHub.dev_bypass_auth_enabled?
-    get "/dev/login", to: "dev_auth#new", as: :dev_login
-    post "/dev/login", to: "dev_auth#create"
-    delete "/dev/logout", to: "dev_auth#destroy", as: :dev_logout
-  end
-
   resources :organisations, only: %i[index show edit update]
   resources :users, only: %i[destroy]
   get "users/:id/remove", to: "users#remove", as: :remove_user
@@ -43,10 +37,10 @@ Rails.application.routes.draw do
 
   resources :trade_tariff_keys, only: %i[index new create] do
     member do
-      get :revoke, to: 'trade_tariff_keys#confirm_action', as: :revoke
+      get :revoke, to: "trade_tariff_keys#confirm_action", as: :revoke
       patch :revoke
 
-      get :delete, to: 'trade_tariff_keys#confirm_action', as: :delete
+      get :delete, to: "trade_tariff_keys#confirm_action", as: :delete
       delete :delete
     end
   end

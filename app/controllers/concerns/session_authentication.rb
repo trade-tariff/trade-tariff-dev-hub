@@ -9,12 +9,9 @@ protected
     return false if user_session.blank?
     return false unless user_session.current?
 
-    # Check cookie matching only if cookie is present
-    # If no cookie is present, allow the session (cookie might not be set yet in callback flow)
     cookie_token = cookies[TradeTariffDevHub.id_token_cookie_name]
-    return true if cookie_token.blank? # No cookie to check - allow valid session
+    return false if cookie_token.blank?
 
-    # If cookie is present, it must match the session
     user_session.cookie_token_match_for?(cookie_token)
   end
 

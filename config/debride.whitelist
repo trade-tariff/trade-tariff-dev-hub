@@ -25,6 +25,8 @@ DevAuthController#default_redirect_path
 DevAuthController#identity_service_url
 DevAuthController#new
 DevBypassAuthentication#dev_bypass_user?
+DevBypassAuthentication#organisation_with_dev_bypass
+DevBypassAuthentication#require_dev_bypass_authentication
 ErrorsController#bad_request
 ErrorsController#internal_server_error
 ErrorsController#maintenance

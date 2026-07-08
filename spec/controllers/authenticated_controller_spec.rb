@@ -11,7 +11,6 @@ RSpec.describe AuthenticatedController, type: :controller do
   before do
     routes.draw do
       get "test_action" => "organisations#test_action"
-      get "/dev/login", to: "dev_auth#new", as: :dev_login
       get "/organisations/:id", to: "organisations#show", as: :organisation
       root to: "homepage#index"
     end
@@ -27,9 +26,12 @@ RSpec.describe AuthenticatedController, type: :controller do
       allow(TradeTariffDevHub).to receive_messages(identity_consumer_url: identity_consumer_url, id_token_cookie_name: :id_token)
     end
 
-    context "when in development environment with dev bypass enabled" do
+    context "when in development environment" do
       before do
-        allow(TradeTariffDevHub).to receive_messages(deployed_environment?: false, dev_bypass_auth_enabled?: true)
+        allow(TradeTariffDevHub).to receive_messages(
+          deployed_environment?: false,
+          block_non_fpo_identity_sessions_in_production?: false,
+        )
       end
 
       context "when user has valid identity session" do
@@ -43,12 +45,11 @@ RSpec.describe AuthenticatedController, type: :controller do
           )
         end
 
-        it "allows access without redirecting to dev login", :aggregate_failures do
+        it "allows access", :aggregate_failures do
           create(:session, user: current_user, token: plain_token, id_token: id_token_value)
           get :test_action
           expect(response).to have_http_status(:ok)
           expect(response.body).to eq("OK")
-          expect(response).not_to redirect_to("/dev/login")
         end
       end
 
@@ -58,9 +59,23 @@ RSpec.describe AuthenticatedController, type: :controller do
           cookies.delete(TradeTariffDevHub.id_token_cookie_name)
         end
 
-        it "redirects to dev login page" do
+        it "redirects to identity service" do
           get :test_action
-          expect(response).to redirect_to("/dev/login")
+          expect(response).to redirect_to(identity_consumer_url)
+        end
+      end
+
+      context "when user has a Rails session but no identity cookie" do
+        before do
+          create(:session, user: current_user, token: plain_token, id_token: id_token_value)
+          session[:token] = plain_token
+          cookies.delete(TradeTariffDevHub.id_token_cookie_name)
+        end
+
+        it "clears the stale Rails session and redirects to identity service", :aggregate_failures do
+          get :test_action
+          expect(response).to redirect_to(identity_consumer_url)
+          expect(Session.find_by_token(plain_token)).to be_nil
         end
       end
     end
@@ -73,23 +88,8 @@ RSpec.describe AuthenticatedController, type: :controller do
         )
       end
 
-      context "when dev bypass is enabled without identity session" do
+      context "when user has no identity session" do
         before do
-          allow(TradeTariffDevHub).to receive(:dev_bypass_auth_enabled?).and_return(true)
-          session[:token] = nil
-          cookies.delete(TradeTariffDevHub.id_token_cookie_name)
-        end
-
-        it "redirects to identity service, not dev login", :aggregate_failures do
-          get :test_action
-          expect(response).to redirect_to(identity_consumer_url)
-          expect(response).not_to redirect_to("/dev/login")
-        end
-      end
-
-      context "when dev bypass is disabled without identity session" do
-        before do
-          allow(TradeTariffDevHub).to receive(:dev_bypass_auth_enabled?).and_return(false)
           session[:token] = nil
           cookies.delete(TradeTariffDevHub.id_token_cookie_name)
         end
@@ -166,7 +166,6 @@ RSpec.describe AuthenticatedController, type: :controller do
         allow(TradeTariffDevHub).to receive_messages(
           deployed_environment?: true,
           block_non_fpo_identity_sessions_in_production?: false,
-          dev_bypass_auth_enabled?: false,
         )
         create(:session, user: current_user, token: plain_token, id_token: id_token_value)
         session[:token] = plain_token
