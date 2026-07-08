@@ -13,6 +13,7 @@ class CreateApiKey
 
   def initialize(api_gateway_client = nil)
     @api_gateway_client = api_gateway_client || Aws::APIGateway::Client.new
+    @newly_created_usage_plan_id = nil
   end
 
   def call(api_key)
@@ -27,11 +28,20 @@ class CreateApiKey
     rescue StandardError => e
       Rails.logger.error("Error creating API key: #{e.message}")
       if api_key.api_gateway_id
+        if @newly_created_usage_plan_id
+          begin
+            api_gateway_client.delete_usage_plan(usage_plan_id: @newly_created_usage_plan_id)
+          rescue StandardError => delete_error
+            Rails.logger.error("Failed to delete usage plan #{@newly_created_usage_plan_id} from AWS: #{delete_error.message}")
+          end
+        end
+
         begin
           api_gateway_client.delete_api_key(api_key_id: api_key.api_gateway_id)
         rescue StandardError => delete_error
           Rails.logger.error("Failed to delete API key #{api_key.api_gateway_id} from AWS: #{delete_error.message}")
         end
+
         api_key.destroy! if api_key.persisted?
       end
 
@@ -99,7 +109,7 @@ private
       api_stages: [{ api_id: REST_API_ID, stage: STAGE_NAME }],
       tags: TAGS,
     )
-    response.id
+    @newly_created_usage_plan_id = response.id
   end
 
   def generate_client_id
