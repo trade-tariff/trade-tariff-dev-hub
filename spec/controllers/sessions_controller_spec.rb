@@ -15,12 +15,6 @@ RSpec.describe SessionsController, type: :controller do
       expect(session[:token]).to be_nil
       expect(flash[:notice]).to be_nil
     end
-
-    it "clears legacy dev bypass session state" do
-      session[:dev_bypass] = "user"
-      get :destroy
-      expect(session[:dev_bypass]).to be_nil
-    end
   end
 
   describe "GET #signed_out" do

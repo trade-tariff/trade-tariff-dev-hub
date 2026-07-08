@@ -18,7 +18,6 @@ class ApplicationController < ActionController::Base
     # Clear Rails session variables
     session[:token] = nil
     session[:authenticated] = nil
-    session[:dev_bypass] = nil
 
     # Delete authentication cookies
     cookies.delete(TradeTariffDevHub.id_token_cookie_name, domain: TradeTariffDevHub.identity_cookie_domain)
