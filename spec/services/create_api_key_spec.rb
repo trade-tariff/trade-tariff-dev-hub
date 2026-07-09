@@ -46,5 +46,51 @@ RSpec.describe CreateApiKey do
       create_api_key.call(api_key)
       expect(api_gateway_client).not_to have_received(:create_usage_plan)
     end
+
+    context "when save! fails after using a pre-existing usage plan" do
+      before do
+        allow(api_key).to receive(:save!).and_raise(ActiveRecord::RecordInvalid)
+        allow(api_gateway_client).to receive(:delete_api_key)
+        allow(api_gateway_client).to receive(:delete_usage_plan)
+        create_api_key.call(api_key)
+      rescue ActiveRecord::RecordInvalid
+        nil
+      end
+
+      it "deletes the API Gateway key from AWS" do
+        expect(api_gateway_client).to have_received(:delete_api_key).with(
+          api_key_id: "api-gateway-id-123",
+        )
+      end
+
+      it "does not delete the pre-existing usage plan" do
+        expect(api_gateway_client).not_to have_received(:delete_usage_plan)
+      end
+    end
+
+    context "when save! fails after a new usage plan was created" do
+      before do
+        api_gateway_client.stub_responses(:get_usage_plans, items: [], position: nil)
+        api_gateway_client.stub_responses(:create_usage_plan, id: "new-plan-id-789")
+        allow(api_key).to receive(:save!).and_raise(ActiveRecord::RecordInvalid)
+        allow(api_gateway_client).to receive(:delete_api_key)
+        allow(api_gateway_client).to receive(:delete_usage_plan)
+        create_api_key.call(api_key)
+      rescue ActiveRecord::RecordInvalid
+        nil
+      end
+
+      it "deletes the newly created usage plan from AWS" do
+        expect(api_gateway_client).to have_received(:delete_usage_plan).with(
+          usage_plan_id: "new-plan-id-789",
+        )
+      end
+
+      it "also deletes the API Gateway key from AWS" do
+        expect(api_gateway_client).to have_received(:delete_api_key).with(
+          api_key_id: "api-gateway-id-123",
+        )
+      end
+    end
   end
 end
