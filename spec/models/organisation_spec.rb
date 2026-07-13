@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Organisation, type: :model do
   subject(:organisation) { build(:organisation) }
 
@@ -43,6 +45,60 @@ RSpec.describe Organisation, type: :model do
 
     context "when the organisation does not have the role" do
       it { is_expected.to be false }
+    end
+  end
+
+  describe ".matching_name" do
+    it "returns all organisations for a blank search" do
+      organisations = create_list(:organisation, 2)
+
+      expect(described_class.matching_name(" ")).to match_array(organisations)
+    end
+
+    it "matches a partial name and escapes wildcard characters" do
+      matching = create(:organisation, organisation_name: "100% Goods")
+      create(:organisation, organisation_name: "100 Goods")
+
+      expect(described_class.matching_name("%")).to contain_exactly(matching)
+    end
+  end
+
+  describe "service access" do
+    it "reports the organisation's assigned service roles", :aggregate_failures do
+      organisation = create(:organisation)
+      organisation.assign_role!("trade_tariff:full")
+
+      expect(organisation).to be_fpo
+      expect(organisation).to be_trade_tariff_access
+    end
+  end
+
+  describe "role removal" do
+    it "blocks removal of the admin role" do
+      expect(organisation.remove_role_block_reason("admin")).to eq(:admin_role)
+    end
+
+    it "blocks a Trade Tariff role while active keys exist" do
+      create(:trade_tariff_key, organisation: organisation)
+
+      expect(organisation.remove_role_block_reason("trade_tariff:full")).to eq(:trade_tariff_keys)
+    end
+
+    it "blocks an FPO role while active API keys exist" do
+      create(:api_key, organisation: organisation)
+
+      expect(organisation.remove_role_block_reason("fpo:full")).to eq(:active_api_keys)
+    end
+
+    it "allows removal when no block reason exists" do
+      expect(organisation.can_remove_role?("fpo:full")).to be(true)
+    end
+
+    it "unassigns an existing role" do
+      organisation.save!
+
+      expect { organisation.unassign_role!("fpo:full") }
+        .to change { organisation.roles.count }.by(-1)
     end
   end
 
