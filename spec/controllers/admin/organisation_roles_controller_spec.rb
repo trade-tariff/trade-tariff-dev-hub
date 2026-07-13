@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Admin::OrganisationRolesController, type: :controller do
   include_context "with authenticated user"
 

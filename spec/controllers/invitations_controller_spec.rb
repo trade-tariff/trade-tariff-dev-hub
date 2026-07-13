@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe InvitationsController, type: :controller do
   include_context "with authenticated user"
 
@@ -20,15 +22,14 @@ RSpec.describe InvitationsController, type: :controller do
     end
   end
 
-  describe "GET #update" do
-    it "renders the revoke page for a pending invitation" do
-      controller.instance_variable_set(:@invitation, invitation)
-      allow(controller.request).to receive(:get?).and_return(true)
-      allow(controller).to receive(:render)
+  describe "GET #update (delete route)" do
+    it "redirects for a pending invitation", :aggregate_failures do
+      allow(controller.request).to receive(:path).and_return("/invitations/#{invitation.id}/delete")
 
-      controller.public_send(:update)
+      get :update, params: { id: invitation.id }
 
-      expect(controller).to have_received(:render).with(:revoke)
+      expect(flash[:alert]).to eq("Invalid invitation state.")
+      expect(response).to redirect_to(organisation_path(current_user.organisation))
     end
 
     it "rejects an invitation in an invalid state" do

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe "Errors", type: :request do
   {
     "/400" => [:bad_request, "The request you made is not valid"],
