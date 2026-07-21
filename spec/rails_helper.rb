@@ -6,7 +6,7 @@ ENV["DISABLE_BOOTSNAP_COMPILE_CACHE"] ||= "1" # SimpleCov starts Ruby coverage b
 require "simplecov"
 
 SimpleCov.start "rails"
-SimpleCov.formatters = SimpleCov::Formatter::HTMLFormatter
+SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
 
 require_relative "../config/environment"
 require "rspec/rails"
