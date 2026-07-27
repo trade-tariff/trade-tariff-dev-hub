@@ -60,7 +60,7 @@ RSpec.describe SessionsController, type: :controller do
       context "when the user already has an active session" do
         let!(:existing_session) { create(:session, user: user) }
 
-        it "destroys the existing session before creating a new one" do
+        it "destroys the existing session before creating a new one", :aggregate_failures do
           expect { get :handle_redirect }.not_to change(Session, :count)
 
           expect(Session.exists?(id: existing_session.id)).to be(false)

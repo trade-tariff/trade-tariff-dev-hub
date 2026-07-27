@@ -61,7 +61,7 @@ private
 
   def create_user_session!(user, payload)
     invalidated = Session.invalidate_for_user!(user)
-    if invalidated > 0
+    if invalidated.positive?
       Rails.logger.warn("[Auth] Concurrent session detected for #{user.email_address}: invalidated #{invalidated} existing session(s)")
     end
 
