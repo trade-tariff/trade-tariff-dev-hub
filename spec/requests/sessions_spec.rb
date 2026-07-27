@@ -4,8 +4,9 @@ RSpec.describe "Sessions", type: :request do
   describe "GET /auth/redirect" do
     let(:extra_session) { {} }
 
-    it "creates a Session" do
-      expect { get auth_redirect_path }.to change(Session, :count).by(1)
+    it "creates a Session for the user, replacing any existing ones" do
+      get auth_redirect_path
+      expect(Session.where(user: current_user).count).to eq(1)
     end
 
     it "redirects the user to their organisation page" do

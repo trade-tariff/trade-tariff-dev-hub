@@ -53,6 +53,49 @@ RSpec.describe Session, type: :model do
     end
   end
 
+  describe ".invalidate_for_user!" do
+    context "when the user has existing sessions" do
+      it "destroys all sessions for that user" do
+        user = create(:user)
+        create_list(:session, 2, user: user)
+
+        described_class.invalidate_for_user!(user)
+
+        expect(described_class.where(user: user).count).to eq(0)
+      end
+
+      it "returns the number of sessions destroyed" do
+        user = create(:user)
+        create_list(:session, 3, user: user)
+
+        count = described_class.invalidate_for_user!(user)
+
+        expect(count).to eq(3)
+      end
+
+      it "does not destroy sessions belonging to other users" do
+        user = create(:user)
+        other_user = create(:user)
+        create(:session, user: user)
+        other_session = create(:session, user: other_user)
+
+        described_class.invalidate_for_user!(user)
+
+        expect(described_class.exists?(id: other_session.id)).to be(true)
+      end
+    end
+
+    context "when the user has no existing sessions" do
+      it "returns 0" do
+        user = create(:user)
+
+        count = described_class.invalidate_for_user!(user)
+
+        expect(count).to eq(0)
+      end
+    end
+  end
+
   describe "#renew?" do
     it "returns true when the token cannot be verified" do
       session = build(:session)
