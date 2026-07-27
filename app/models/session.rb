@@ -38,6 +38,13 @@ class Session < ApplicationRecord
     find_by(token: digest(token))
   end
 
+  def self.invalidate_for_user!(user)
+    sessions = where(user: user)
+    count = sessions.count
+    sessions.destroy_all
+    count
+  end
+
   def current?
     !renew?
   end

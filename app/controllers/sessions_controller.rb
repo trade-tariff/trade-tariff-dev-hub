@@ -60,6 +60,11 @@ class SessionsController < ApplicationController
 private
 
   def create_user_session!(user, payload)
+    invalidated = Session.invalidate_for_user!(user)
+    if invalidated.positive?
+      Rails.logger.warn("[Auth] Concurrent session detected for #{user.email_address}: invalidated #{invalidated} existing session(s)")
+    end
+
     Session.create!(
       user: user,
       token: session_token,

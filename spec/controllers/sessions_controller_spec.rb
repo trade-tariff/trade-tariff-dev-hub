@@ -57,6 +57,25 @@ RSpec.describe SessionsController, type: :controller do
         expect(Session.last.id_token).to eq("encoded-token")
       end
 
+      context "when the user already has an active session" do
+        let!(:existing_session) { create(:session, user: user) }
+
+        it "destroys the existing session before creating a new one", :aggregate_failures do
+          expect { get :handle_redirect }.not_to change(Session, :count)
+
+          expect(Session.exists?(id: existing_session.id)).to be(false)
+          expect(Session.where(user: user).count).to eq(1)
+        end
+
+        it "logs the concurrent session invalidation" do
+          allow(Rails.logger).to receive(:warn)
+
+          get :handle_redirect
+
+          expect(Rails.logger).to have_received(:warn).with(/\[Auth\].*concurrent.*user@example\.com/i)
+        end
+      end
+
       it "stores a hashed session token" do
         get :handle_redirect
 
