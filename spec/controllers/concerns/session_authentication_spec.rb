@@ -6,8 +6,16 @@ RSpec.describe SessionAuthentication, type: :controller do
   controller(ApplicationController) do
     include concern_class
 
+    before_action :check_auth
+
     def index
       render plain: "OK"
+    end
+
+    private
+
+    def check_auth
+      head :unauthorized unless authenticated?
     end
   end
 
@@ -20,7 +28,7 @@ RSpec.describe SessionAuthentication, type: :controller do
   let(:plain_token) { SecureRandom.uuid }
   let(:id_token_value) { "test-id-token" }
 
-  describe "#authenticated?" do
+  describe "GET #index via #authenticated?" do
     context "when the session has exceeded the 4-hour absolute lifetime" do
       before do
         create(
@@ -34,8 +42,9 @@ RSpec.describe SessionAuthentication, type: :controller do
         session[:token] = plain_token
       end
 
-      it "returns false" do
-        expect(controller.send(:authenticated?)).to be(false)
+      it "blocks the request" do
+        get :index
+        expect(response).to have_http_status(:unauthorized)
       end
     end
 
@@ -52,8 +61,9 @@ RSpec.describe SessionAuthentication, type: :controller do
         session[:token] = plain_token
       end
 
-      it "returns false" do
-        expect(controller.send(:authenticated?)).to be(false)
+      it "blocks the request" do
+        get :index
+        expect(response).to have_http_status(:unauthorized)
       end
     end
 
@@ -73,8 +83,9 @@ RSpec.describe SessionAuthentication, type: :controller do
         allow(VerifyToken).to receive(:new).and_return(instance_double(VerifyToken, call: valid_verify_result))
       end
 
-      it "returns true" do
-        expect(controller.send(:authenticated?)).to be(true)
+      it "allows the request through" do
+        get :index
+        expect(response).to have_http_status(:ok)
       end
     end
   end
