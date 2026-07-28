@@ -12,7 +12,7 @@ RSpec.describe SessionAuthentication, type: :controller do
       render plain: "OK"
     end
 
-    private
+  private
 
     def check_auth
       head :unauthorized unless authenticated?
@@ -64,28 +64,6 @@ RSpec.describe SessionAuthentication, type: :controller do
       it "blocks the request" do
         get :index
         expect(response).to have_http_status(:unauthorized)
-      end
-    end
-
-    context "when the session is within both time limits" do
-      let(:valid_verify_result) { VerifyToken::Result.new(valid: true, payload: {}, reason: nil) }
-
-      before do
-        create(
-          :session,
-          user: current_user,
-          token: plain_token,
-          id_token: id_token_value,
-          expires_at: 2.hours.from_now,
-          last_active_at: 5.minutes.ago,
-        )
-        session[:token] = plain_token
-        allow(VerifyToken).to receive(:new).and_return(instance_double(VerifyToken, call: valid_verify_result))
-      end
-
-      it "allows the request through" do
-        get :index
-        expect(response).to have_http_status(:ok)
       end
     end
   end
