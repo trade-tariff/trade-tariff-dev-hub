@@ -155,7 +155,6 @@ RSpec.describe Session, type: :model do
     end
   end
 
-
   describe "#renew?" do
     it "returns true when the token cannot be verified" do
       session = build(:session)

@@ -183,14 +183,13 @@ RSpec.describe AuthenticatedController, type: :controller do
 
     context "when updating last activity" do
       let(:valid_verify_result) { VerifyToken::Result.new(valid: true, payload: {}, reason: nil) }
-      let(:user_session) { create(:session, user: current_user, token: plain_token, id_token: id_token_value) }
 
       before do
+        @session_record = create(:session, user: current_user, token: plain_token, id_token: id_token_value)
         allow(TradeTariffDevHub).to receive_messages(
           deployed_environment?: false,
           block_non_fpo_identity_sessions_in_production?: false,
         )
-        user_session
         session[:token] = plain_token
         cookies[TradeTariffDevHub.id_token_cookie_name] = id_token_value
         allow(VerifyToken).to receive(:new).with(id_token_value).and_return(
@@ -200,7 +199,7 @@ RSpec.describe AuthenticatedController, type: :controller do
 
       it "updates last_active_at on each authenticated request" do
         get :test_action
-        expect(user_session.reload.last_active_at).to be_within(2.seconds).of(Time.current)
+        expect(@session_record.reload.last_active_at).to be_within(2.seconds).of(Time.current)
       end
     end
   end
