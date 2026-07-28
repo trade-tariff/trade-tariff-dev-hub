@@ -65,11 +65,14 @@ private
       Rails.logger.warn("[Auth] Concurrent session detected for #{user.email_address}: invalidated #{invalidated} existing session(s)")
     end
 
+    now = Time.current
     Session.create!(
       user: user,
       token: session_token,
       id_token: id_token,
       raw_info: payload,
+      expires_at: now + Session::ABSOLUTE_LIFETIME,
+      last_active_at: now,
     )
   end
 
@@ -87,6 +90,7 @@ private
 
   def already_authenticated?
     return false if user_session.blank?
+    return false if user_session.app_session_timed_out?
     return false unless user_session.current?
 
     # Check cookie matching only if cookie is present

@@ -19,6 +19,18 @@ RSpec.describe "Sessions", type: :request do
       expect(session[:token]).to be_a_uuid
     end
 
+    it "sets expires_at to 4 hours from now" do
+      get auth_redirect_path
+      created_session = Session.order(created_at: :desc).first
+      expect(created_session.expires_at).to be_within(5.seconds).of(4.hours.from_now)
+    end
+
+    it "sets last_active_at to the current time" do
+      get auth_redirect_path
+      created_session = Session.order(created_at: :desc).first
+      expect(created_session.last_active_at).to be_within(5.seconds).of(Time.current)
+    end
+
     it "does not create a new user implicitly for existing user" do
       expect { get auth_redirect_path }.not_to change(User, :count)
     end

@@ -96,6 +96,66 @@ RSpec.describe Session, type: :model do
     end
   end
 
+  describe "#app_session_timed_out?" do
+    context "when expires_at and last_active_at are nil" do
+      it "returns false" do
+        session = build(:session, expires_at: nil, last_active_at: nil)
+
+        expect(session.app_session_timed_out?).to be(false)
+      end
+    end
+
+    context "when session is within absolute lifetime and recently active" do
+      it "returns false" do
+        session = build(:session, expires_at: 2.hours.from_now, last_active_at: 5.minutes.ago)
+
+        expect(session.app_session_timed_out?).to be(false)
+      end
+    end
+
+    context "when session has exceeded the absolute 4-hour lifetime" do
+      it "returns true" do
+        session = build(:session, expires_at: 1.second.ago)
+
+        expect(session.app_session_timed_out?).to be(true)
+      end
+    end
+
+    context "when session has been inactive for more than 15 minutes" do
+      it "returns true" do
+        session = build(:session, expires_at: 2.hours.from_now, last_active_at: 16.minutes.ago)
+
+        expect(session.app_session_timed_out?).to be(true)
+      end
+    end
+
+    context "when last_active_at is nil but expires_at is in the future" do
+      it "returns false" do
+        session = build(:session, expires_at: 2.hours.from_now, last_active_at: nil)
+
+        expect(session.app_session_timed_out?).to be(false)
+      end
+    end
+
+    context "when expires_at is nil but last_active_at is recent" do
+      it "returns false" do
+        session = build(:session, expires_at: nil, last_active_at: 5.minutes.ago)
+
+        expect(session.app_session_timed_out?).to be(false)
+      end
+    end
+  end
+
+  describe "#touch_last_active!" do
+    it "updates last_active_at to approximately the current time" do
+      session = create(:session)
+      session.touch_last_active!
+
+      expect(session.reload.last_active_at).to be_within(2.seconds).of(Time.current)
+    end
+  end
+
+
   describe "#renew?" do
     it "returns true when the token cannot be verified" do
       session = build(:session)

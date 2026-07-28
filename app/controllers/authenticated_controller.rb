@@ -20,6 +20,7 @@ protected
   def require_authentication
     # Check for identity authentication first (works in all environments)
     if authenticated?
+      user_session&.touch_last_active!
       handle_user_session
       return
     end

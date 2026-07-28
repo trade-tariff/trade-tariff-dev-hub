@@ -7,6 +7,7 @@ protected
 
   def authenticated?
     return false if user_session.blank?
+    return false if user_session.app_session_timed_out?
     return false unless user_session.current?
 
     cookie_token = cookies[TradeTariffDevHub.id_token_cookie_name]

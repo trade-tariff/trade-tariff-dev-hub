@@ -6,6 +6,7 @@
 #  token                   :string           not null
 #  user_id                 :uuid             not null
 #  expires_at              :datetime
+#  last_active_at          :datetime
 #  raw_info                :jsonb
 #  created_at              :datetime         not null
 #  updated_at              :datetime         not null
@@ -20,6 +21,9 @@
 #
 
 class Session < ApplicationRecord
+  ABSOLUTE_LIFETIME = 4.hours
+  INACTIVITY_TIMEOUT = 15.minutes
+
   belongs_to :user
   belongs_to :assumed_organisation, class_name: "Organisation", optional: true
 
@@ -53,11 +57,27 @@ class Session < ApplicationRecord
     !verify_id_token.valid?
   end
 
+  def app_session_timed_out?
+    absolute_lifetime_exceeded? || inactive?
+  end
+
+  def touch_last_active!
+    update_column(:last_active_at, Time.current)
+  end
+
   def cookie_token_match_for?(cookie_token)
     id_token == cookie_token.to_s
   end
 
 private
+
+  def absolute_lifetime_exceeded?
+    expires_at.present? && Time.current >= expires_at
+  end
+
+  def inactive?
+    last_active_at.present? && Time.current >= last_active_at + INACTIVITY_TIMEOUT
+  end
 
   def verify_id_token
     @verify_id_token ||= VerifyToken.new(id_token).call
