@@ -22,7 +22,7 @@ RSpec.describe SessionAuthentication, type: :controller do
 
   describe "#authenticated?" do
     context "when the session has exceeded the 4-hour absolute lifetime" do
-      it "returns false" do
+      before do
         create(
           :session,
           user: current_user,
@@ -32,13 +32,15 @@ RSpec.describe SessionAuthentication, type: :controller do
           last_active_at: 1.minute.ago,
         )
         session[:token] = plain_token
+      end
 
+      it "returns false" do
         expect(controller.send(:authenticated?)).to be(false)
       end
     end
 
     context "when the session has been inactive for more than 15 minutes" do
-      it "returns false" do
+      before do
         create(
           :session,
           user: current_user,
@@ -48,7 +50,9 @@ RSpec.describe SessionAuthentication, type: :controller do
           last_active_at: 16.minutes.ago,
         )
         session[:token] = plain_token
+      end
 
+      it "returns false" do
         expect(controller.send(:authenticated?)).to be(false)
       end
     end
@@ -56,7 +60,7 @@ RSpec.describe SessionAuthentication, type: :controller do
     context "when the session is within both time limits" do
       let(:valid_verify_result) { VerifyToken::Result.new(valid: true, payload: {}, reason: nil) }
 
-      it "returns true" do
+      before do
         create(
           :session,
           user: current_user,
@@ -67,7 +71,9 @@ RSpec.describe SessionAuthentication, type: :controller do
         )
         session[:token] = plain_token
         allow(VerifyToken).to receive(:new).and_return(instance_double(VerifyToken, call: valid_verify_result))
+      end
 
+      it "returns true" do
         expect(controller.send(:authenticated?)).to be(true)
       end
     end
