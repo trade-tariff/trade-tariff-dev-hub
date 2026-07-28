@@ -16,7 +16,7 @@ jobs:
   check-pr-lines:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
@@ -35,7 +35,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
       - uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/pre-commit
@@ -78,7 +78,7 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
       - uses: ruby/setup-ruby@v1.317.0
         with:
           bundler-cache: true
