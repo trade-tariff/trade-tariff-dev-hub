@@ -4,3 +4,7 @@
   padding: 1rem;
   overflow-x: auto;
 }
+
+.tariff-feedback-banner > .govuk-phase-banner {
+  padding-top: 20px;
+}

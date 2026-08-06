@@ -75,6 +75,13 @@ module TradeTariffDevHub
       )
     end
 
+    def privacy_url
+      ENV.fetch(
+        "PRIVACY_URL",
+        "https://www.trade-tariff.service.gov.uk/privacy",
+      )
+    end
+
     def terms_and_conditions_url
       ENV.fetch(
         "TERMS_AND_CONDITIONS_URL",
