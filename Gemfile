@@ -39,7 +39,6 @@ end
 
 group :test do
   gem "capybara"
-  gem "debride", "~> 1.15", require: false
   gem "factory_bot_rails"
   gem "rails-controller-testing"
   gem "rspec-json_expectations"
