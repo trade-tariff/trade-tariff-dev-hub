@@ -68,7 +68,6 @@ Rails.application.routes.draw do
     end
   end
 
-  get :privacy, to: "pages#privacy"
   get :cookies, to: "pages#cookies_info"
   get "/cookies-policy", to: "pages#cookies_policy", as: :cookies_policy
   post "/cookies-policy", to: "pages#update_cookies_policy"

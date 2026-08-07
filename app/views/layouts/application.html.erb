@@ -39,35 +39,17 @@
     <% end %>
     <div class="govuk-width-container app-width-container">
       <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
-      <%= govuk_phase_banner(tag: { text: "Beta" }) do %>This is a new service, your
-        <%= govuk_link_to("feedback (opens in new tab)", ENV["FEEDBACK_URL"] || 'https://www.trade-tariff.service.gov.uk/feedback', target: "_blank", rel: "noopener") %>
-        will help us improve it.
-      <% end %>
+      <%= render 'shared/feedback_banner' %>
       <% if content_for?(:back_link) %>
         <%= yield :back_link %>
       <% end %>
       <main class="govuk-main-wrapper app-main-class" id="main-content">
-        <%= render 'flashes' unless content_for?(:hide_layout_flashes) %>
+        <%= render 'application/flashes' unless content_for?(:hide_layout_flashes) %>
         <%= yield %>
       </main>
     </div>
     <%= govuk_footer(meta_items: [
-      {
-        text: "API documentation",
-        href: TradeTariffDevHub.documentation_url,
-        attr: { target: "_blank", rel: "noopener" },
-      },
-      {
-        text: "Enquiry form",
-        href: TradeTariffDevHub.enquiry_form_url,
-        attr: { target: "_blank", rel: "noopener" },
-      },
-      {
-        text: "Feedback",
-        href: TradeTariffDevHub.feedback_url,
-        attr: { target: "_blank", rel: "noopener" },
-      },
-      { text: "Privacy policy", href: privacy_path },
+      { text: "Privacy", href: TradeTariffDevHub.privacy_url },
       { text: "Cookies", href: cookies_path },
       {
         text: "Terms and conditions",

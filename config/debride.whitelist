@@ -69,6 +69,7 @@ TradeTariffDevHub#enquiry_form_url
 TradeTariffDevHub#feedback_url
 TradeTariffDevHub#google_tag_manager_container_id
 TradeTariffDevHub#govuk_notifier_api_key
+TradeTariffDevHub#privacy_url
 TradeTariffKeysController#confirm_action
 TradeTariffKeysController#create
 TradeTariffKeysController#new
