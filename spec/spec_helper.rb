@@ -1,5 +1,6 @@
 require "rspec/json_expectations"
 require "webmock/rspec"
+require "capybara/rspec"
 
 WebMock.disable_net_connect!
 

@@ -48,6 +48,7 @@ jobs:
       - uses: ruby/setup-ruby@v1.321.0
         with:
           bundler-cache: true
+          cache-version: 2
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
@@ -82,6 +83,7 @@ jobs:
       - uses: ruby/setup-ruby@v1.321.0
         with:
           bundler-cache: true
+          cache-version: 2
       - run: bundle exec rspec
         env:
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/tariff_dev_hub_test"
