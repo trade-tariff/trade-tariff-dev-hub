@@ -56,8 +56,3 @@ repos:
         entry: bash -c '.github/bin/trufflehog'
         language: system
         stages: ["pre-commit", "pre-push"]
-
-  - repo: https://github.com/trade-tariff/trade-tariff-tools
-    rev: main
-    hooks:
-      - id: debride
