@@ -17,6 +17,13 @@ module TradeTariffDevHub
   ANALYTICS_COOKIE_PREFIXES = %w[_ga _gat _gid].freeze
 
   class << self
+    def api_docs_url
+      ENV.fetch(
+        "API_DOCS_URL",
+        "https://docs.trade-tariff.service.gov.uk",
+      )
+    end
+
     def enquiry_form_url
       ENV.fetch(
         "ENQUIRY_FORM_URL",
@@ -85,7 +92,7 @@ module TradeTariffDevHub
     def terms_and_conditions_url
       ENV.fetch(
         "TERMS_AND_CONDITIONS_URL",
-        "https://api.trade-tariff.service.gov.uk/fpo/terms-and-conditions.html",
+        "https://docs.trade-tariff.service.gov.uk/fpo/terms-and-conditions.html",
       )
     end
 
