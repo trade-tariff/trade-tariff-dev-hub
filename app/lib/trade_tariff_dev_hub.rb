@@ -20,7 +20,7 @@ module TradeTariffDevHub
     def api_docs_url
       ENV.fetch(
         "API_DOCS_URL",
-        "https://docs.trade-tariff.service.gov.uk"
+        "https://docs.trade-tariff.service.gov.uk",
       )
     end
 
@@ -92,7 +92,7 @@ module TradeTariffDevHub
     def terms_and_conditions_url
       ENV.fetch(
         "TERMS_AND_CONDITIONS_URL",
-        "https://www.trade-tariff.service.gov.uk/terms",
+        "https://docs.trade-tariff.service.gov.uk/fpo/terms-and-conditions.html",
       )
     end
 
