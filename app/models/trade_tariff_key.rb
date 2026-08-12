@@ -23,6 +23,11 @@
 class TradeTariffKey < ApplicationRecord
   include KeyLimitValidation
 
+  # Scopes that exist on a key but must never be shown in the Dev Portal UI,
+  # e.g. because the key was provisioned directly from the backend outside
+  # any self-service flow.
+  HIDDEN_SCOPES = %w[categorisation].freeze
+
   has_paper_trail
 
   belongs_to :organisation
@@ -34,6 +39,10 @@ class TradeTariffKey < ApplicationRecord
 
   def revoke!
     update!(enabled: false, revoked_at: Time.current)
+  end
+
+  def visible_scopes
+    scopes - HIDDEN_SCOPES
   end
 
   def active?

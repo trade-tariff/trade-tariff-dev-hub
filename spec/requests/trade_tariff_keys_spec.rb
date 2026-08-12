@@ -7,6 +7,17 @@ RSpec.describe "Trade Tariff keys", type: :request do
     current_user.organisation.assign_role!("trade_tariff:full")
   end
 
+  describe "GET /trade_tariff_keys" do
+    it "does not render the categorisation scope for a key that has it", :aggregate_failures do
+      create(:trade_tariff_key, :cognito_provisioned, organisation: current_user.organisation, scopes: %w[read categorisation])
+
+      get trade_tariff_keys_path
+
+      expect(response.body).to include("read")
+      expect(response.body).not_to include("categorisation")
+    end
+  end
+
   describe "POST /trade_tariff_keys" do
     let(:create_service) { instance_double(TradeTariff::CreateTradeTariffKey) }
     let(:trade_tariff_key) { create(:trade_tariff_key, :cognito_provisioned, organisation: current_user.organisation) }

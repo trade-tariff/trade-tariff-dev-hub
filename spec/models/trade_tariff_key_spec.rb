@@ -11,6 +11,18 @@ RSpec.describe TradeTariffKey, type: :model do
   it { is_expected.to validate_uniqueness_of(:client_id) }
   it { is_expected.to validate_presence_of(:scopes) }
 
+  describe "#visible_scopes" do
+    it "excludes categorisation from the scopes shown in the UI" do
+      key = build(:trade_tariff_key, scopes: %w[read categorisation])
+      expect(key.visible_scopes).to eq(%w[read])
+    end
+
+    it "returns all scopes unchanged when none are hidden" do
+      key = build(:trade_tariff_key, scopes: %w[read write])
+      expect(key.visible_scopes).to eq(%w[read write])
+    end
+  end
+
   describe "#limit_keys_per_organisation" do
     before { allow(TradeTariffDevHub).to receive(:live_production_environment?).and_return(true) }
 

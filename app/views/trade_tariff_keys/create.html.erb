@@ -15,7 +15,7 @@
       end
       summary_list.with_row do |row|
         row.with_key(text: "Scopes")
-        row.with_value(text: @trade_tariff_key.scopes.join(", "))
+        row.with_value(text: @trade_tariff_key.visible_scopes.join(", "))
       end
     end %>
 
