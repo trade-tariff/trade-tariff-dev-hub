@@ -44,6 +44,18 @@ docker-compose up
 
 To **create real Trade Tariff keys** (Cognito + API Gateway), set `IDENTITY_API_KEY` and `TRADE_TARIFF_USAGE_PLAN_ID` (see [docs/TRADE_TARIFF_KEYS_SETUP.md](docs/TRADE_TARIFF_KEYS_SETUP.md) for how to find the usage plan in AWS and per-environment setup).
 
+#### Provisioning a Categorisation API key
+
+Categorisation keys are generated manually, one organisation at a time. They are not part of the self-service key-creation flow. Configure `IDENTITY_API_KEY` and the dedicated `CATEGORISATION_USAGE_PLAN_ID`, then run:
+
+```sh
+bin/rails 'categorisation_keys:provision[<dev-hub-organisation-uuid>]'
+```
+
+You can quote the task name so shells such as zsh do not interpret the square brackets. On success the task prints the client ID and client secret. Store the secret securely at once: Dev Hub saves the client ID and key metadata, but does not retain the client secret.
+
+A Categorisation key currently counts towards the production limit of 3 active Trade Tariff keys per organisation. Revoke the existing key before deliberately creating a replacement.
+
 ### Playwright API key cleanup (development and staging)
 
 API keys created by Playwright tests use a description prefix `playwright-` (e.g. `playwright-${Date.now()}`). A daily scheduled task removes these keys so the admin org doesn’t accumulate them.

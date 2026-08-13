@@ -175,6 +175,11 @@ module TradeTariffDevHub
       @trade_tariff_usage_plan_id ||= ENV["TRADE_TARIFF_USAGE_PLAN_ID"]
     end
 
+    # Pre-created API Gateway usage plan for Categorisation API consumers.
+    def categorisation_usage_plan_id
+      @categorisation_usage_plan_id ||= ENV["CATEGORISATION_USAGE_PLAN_ID"]
+    end
+
     def identity_cognito_jwks_keys
       return if identity_cognito_jwks_url.blank?
 
