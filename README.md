@@ -42,19 +42,21 @@ docker-compose up
 
 ### Trade Tariff keys (identity + API Gateway)
 
-To **create real Trade Tariff keys** (Cognito + API Gateway), set `IDENTITY_API_KEY` and `TRADE_TARIFF_USAGE_PLAN_ID` (see [docs/TRADE_TARIFF_KEYS_SETUP.md](docs/TRADE_TARIFF_KEYS_SETUP.md) for how to find the usage plan in AWS and per-environment setup).
+To **create real Trade Tariff keys** (Cognito + API Gateway), set `IDENTITY_API_KEY` and `TRADE_TARIFF_USAGE_PLAN_ID`. See [Trade Tariff key setup](docs/TRADE_TARIFF_KEYS_SETUP.md) for the environment prerequisites and operator runbook.
 
 #### Provisioning a Categorisation API key
 
-Categorisation keys are generated manually, one organisation at a time. They are not part of the self-service key-creation flow. Configure `IDENTITY_API_KEY` and the dedicated `CATEGORISATION_USAGE_PLAN_ID`, then run:
+Categorisation accounts and API keys are provisioned manually. They are not part of the self-service key-creation flow. After completing the [environment prerequisites](docs/TRADE_TARIFF_KEYS_SETUP.md#categorisation-account-provisioning), run the task inside the deployed Dev Hub service or an equivalently configured one-off task:
 
 ```sh
-bin/rails 'categorisation_keys:provision[<dev-hub-organisation-uuid>]'
+bin/rails 'categorisation_accounts:create[person@example.com]'
 ```
 
-You can quote the task name so shells such as zsh do not interpret the square brackets. On success the task prints the client ID and client secret. Store the secret securely at once: Dev Hub saves the client ID and key metadata, but does not retain the client secret.
+You can quote the task name so shells such as zsh do not interpret the square brackets. Verify the environment and email shown by the confirmation prompt before continuing. The task creates a Dev Hub user and organisation for the email address, grants Trade Tariff access, and provisions a Categorisation API key. On success it prints the email address, client ID, and client secret.
 
-A Categorisation key currently counts towards the production limit of 3 active Trade Tariff keys per organisation. Revoke the existing key before deliberately creating a replacement.
+Store the secret securely at once: Dev Hub saves the client ID and key metadata, but does not retain the client secret. Do not copy it into Slack, Jira, pull requests, or other ordinary logs. The user can then sign in through the passwordless Identity flow using the provisioned email address.
+
+A Categorisation key currently counts towards the production limit of 3 active Trade Tariff keys per organisation. This account-provisioning task rejects an email that already has an account and is not a key-rotation mechanism.
 
 ### Playwright API key cleanup (development and staging)
 
