@@ -42,7 +42,7 @@ docker-compose up
 
 ### Trade Tariff keys (identity + API Gateway)
 
-To **create real Trade Tariff keys** (Cognito + API Gateway), set `IDENTITY_API_KEY` and `TRADE_TARIFF_USAGE_PLAN_ID`. See [Trade Tariff key setup](docs/TRADE_TARIFF_KEYS_SETUP.md) for the environment prerequisites and operator runbook.
+To **create real Trade Tariff keys** (Cognito + API Gateway), set `IDENTITY_API_KEY` and `TRADE_TARIFF_USAGE_PLAN_ID` (see [docs/TRADE_TARIFF_KEYS_SETUP.md](docs/TRADE_TARIFF_KEYS_SETUP.md) for how to find the usage plan in AWS and per-environment setup).
 
 #### Provisioning a Categorisation API key
 
