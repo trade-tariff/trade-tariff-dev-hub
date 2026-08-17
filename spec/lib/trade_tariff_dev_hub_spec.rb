@@ -287,7 +287,6 @@ RSpec.describe TradeTariffDevHub do
     identity_encryption_secret: %w[IDENTITY_ENCRYPTION_SECRET secret],
     identity_api_key: %w[IDENTITY_API_KEY identity-key],
     trade_tariff_usage_plan_id: %w[TRADE_TARIFF_USAGE_PLAN_ID usage-plan],
-    categorisation_usage_plan_id: %w[CATEGORISATION_USAGE_PLAN_ID categorisation-plan],
     identity_cognito_jwks_url: ["IDENTITY_COGNITO_JWKS_URL", "https://identity.example.com/pool/.well-known/jwks.json"],
     uk_backend_url: ["UK_BACKEND_URL", "https://backend.example.com/uk/api"],
     uk_backend_bearer_token: %w[UK_BACKEND_BEARER_TOKEN backend-token],

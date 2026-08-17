@@ -79,21 +79,6 @@ RSpec.describe TradeTariff::CreateTradeTariffKey do
       )
     end
 
-    it "uses an explicitly supplied usage plan" do # rubocop:disable RSpec/ExampleLength
-      create_trade_tariff_key.call(
-        organisation.id,
-        call_params[:description],
-        call_params[:scopes],
-        usage_plan_id: "categorisation-plan-id",
-      )
-
-      expect(api_gateway_client).to have_received(:create_usage_plan_key).with(
-        key_id: stub_creds[:api_gateway_key_id],
-        key_type: "API_KEY",
-        usage_plan_id: "categorisation-plan-id",
-      )
-    end # rubocop:enable RSpec/ExampleLength
-
     it "uses default scopes if not provided" do
       allow(identity_client).to receive(:create!).with(%w[read]).and_return(
         Identity::ClientCredentialsApi::CreateResult.new(client_id: stub_creds[:client_id], client_secret: stub_creds[:client_secret]),

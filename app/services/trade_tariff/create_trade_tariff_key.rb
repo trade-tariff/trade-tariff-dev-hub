@@ -11,8 +11,8 @@ class TradeTariff::CreateTradeTariffKey
     @api_gateway_client = api_gateway_client || Aws::APIGateway::Client.new
   end
 
-  def call(organisation_id, description = nil, scopes = DEFAULT_SCOPES, usage_plan_id: nil)
-    usage_plan_id ||= TradeTariffDevHub.trade_tariff_usage_plan_id
+  def call(organisation_id, description = nil, scopes = DEFAULT_SCOPES)
+    usage_plan_id = TradeTariffDevHub.trade_tariff_usage_plan_id
     identity_token = TradeTariffDevHub.identity_api_key
     if usage_plan_id.blank? || identity_token.blank?
       raise ArgumentError, "Something went wrong. Please contact #{TradeTariffDevHub.application_support_email} for assistance."

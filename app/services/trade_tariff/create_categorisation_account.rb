@@ -7,13 +7,15 @@ class TradeTariff::CreateCategorisationAccount
     @key_creator = key_creator || TradeTariff::CreateCategorisationKey.new
   end
 
-  def call(email_address)
+  def call(email_address, organisation_name)
     email_address = normalize_email(email_address)
+    organisation_name = organisation_name.to_s.strip
     validate_email!(email_address)
+    validate_organisation_name!(organisation_name)
     ensure_user_does_not_exist!(email_address)
 
     User.transaction do
-      organisation = create_organisation!(email_address)
+      organisation = create_organisation!(organisation_name, email_address)
       user = create_user!(email_address, organisation)
       key_result = @key_creator.call(organisation)
 
@@ -37,15 +39,19 @@ private
     raise ArgumentError, "A valid email address is required"
   end
 
+  def validate_organisation_name!(organisation_name)
+    raise ArgumentError, "Organisation name is required" if organisation_name.blank?
+  end
+
   def ensure_user_does_not_exist!(email_address)
     return unless User.where("LOWER(email_address) = ?", email_address).exists?
 
     raise ArgumentError, "An account already exists for #{email_address}"
   end
 
-  def create_organisation!(email_address)
+  def create_organisation!(organisation_name, email_address)
     Organisation.create!(
-      organisation_name: email_address,
+      organisation_name: organisation_name,
       description: "Categorisation API organisation for #{email_address}",
     ).tap do |organisation|
       organisation.assign_role!(Role::TRADE_TARIFF_ROLE_NAME)

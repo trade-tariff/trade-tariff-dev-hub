@@ -38,24 +38,24 @@ Gateway for the key + usage plan association.
 
 ## Categorisation account provisioning
 
-In addition to the common prerequisites:
+Categorisation keys use the same `TRADE_TARIFF_USAGE_PLAN_ID` as other Trade
+Tariff keys. In addition to the common prerequisites:
 
-- add `CATEGORISATION_USAGE_PLAN_ID` to the configuration used by the task;
-- confirm that the value identifies the dedicated Categorisation API usage plan;
 - confirm that Cognito exposes the `tariff/categorisation` OAuth scope; and
 - deploy the matching authoriser and API Gateway protection before issuing credentials.
 
 Run this inside the target Dev Hub container:
 
 ```sh
-bin/rails 'categorisation_accounts:create[person@example.com]'
+bin/rails 'categorisation_accounts:create[person@example.com,Example Traders Ltd]'
 ```
 
-The prompt displays the environment and email. Continue only when both are correct. The task normalises the stored email, creates the user and organisation, grants Trade Tariff access, and creates one active categorisation credential.
+Use the existing `backend-green-lanes-api-keys` secret's `client_contact` as the email and `name` as the organisation name. Do not pass the secret's credentials to this task. The prompt displays the environment, email, and organisation name. Continue only when all three are correct. The task normalises the stored email and organisation name, creates the user and organisation, grants Trade Tariff access, and creates one active categorisation credential.
 
 On success, securely deliver these console values to the intended recipient:
 
 - email;
+- organisation name;
 - client ID; and
 - client secret.
 
@@ -65,7 +65,7 @@ The recipient can sign in through the passwordless Identity flow using the provi
 
 ### Failures and retries
 
-Do not assume provisioning succeeded unless the task prints all three output values. Local account creation is transactional, and key creation attempts to remove any Cognito or API Gateway resources it created after a later failure.
+Do not assume provisioning succeeded unless the task prints all four output values. Local account creation is transactional, and key creation attempts to remove any Cognito or API Gateway resources it created after a later failure.
 
 If cleanup itself reports an error, inspect Dev Hub, Identity, and API Gateway before retrying so that an orphaned external credential is not overlooked. The task rejects an email that already belongs to a Dev Hub account.
 

@@ -49,10 +49,10 @@ To **create real Trade Tariff keys** (Cognito + API Gateway), set `IDENTITY_API_
 Categorisation accounts and API keys are provisioned manually. They are not part of the self-service key-creation flow. After completing the [environment prerequisites](docs/TRADE_TARIFF_KEYS_SETUP.md#categorisation-account-provisioning), run the task inside the deployed Dev Hub service or an equivalently configured one-off task:
 
 ```sh
-bin/rails 'categorisation_accounts:create[person@example.com]'
+bin/rails 'categorisation_accounts:create[person@example.com,Example Traders Ltd]'
 ```
 
-You can quote the task name so shells such as zsh do not interpret the square brackets. Verify the environment and email shown by the confirmation prompt before continuing. The task creates a Dev Hub user and organisation for the email address, grants Trade Tariff access, and provisions a Categorisation API key. On success it prints the email address, client ID, and client secret.
+Use the existing Green Lanes secret's `client_contact` as the email and `name` as the organisation name. You can quote the task name so shells such as zsh do not interpret the square brackets. Verify the environment, email, and organisation shown by the confirmation prompt before continuing. The task creates a Dev Hub user and organisation, grants Trade Tariff access, and provisions a Categorisation API key. On success it prints the organisation, email address, client ID, and client secret.
 
 Store the secret securely at once: Dev Hub saves the client ID and key metadata, but does not retain the client secret. Do not copy it into Slack, Jira, pull requests, or other ordinary logs. The user can then sign in through the passwordless Identity flow using the provisioned email address.
 

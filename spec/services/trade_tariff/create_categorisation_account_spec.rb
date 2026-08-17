@@ -17,7 +17,7 @@ RSpec.describe TradeTariff::CreateCategorisationAccount do
   end
 
   context "with a valid new email address" do
-    subject(:result) { provision_account.call("  Consumer@Example.com ") }
+    subject(:result) { provision_account.call("  Consumer@Example.com ", "  Example Traders Ltd  ") }
 
     it "creates a user and organisation" do
       expect { result }.to change(User, :count).by(1)
@@ -31,7 +31,7 @@ RSpec.describe TradeTariff::CreateCategorisationAccount do
 
     it "creates an organisation that can access Trade Tariff keys", :aggregate_failures do
       expect(result.user.organisation).to have_attributes(
-        organisation_name: "consumer@example.com",
+        organisation_name: "Example Traders Ltd",
         description: "Categorisation API organisation for consumer@example.com",
       )
       expect(result.user.organisation.has_role?(Role::TRADE_TARIFF_ROLE_NAME)).to be(true)
@@ -48,8 +48,20 @@ RSpec.describe TradeTariff::CreateCategorisationAccount do
     original_user_count = User.count
     original_organisation_count = Organisation.count
 
-    expect { provision_account.call("not-an-email") }
+    expect { provision_account.call("not-an-email", "Example Traders Ltd") }
       .to raise_error(ArgumentError, "A valid email address is required")
+
+    expect(User.count).to eq(original_user_count)
+    expect(Organisation.count).to eq(original_organisation_count)
+    expect(key_creator).not_to have_received(:call)
+  end
+
+  it "rejects a blank organisation name before creating anything", :aggregate_failures do
+    original_user_count = User.count
+    original_organisation_count = Organisation.count
+
+    expect { provision_account.call("consumer@example.com", "  ") }
+      .to raise_error(ArgumentError, "Organisation name is required")
 
     expect(User.count).to eq(original_user_count)
     expect(Organisation.count).to eq(original_organisation_count)
@@ -61,7 +73,7 @@ RSpec.describe TradeTariff::CreateCategorisationAccount do
     original_user_count = User.count
     original_organisation_count = Organisation.count
 
-    expect { provision_account.call("CONSUMER@example.com") }
+    expect { provision_account.call("CONSUMER@example.com", "Example Traders Ltd") }
       .to raise_error(ArgumentError, "An account already exists for consumer@example.com")
 
     expect(User.count).to eq(original_user_count)
@@ -74,7 +86,7 @@ RSpec.describe TradeTariff::CreateCategorisationAccount do
     original_user_count = User.count
     original_organisation_count = Organisation.count
 
-    expect { provision_account.call("consumer@example.com") }
+    expect { provision_account.call("consumer@example.com", "Example Traders Ltd") }
       .to raise_error(StandardError, "AWS failed")
 
     expect(User.count).to eq(original_user_count)

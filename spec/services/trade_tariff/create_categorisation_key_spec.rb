@@ -8,18 +8,16 @@ RSpec.describe TradeTariff::CreateCategorisationKey do
   let(:result) { instance_double(TradeTariff::CreateTradeTariffKey::CreateResult) }
 
   before do
-    allow(TradeTariffDevHub).to receive(:categorisation_usage_plan_id).and_return("categorisation-plan-id")
     allow(key_creator).to receive(:call).and_return(result)
   end
 
-  it "creates a categorisation-only key in the categorisation usage plan", :aggregate_failures do
+  it "creates a categorisation-only key", :aggregate_failures do
     expect(create_key.call(organisation)).to eq(result)
 
     expect(key_creator).to have_received(:call).with(
       organisation.id,
       "Categorisation API key",
       %w[categorisation],
-      usage_plan_id: "categorisation-plan-id",
     )
   end
 
@@ -35,14 +33,6 @@ RSpec.describe TradeTariff::CreateCategorisationKey do
     create(:trade_tariff_key, organisation: organisation, scopes: %w[categorisation], enabled: false)
 
     expect { create_key.call(organisation) }.not_to raise_error
-  end
-
-  it "fails before provisioning when the categorisation usage plan is not configured", :aggregate_failures do
-    allow(TradeTariffDevHub).to receive(:categorisation_usage_plan_id).and_return(nil)
-
-    expect { create_key.call(organisation) }
-      .to raise_error(ArgumentError, "CATEGORISATION_USAGE_PLAN_ID is not configured")
-    expect(key_creator).not_to have_received(:call)
   end
 
   it "requires a persisted organisation", :aggregate_failures do
