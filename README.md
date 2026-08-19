@@ -46,7 +46,16 @@ To **create real Trade Tariff keys** (Cognito + API Gateway), set `IDENTITY_API_
 
 #### Provisioning a Categorisation API key
 
-Categorisation accounts and API keys are provisioned manually. They are not part of the self-service key-creation flow. After completing the [environment prerequisites](docs/TRADE_TARIFF_KEYS_SETUP.md#categorisation-account-provisioning), run the task inside the deployed Dev Hub service or an equivalently configured one-off task:
+Categorisation accounts and API keys are provisioned manually. Ensure the [environment prerequisites](docs/TRADE_TARIFF_KEYS_SETUP.md#categorisation-account-provisioning) are configured.
+
+Ensure you run this task as the `tariff` user. If you don't switch, it changes the ownership of the `/tmp/backend.crt` certificate and borks things for future key generation.
+
+```sh
+su -s /bin/sh tariff
+id
+```
+
+Once you are the `tariff` user, you can run the rake task to provision the account and key:
 
 ```sh
 bin/rails 'categorisation_accounts:create[person@example.com,Example Traders Ltd]'

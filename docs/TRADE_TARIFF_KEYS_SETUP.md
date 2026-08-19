@@ -44,7 +44,22 @@ Tariff keys. In addition to the common prerequisites:
 - confirm that Cognito exposes the `tariff/categorisation` OAuth scope; and
 - deploy the matching authoriser and API Gateway protection before issuing credentials.
 
-Run this inside the target Dev Hub container:
+To provision an account with a key, first get a shell on AWS through cloudshell or your cli.
+
+Then switch to the `tariff` user. By default, shells run as root, and running this task as root will change the ownership of the `/tmp/backend.crt` certificate to root. This borks things for the application which uses the `tariff` user. When the application next comes to provision a key and overwrite the certificate it will run into the following error: 
+
+```text
+Failed to create Trade Tariff key: Permission denied @ rb_sysopen - /tmp/backend.crt
+```
+
+You can switch to the tariff user with:
+
+```sh
+su -s /bin/sh tariff
+id
+```
+
+Ensure `id` comes back as `tariff`. Only then can you run the task in the target dev hub container:
 
 ```sh
 bin/rails 'categorisation_accounts:create[person@example.com,Example Traders Ltd]'
