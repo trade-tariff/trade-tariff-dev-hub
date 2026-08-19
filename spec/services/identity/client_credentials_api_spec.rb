@@ -44,6 +44,20 @@ RSpec.describe Identity::ClientCredentialsApi do
       expect(captured_body).to eq({ scopes: %w[tariff/read tariff/write] })
     end
 
+    it "maps categorisation to tariff/categorisation when sending to identity" do
+      captured_body = nil
+      allow(http_client).to receive(:post).with("client_credentials") do |&block|
+        req = instance_double(Faraday::Request)
+        allow(req).to receive(:body=) { |body| captured_body = body }
+        block.call(req)
+        response
+      end
+
+      api.create!(%w[categorisation])
+
+      expect(captured_body).to eq({ scopes: %w[tariff/categorisation] })
+    end
+
     context "when API returns 400" do
       let(:response) { instance_double(Faraday::Response, status: 400, body: { "error" => "scopes required" }.to_json) }
 

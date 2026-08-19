@@ -44,6 +44,29 @@ docker-compose up
 
 To **create real Trade Tariff keys** (Cognito + API Gateway), set `IDENTITY_API_KEY` and `TRADE_TARIFF_USAGE_PLAN_ID` (see [docs/TRADE_TARIFF_KEYS_SETUP.md](docs/TRADE_TARIFF_KEYS_SETUP.md) for how to find the usage plan in AWS and per-environment setup).
 
+#### Provisioning a Categorisation API key
+
+Categorisation accounts and API keys are provisioned manually. Ensure the [environment prerequisites](docs/TRADE_TARIFF_KEYS_SETUP.md#categorisation-account-provisioning) are configured.
+
+Ensure you run this task as the `tariff` user. If you don't switch, it changes the ownership of the `/tmp/backend.crt` certificate and borks things for future key generation.
+
+```sh
+su -s /bin/sh tariff
+id
+```
+
+Once you are the `tariff` user, you can run the rake task to provision the account and key:
+
+```sh
+bin/rails 'categorisation_accounts:create[person@example.com,Example Traders Ltd]'
+```
+
+Use the existing Green Lanes secret's `client_contact` as the email and `name` as the organisation name. You can quote the task name so shells such as zsh do not interpret the square brackets. Verify the environment, email, and organisation shown by the confirmation prompt before continuing. The task creates a Dev Hub user and organisation, grants Trade Tariff access, and provisions a Categorisation API key. On success it prints the organisation, email address, client ID, and client secret.
+
+Store the secret securely at once: Dev Hub saves the client ID and key metadata, but does not retain the client secret. Do not copy it into Slack, Jira, pull requests, or other ordinary logs. The user can then sign in through the passwordless Identity flow using the provisioned email address.
+
+A Categorisation key currently counts towards the production limit of 3 active Trade Tariff keys per organisation. This account-provisioning task rejects an email that already has an account and is not a key-rotation mechanism.
+
 ### Playwright API key cleanup (development and staging)
 
 API keys created by Playwright tests use a description prefix `playwright-` (e.g. `playwright-${Date.now()}`). A daily scheduled task removes these keys so the admin org doesn’t accumulate them.

@@ -36,6 +36,54 @@ Gateway for the key + usage plan association.
   aws apigateway get-usage-plans --query "items[?name=='standard-<environment>'].id" --output text
   ```
 
+## Categorisation account provisioning
+
+Categorisation keys use the same `TRADE_TARIFF_USAGE_PLAN_ID` as other Trade
+Tariff keys. In addition to the common prerequisites:
+
+- confirm that Cognito exposes the `tariff/categorisation` OAuth scope; and
+- deploy the matching authoriser and API Gateway protection before issuing credentials.
+
+To provision an account with a key, first get a shell on AWS through cloudshell or your cli.
+
+Then switch to the `tariff` user. By default, shells run as root, and running this task as root will change the ownership of the `/tmp/backend.crt` certificate to root. This borks things for the application which uses the `tariff` user. When the application next comes to provision a key and overwrite the certificate it will run into the following error:
+
+```text
+Failed to create Trade Tariff key: Permission denied @ rb_sysopen - /tmp/backend.crt
+```
+
+You can switch to the tariff user with:
+
+```sh
+su -s /bin/sh tariff
+id
+```
+
+Ensure `id` comes back as `tariff`. Only then can you run the task in the target dev hub container:
+
+```sh
+bin/rails 'categorisation_accounts:create[person@example.com,Example Traders Ltd]'
+```
+
+Use the existing `backend-green-lanes-api-keys` secret's `client_contact` as the email and `name` as the organisation name. Do not pass the secret's credentials to this task. The prompt displays the environment, email, and organisation name. Continue only when all three are correct. The task normalises the stored email and organisation name, creates the user and organisation, grants Trade Tariff access, and creates one active categorisation credential.
+
+On success, securely deliver these console values to the intended recipient:
+
+- email;
+- organisation name;
+- client ID; and
+- client secret.
+
+The client secret is shown once and is not stored by Dev Hub. Do not put it in Slack, Jira, pull requests, shell history, or ordinary logs. Use the team's approved secure secret-sharing mechanism.
+
+The recipient can sign in through the passwordless Identity flow using the provisioned email address.
+
+### Failures and retries
+
+Do not assume provisioning succeeded unless the task prints all four output values. Local account creation is transactional, and key creation attempts to remove any Cognito or API Gateway resources it created after a later failure.
+
+If cleanup itself reports an error, inspect Dev Hub, Identity, and API Gateway before retrying so that an orphaned external credential is not overlooked. The task rejects an email that already belongs to a Dev Hub account.
+
 ## Measuring active Trade Tariff key usage
 
 As of HMRC-2632, **production** has API Gateway access logging and detailed

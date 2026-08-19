@@ -6,6 +6,7 @@ module Identity
     SCOPE_MAP = {
       "read" => "tariff/read",
       "write" => "tariff/write",
+      "categorisation" => "tariff/categorisation",
     }.freeze
 
     CreateResult = Data.define(:client_id, :client_secret)

@@ -44,6 +44,22 @@ RSpec.describe User, type: :model do
       it { expect { from_passwordless_payload! }.not_to change(Organisation, :count) }
     end
 
+    context "when the account was provisioned before its first passwordless login" do
+      let!(:user) do
+        create(
+          :user,
+          user_id: "preprovisioned-placeholder",
+          email_address: decoded_token["email"],
+        )
+      end
+
+      it "signs in the same account and replaces its provisional ID", :aggregate_failures do
+        expect { from_passwordless_payload! }.not_to change(described_class, :count)
+        expect(from_passwordless_payload!).to eq(user)
+        expect(user.reload.user_id).to eq(decoded_token["sub"])
+      end
+    end
+
     context "when the user does not exist and has no pending invitation" do
       before do
         allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(false)

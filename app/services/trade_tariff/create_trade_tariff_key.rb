@@ -28,7 +28,7 @@ class TradeTariff::CreateTradeTariffKey
     )
 
     begin
-      create_in_api_gateway(trade_tariff_key, usage_plan_id)
+      create_in_api_gateway(trade_tariff_key)
       associate_to_usage_plan(trade_tariff_key, usage_plan_id)
       trade_tariff_key.save!
     rescue StandardError
@@ -40,7 +40,7 @@ class TradeTariff::CreateTradeTariffKey
 
 private
 
-  def create_in_api_gateway(trade_tariff_key, _usage_plan_id)
+  def create_in_api_gateway(trade_tariff_key)
     name = api_gateway_key_name_for(trade_tariff_key)
     response = @api_gateway_client.create_api_key(
       name: name,
