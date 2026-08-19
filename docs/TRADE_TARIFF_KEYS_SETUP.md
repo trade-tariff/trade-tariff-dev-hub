@@ -46,7 +46,7 @@ Tariff keys. In addition to the common prerequisites:
 
 To provision an account with a key, first get a shell on AWS through cloudshell or your cli.
 
-Then switch to the `tariff` user. By default, shells run as root, and running this task as root will change the ownership of the `/tmp/backend.crt` certificate to root. This borks things for the application which uses the `tariff` user. When the application next comes to provision a key and overwrite the certificate it will run into the following error: 
+Then switch to the `tariff` user. By default, shells run as root, and running this task as root will change the ownership of the `/tmp/backend.crt` certificate to root. This borks things for the application which uses the `tariff` user. When the application next comes to provision a key and overwrite the certificate it will run into the following error:
 
 ```text
 Failed to create Trade Tariff key: Permission denied @ rb_sysopen - /tmp/backend.crt
