@@ -15,6 +15,7 @@ gem "pg"
 gem "propshaft"
 gem "puma"
 gem "rack-cors"
+gem "resolv", "~> 0.7.2"
 
 gem "pagy"
 
