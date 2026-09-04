@@ -68,17 +68,31 @@ RSpec.describe TradeTariff::CreateCategorisationAccount do
     expect(key_creator).not_to have_received(:call)
   end
 
-  it "rejects an email address that already has an account, ignoring case", :aggregate_failures do
-    create(:user, email_address: "consumer@example.com")
-    original_user_count = User.count
-    original_organisation_count = Organisation.count
+  context "when the email address already has an account, ignoring case" do
+    subject(:result) { provision_account.call("CONSUMER@example.com", "Example Traders Ltd") }
 
-    expect { provision_account.call("CONSUMER@example.com", "Example Traders Ltd") }
-      .to raise_error(ArgumentError, "An account already exists for consumer@example.com")
+    let(:organisation) { create(:organisation) }
+    let!(:existing_user) { create(:user, email_address: "consumer@example.com", organisation: organisation) }
 
-    expect(User.count).to eq(original_user_count)
-    expect(Organisation.count).to eq(original_organisation_count)
-    expect(key_creator).not_to have_received(:call)
+    it "does not create a new user" do
+      expect { result }.not_to change(User, :count)
+    end
+
+    it "does not create a new organisation" do
+      expect { provision_account.call("CONSUMER@example.com", "Example Traders Ltd") }
+        .not_to change(Organisation, :count)
+    end
+
+    it "creates a key for the existing user's organisation instead", :aggregate_failures do
+      expect(result.user).to eq(existing_user)
+      expect(result.categorisation_key).to eq(trade_tariff_key)
+      expect(result.client_secret).to eq("secret-once-only")
+      expect(key_creator).to have_received(:call).with(organisation)
+    end
+
+    it "ignores the organisation_name argument" do
+      expect { provision_account.call("CONSUMER@example.com", "") }.not_to raise_error
+    end
   end
 
   it "rolls back the local account when key provisioning fails", :aggregate_failures do

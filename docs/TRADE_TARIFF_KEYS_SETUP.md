@@ -65,7 +65,7 @@ Ensure `id` comes back as `tariff`. Only then can you run the task in the target
 bin/rails 'categorisation_accounts:create[person@example.com,Example Traders Ltd]'
 ```
 
-Use the existing `backend-green-lanes-api-keys` secret's `client_contact` as the email and `name` as the organisation name. Do not pass the secret's credentials to this task. The prompt displays the environment, email, and organisation name. Continue only when all three are correct. The task normalises the stored email and organisation name, creates the user and organisation, grants Trade Tariff access, and creates one active categorisation credential.
+Use the existing `backend-green-lanes-api-keys` secret's `client_contact` as the email and `name` as the organisation name. Do not pass the secret's credentials to this task. The prompt displays the environment, email, and organisation name. Continue only when all three are correct. The task normalises the stored email and organisation name. If the email address does not already have a Dev Hub account, it creates the user and organisation and grants Trade Tariff access; if the email already has an account, it reuses that account's existing organisation instead (the organisation name argument is ignored) — either way, it then creates one active categorisation credential for that organisation.
 
 On success, securely deliver these console values to the intended recipient:
 
@@ -82,7 +82,7 @@ The recipient can sign in through the passwordless Identity flow using the provi
 
 Do not assume provisioning succeeded unless the task prints all four output values. Local account creation is transactional, and key creation attempts to remove any Cognito or API Gateway resources it created after a later failure.
 
-If cleanup itself reports an error, inspect Dev Hub, Identity, and API Gateway before retrying so that an orphaned external credential is not overlooked. The task rejects an email that already belongs to a Dev Hub account.
+If cleanup itself reports an error, inspect Dev Hub, Identity, and API Gateway before retrying so that an orphaned external credential is not overlooked. Retrying for an email that already has a Dev Hub account reuses that account's existing organisation rather than creating a new one, and the task still refuses to create a second active Categorisation key for the same organisation — so a retry cannot silently duplicate a key, but any orphaned external credential from a previous failed attempt still needs manual cleanup.
 
 ## Measuring active Trade Tariff key usage
 

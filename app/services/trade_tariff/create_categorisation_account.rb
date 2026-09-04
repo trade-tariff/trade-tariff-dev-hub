@@ -9,21 +9,18 @@ class TradeTariff::CreateCategorisationAccount
 
   def call(email_address, organisation_name)
     email_address = normalize_email(email_address)
-    organisation_name = organisation_name.to_s.strip
     validate_email!(email_address)
+
+    existing_user = find_existing_user(email_address)
+    return build_result(existing_user, @key_creator.call(existing_user.organisation)) if existing_user
+
+    organisation_name = organisation_name.to_s.strip
     validate_organisation_name!(organisation_name)
-    ensure_user_does_not_exist!(email_address)
 
     User.transaction do
       organisation = create_organisation!(organisation_name, email_address)
       user = create_user!(email_address, organisation)
-      key_result = @key_creator.call(organisation)
-
-      Result.new(
-        user: user,
-        categorisation_key: key_result.trade_tariff_key,
-        client_secret: key_result.client_secret,
-      )
+      build_result(user, @key_creator.call(organisation))
     end
   end
 
@@ -43,10 +40,16 @@ private
     raise ArgumentError, "Organisation name is required" if organisation_name.blank?
   end
 
-  def ensure_user_does_not_exist!(email_address)
-    return unless User.where("LOWER(email_address) = ?", email_address).exists?
+  def find_existing_user(email_address)
+    User.where("LOWER(email_address) = ?", email_address).first
+  end
 
-    raise ArgumentError, "An account already exists for #{email_address}"
+  def build_result(user, key_result)
+    Result.new(
+      user: user,
+      categorisation_key: key_result.trade_tariff_key,
+      client_secret: key_result.client_secret,
+    )
   end
 
   def create_organisation!(organisation_name, email_address)

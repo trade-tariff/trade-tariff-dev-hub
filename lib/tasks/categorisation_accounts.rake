@@ -6,12 +6,14 @@ namespace :categorisation_accounts do
     email_address = args[:email_address]
     organisation_name = args[:organisation_name]
     abort "Email address is required" if email_address.blank?
-    abort "Organisation name is required" if organisation_name.blank?
+
+    existing_user = User.where("LOWER(email_address) = ?", email_address.to_s.strip.downcase).first
+    abort "Organisation name is required" if existing_user.nil? && organisation_name.blank?
 
     puts "Create a Dev Hub account and Categorisation API key"
     puts "Environment: #{TradeTariffDevHub.environment}"
     puts "Email: #{email_address}"
-    puts "Organisation: #{organisation_name}"
+    puts "Organisation: #{organisation_name}" if organisation_name.present?
     print "Continue? [y/N] "
     confirmation = $stdin.gets&.strip&.downcase
     abort "Creation cancelled; no account or key was created" unless %w[y yes].include?(confirmation)
