@@ -84,10 +84,36 @@ RSpec.describe Rake::Task, "categorisation_accounts:create" do
     expect(service).not_to have_received(:call)
   end
 
-  it "requires an organisation name", :aggregate_failures do
+  it "requires an organisation name when no account exists yet for the email", :aggregate_failures do
     expect { task.invoke(account_details[:email_address]) }
       .to output(/Organisation name is required/).to_stderr
       .and raise_error(SystemExit, /Organisation name is required/)
     expect(service).not_to have_received(:call)
+  end
+
+  it "does not require an organisation name when the email already has an account, passing it through to the service as nil", :aggregate_failures do
+    create(:user, email_address: account_details[:email_address])
+    allow($stdin).to receive(:gets).and_return("yes\n")
+
+    expect { task.invoke(account_details[:email_address]) }
+      .to output(/account and Categorisation API key created/).to_stdout
+
+    expect(service).to have_received(:call).with(account_details[:email_address], nil)
+  end
+
+  it "matches the existing account by email case-insensitively" do
+    create(:user, email_address: account_details[:email_address].downcase)
+    allow($stdin).to receive(:gets).and_return("yes\n")
+
+    expect { task.invoke(account_details[:email_address].upcase) }
+      .to output(/account and Categorisation API key created/).to_stdout
+  end
+
+  it "lets a service error propagate with its backtrace instead of swallowing it into an abort" do
+    allow($stdin).to receive(:gets).and_return("yes\n")
+    allow(service).to receive(:call).and_raise(ArgumentError, "An unexpected service error")
+
+    expect { task.invoke(*account_details.values_at(:email_address, :organisation_name)) }
+      .to raise_error(ArgumentError, "An unexpected service error")
   end
 end

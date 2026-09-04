@@ -61,11 +61,11 @@ Once you are the `tariff` user, you can run the rake task to provision the accou
 bin/rails 'categorisation_accounts:create[person@example.com,Example Traders Ltd]'
 ```
 
-Use the existing Green Lanes secret's `client_contact` as the email and `name` as the organisation name. You can quote the task name so shells such as zsh do not interpret the square brackets. Verify the environment, email, and organisation shown by the confirmation prompt before continuing. The task creates a Dev Hub user and organisation, grants Trade Tariff access, and provisions a Categorisation API key. On success it prints the organisation, email address, client ID, and client secret.
+Use the existing Green Lanes secret's `client_contact` as the email and `name` as the organisation name. You can quote the task name so shells such as zsh do not interpret the square brackets. Verify the environment, email, and organisation shown by the confirmation prompt before continuing. If the email address does not already have a Dev Hub account, the task creates a new Dev Hub user and organisation, grants Trade Tariff access, and provisions a Categorisation API key. If the email address already has an account, the task reuses that account's existing organisation instead of creating a new one — the organisation name argument is ignored in that case — and just provisions a Categorisation API key for it. On success it prints the organisation, email address, client ID, and client secret.
 
 Store the secret securely at once: Dev Hub saves the client ID and key metadata, but does not retain the client secret. Do not copy it into Slack, Jira, pull requests, or other ordinary logs. The user can then sign in through the passwordless Identity flow using the provisioned email address.
 
-A Categorisation key currently counts towards the production limit of 3 active Trade Tariff keys per organisation. This account-provisioning task rejects an email that already has an account and is not a key-rotation mechanism.
+A Categorisation key currently counts towards the production limit of 3 active Trade Tariff keys per organisation. If the target organisation already has an active Categorisation key, the task fails rather than creating a duplicate — it is not a key-rotation mechanism.
 
 ### Playwright API key cleanup (development and staging)
 
