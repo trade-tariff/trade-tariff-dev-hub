@@ -4,6 +4,8 @@ This guide is for maintainers. Local setup is in [README.md](../README.md).
 Check [application configuration](../app/lib/trade_tariff_dev_hub.rb) before
 changing access flags. `RAILS_ENV` and `ENVIRONMENT` have different purposes:
 a deployed development or staging slot can run Rails in production mode.
+`TradeTariffDevHub.environment` defaults to `production` when `ENVIRONMENT`
+is unset.
 
 ## Organisation creation and role requests
 
@@ -25,9 +27,9 @@ Enable it explicitly when a deployed slot needs the role-request journey.
 ## Active key limits
 
 The per-organisation limit is 3 active keys for each key type, enforced only
-when `ENVIRONMENT=production`. Admin organisations are exempt. Revoked keys do
-not count. Categorisation keys are Trade Tariff keys and count towards that
-limit. See [key limit validation](../app/models/concerns/key_limit_validation.rb).
+when `ENVIRONMENT=production` or `ENVIRONMENT` is unset. Admin organisations
+are exempt. Revoked keys do not count. Categorisation keys are Trade Tariff
+keys and count towards that limit. See [key limit validation](../app/models/concerns/key_limit_validation.rb).
 
 ## Provision Categorisation credentials
 
@@ -42,11 +44,21 @@ credentials; it is not part of local application setup.
 start with `playwright-`, and deletes their external API Gateway keys. It acts
 across all organisations. It does not clean up `TradeTariffKey` records.
 
-Despite the task's description, the
-[implementation](../lib/tasks/cleanup.rake) has no environment guard and does not
-check `CLEANUP_PLAYWRIGHT_KEYS_ENABLED`. Do not rely on that variable to make it
-safe. Before running the task, verify the target database and AWS account and
-review the matching keys. Use it only with approval for the target environment.
+The [task](../lib/tasks/cleanup.rake) requires both `ENVIRONMENT=development`
+and `CLEANUP_PLAYWRIGHT_KEYS_ENABLED=true`. The flag must be the literal `true`.
+Otherwise it exits with an error before querying or deleting keys. Production,
+staging and an unset environment are blocked, even when the flag is enabled.
+`RAILS_ENV=development` alone does not enable cleanup.
+
+Before an approved run, verify the target database and AWS account and review
+the matching keys. After those checks, enable cleanup for that invocation:
+
+```sh
+ENVIRONMENT=development CLEANUP_PLAYWRIGHT_KEYS_ENABLED=true bundle exec rails cleanup:api_keys
+```
+
+These settings do not redirect the database or AWS clients. Confirm their targets
+independently; do not relabel a production connection as development.
 
 Any deployed schedule belongs to platform infrastructure, not this repository's
 local setup. Check the current platform configuration before changing it.

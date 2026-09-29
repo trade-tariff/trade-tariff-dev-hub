@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
 namespace :cleanup do
-  desc "Delete API keys with description starting with 'playwright-' (dev only, all orgs)"
+  desc "Delete playwright- API keys across all organisations (development only, explicit opt-in required)"
   task api_keys: :environment do
+    unless TradeTariffDevHub.environment == "development" && ENV["CLEANUP_PLAYWRIGHT_KEYS_ENABLED"] == "true"
+      abort "Cleanup requires ENVIRONMENT=development and CLEANUP_PLAYWRIGHT_KEYS_ENABLED=true"
+    end
+
     scope = ApiKey.where("description LIKE ?", "playwright-%")
     count = scope.count
 
