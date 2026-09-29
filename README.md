@@ -1,75 +1,106 @@
-# trade-tariff-dev-hub
+# Trade Tariff Dev Hub
 
-Ruby app giving FPO operators the ability to manage their own API credentials.
+Trade Tariff Dev Hub is the developer portal for Fast Parcel Operators (FPOs)
+and other organisations that use protected Trade Tariff APIs. Users sign in,
+manage organisation membership, request access and create or revoke API credentials.
 
-## Getting started
+This Ruby on Rails application stores users, organisations and key metadata in
+PostgreSQL. It uses [Identity](https://github.com/trade-tariff/identity) for
+passwordless sign-in and client credentials, and AWS API Gateway for API keys.
+It is not the public tariff website or the API documentation site.
 
-### Localstack
+Related projects:
 
-We use localstack to simulate the aws services we use to enable the dev hub
-to run locally.
+- [Trade Tariff Backend](https://github.com/trade-tariff/trade-tariff-backend): tariff APIs and FPO integration.
+- [Trade Tariff API documentation](https://docs.trade-tariff.service.gov.uk/): guidance for API consumers.
+- [Dev Hub end-to-end tests](https://github.com/trade-tariff/trade-tariff-fpo-dev-hub-e2e): browser tests for deployed journeys.
 
-You'll need docker and docker-compose installed with your package manager.
+## Run locally
 
-To bring up localstack run the following command:
+### Prerequisites
 
-```bash
-docker-compose up
-```
+- Ruby at the version in [.ruby-version](.ruby-version) and Bundler.
+- PostgreSQL, with a local user that can create development and test databases.
+- A configured Identity service for sign-in journeys.
+- Docker Compose if you need LocalStack for local AWS integration work.
 
-> [!TIP]
-> If you're on a linux machine you'll want to alias the `host.docker.internal` namespace
->
-> ```hosts
-> 127.0.0.1 host.docker.internal
-> ```
+Clone this repository, or follow the [fork workflow](CONTRIBUTING.md#fork-and-branch)
+if you want to contribute without write access.
 
-### Passwordless signup and role request flags
+### Configure the application
 
-`ENVIRONMENT` (e.g. `production`, `staging`, `development`) is set per deploy; tests default it to `test`.
+Put local overrides in `.env.development.local`. The tracked
+[.env.development](.env.development) contains defaults, not a complete working
+Identity or AWS environment. Do not use production credentials for local work.
 
-**Self-service org at sign-in (no invitation)** is gated in two steps:
+[config/database.yml](config/database.yml) reads `PGHOST` and `DB_USER`, which
+default to `localhost` and `postgres`. The databases are
+`tariff_dev_hub_development` and `tariff_dev_hub_test`.
 
-1. `self_service_org_creation_enabled?` — if `FEATURE_FLAG_SELF_SERVICE_ORG_CREATION` is set, that value wins. If unset: enabled when `Rails.env.development?` or when `ENVIRONMENT` is `development` or `staging`; disabled when `ENVIRONMENT` is `production` (or anything else like `test`).
-2. `allow_passwordless_self_service_org_creation?` — additionally requires `ENVIRONMENT != "production"`. So the live production slot never creates a personal org from the callback, even if the feature flag is `true`.
+Passwordless sign-in requires `IDENTITY_BASE_URL`, `IDENTITY_CONSUMER`,
+`IDENTITY_COGNITO_JWKS_URL` and `IDENTITY_ENCRYPTION_SECRET`, matched to the
+Identity service. The consumer defaults to `portal`. Without that integration,
+you can work on code and run mocked tests, but cannot complete a real sign-in.
 
-**Role requests** use `FEATURE_FLAG_ROLE_REQUEST`:
+Creating Trade Tariff credentials also needs `IDENTITY_API_KEY` and
+`TRADE_TARIFF_USAGE_PLAN_ID`. See the
+[key setup guide](docs/TRADE_TARIFF_KEYS_SETUP.md) before testing key creation.
+It changes external resources and can issue usable credentials.
 
-- If the variable is set: `true` / `false` applies in every environment.
-- If unset: enabled in `development` and `test` only; disabled in deployed environments unless you set the flag (e.g. `FEATURE_FLAG_ROLE_REQUEST=true` on staging so new orgs can request `fpo:full` / `trade_tariff:full`).
-
-**API keys and Trade Tariff keys:** the per-organisation cap (3 active keys) applies only when `ENVIRONMENT=production`. Staging, development, and local/test do not enforce that limit.
-
-### Trade Tariff keys (identity + API Gateway)
-
-To **create real Trade Tariff keys** (Cognito + API Gateway), set `IDENTITY_API_KEY` and `TRADE_TARIFF_USAGE_PLAN_ID` (see [docs/TRADE_TARIFF_KEYS_SETUP.md](docs/TRADE_TARIFF_KEYS_SETUP.md) for how to find the usage plan in AWS and per-environment setup).
-
-#### Provisioning a Categorisation API key
-
-Categorisation accounts and API keys are provisioned manually. Ensure the [environment prerequisites](docs/TRADE_TARIFF_KEYS_SETUP.md#categorisation-account-provisioning) are configured.
-
-Ensure you run this task as the `tariff` user. If you don't switch, it changes the ownership of the `/tmp/backend.crt` certificate and borks things for future key generation.
-
-```sh
-su -s /bin/sh tariff
-id
-```
-
-Once you are the `tariff` user, you can run the rake task to provision the account and key:
+### Set up and start
 
 ```sh
-bin/rails 'categorisation_accounts:create[person@example.com,Example Traders Ltd]'
+bin/setup --skip-server
+bin/dev
 ```
 
-Use the existing Green Lanes secret's `client_contact` as the email and `name` as the organisation name. You can quote the task name so shells such as zsh do not interpret the square brackets. Verify the environment, email, and organisation shown by the confirmation prompt before continuing. If the email address does not already have a Dev Hub account, the task creates a new Dev Hub user and organisation, grants Trade Tariff access, and provisions a Categorisation API key. If the email address already has an account, the task reuses that account's existing organisation instead of creating a new one — the organisation name argument is ignored in that case — and just provisions a Categorisation API key for it. On success it prints the organisation, email address, client ID, and client secret.
+`bin/setup` installs Ruby dependencies and prepares the database. Without
+`--skip-server`, it also starts the application. Open <http://localhost:3004>.
 
-Store the secret securely at once: Dev Hub saves the client ID and key metadata, but does not retain the client secret. Do not copy it into Slack, Jira, pull requests, or other ordinary logs. The user can then sign in through the passwordless Identity flow using the provisioned email address.
+For local AWS integration work, the Compose file starts LocalStack only:
 
-A Categorisation key currently counts towards the production limit of 3 active Trade Tariff keys per organisation. If the target organisation already has an active Categorisation key, the task fails rather than creating a duplicate — it is not a key-rotation mechanism.
+```sh
+docker compose up -d localstack
+```
 
-### Playwright API key cleanup (development and staging)
+It does not start PostgreSQL or Identity, or create a usage plan. AWS clients
+use the AWS SDK configuration; starting LocalStack alone does not redirect
+requests to it. Configure and verify a local endpoint and disposable resources
+before testing key creation or deletion. Do not assume `LOCALSTACK_HOST` alone
+changes the SDK endpoint.
 
-API keys created by Playwright tests use a description prefix `playwright-` (e.g. `playwright-${Date.now()}`). A daily scheduled task removes these keys so the admin org doesn’t accumulate them.
+## Run checks
 
-- **Rake task:** `rails cleanup:api_keys` — only runs in development, or when `CLEANUP_PLAYWRIGHT_KEYS_ENABLED=true`, and cleans up Playwright keys from all organisations.
-- **AWS:** In the development and staging environments, Terraform defines an ECS job (`dev-hub-job`) and an EventBridge rule that runs it daily at 03:00 UTC with command `bundle exec rails cleanup:api_keys`. Set `CLEANUP_PLAYWRIGHT_KEYS_ENABLED=true` in the `dev-hub-job-configuration` secret so the task runs the cleanup.
+With PostgreSQL available:
+
+```sh
+bundle install
+RAILS_ENV=test bin/rails db:prepare
+bundle exec rspec
+bundle exec rubocop
+bundle exec brakeman
+```
+
+The RSpec suite mocks external requests. It does not need live AWS or Identity
+credentials. See [CONTRIBUTING.md](CONTRIBUTING.md) for hooks and pull requests.
+[GitHub Actions](.github/workflows/ci.yml) defines the CI checks.
+
+## Find your way around
+
+- [Routes](config/routes.rb): sign-in, organisations, invitations and keys.
+- [Services](app/services/): credential provisioning and external integrations.
+- [Application configuration](app/lib/trade_tariff_dev_hub.rb): integration settings and flags.
+- [Access and maintenance](docs/access-and-maintenance.md): sign-up flags, key limits and test-key cleanup.
+- [Key setup and provisioning](docs/TRADE_TARIFF_KEYS_SETUP.md): maintainer-only integration tasks and secret handling.
+
+## Contribute
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for reporting bugs, making a fork,
+submitting changes and reporting security issues privately.
+
+## Licence
+
+The code and associated documentation are available under the
+[MIT licence](LICENCE.md), with Crown copyright (HM Revenue & Customs).
+Keep the licence and copyright notice when you reuse the software.
+Third-party dependencies and assets retain their own licences.
