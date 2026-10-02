@@ -2,7 +2,7 @@
 # EventBridge triggers the job with a command override to run the rake task.
 
 module "dev-hub-job" {
-  source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v3.0.1"
+  source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v3.3.1"
 
   region = var.region
 
@@ -30,6 +30,10 @@ module "dev-hub-job" {
   max_capacity               = 1
   min_capacity               = 0
   sns_topic_arns             = [data.aws_sns_topic.slack_topic.arn]
+
+  readonly_root_filesystem = true
+  writable_paths           = local.writable_paths
+  container_user           = local.container_user
 }
 
 data "aws_ecs_task_definition" "job" {

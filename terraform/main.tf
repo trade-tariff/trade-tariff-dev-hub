@@ -1,5 +1,5 @@
 module "service" {
-  source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v3.1.0"
+  source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v3.3.1"
 
   region = var.region
 
@@ -30,6 +30,10 @@ module "service" {
   execution_role_policy_arns = [aws_iam_policy.exec.arn]
   task_role_policy_arns      = [aws_iam_policy.task.arn]
   enable_ecs_exec            = true
+
+  readonly_root_filesystem = true
+  writable_paths           = local.writable_paths
+  container_user           = local.container_user
 
   service_environment_config = local.devhub_service_env_vars
 
