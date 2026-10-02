@@ -30,6 +30,17 @@ module "dev-hub-job" {
   max_capacity               = 1
   min_capacity               = 0
   sns_topic_arns             = [data.aws_sns_topic.slack_topic.arn]
+
+  # WORKDIR is /app, so Rails.root-relative paths resolve there.
+  #   /tmp      - Identity::ClientCredentialsApi and SendNotification write the backend
+  #               TLS cert to /tmp/backend.crt
+  #   /app/tmp  - bootsnap, loaded in config/boot.rb; without it the app fails to boot
+  #   /app/log  - the New Relic agent's own log file (newrelic.yml sets no log_file)
+  # container_user matches the uid/gid pinned in the Dockerfile; the module's init
+  # container chowns the writable mounts to it so the non-root process can write to them.
+  readonly_root_filesystem = true
+  writable_paths           = ["/tmp", "/app/tmp", "/app/log"]
+  container_user           = "1000:1000"
 }
 
 data "aws_ecs_task_definition" "job" {
