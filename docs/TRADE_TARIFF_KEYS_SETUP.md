@@ -16,9 +16,11 @@ Gateway for the key + usage plan association.
 - `TradeTariff::RevokeTradeTariffKey` disables a key in place
   (`update_api_key`); `TradeTariff::DeleteTradeTariffKey` removes it
   (`delete_api_key`).
-- Every organisation is capped at 3 active Trade Tariff keys, but only when
-  `ENVIRONMENT=production` — see `README.md` for the other environment
-  flags.
+- Non-admin organisations are capped at 3 active Trade Tariff keys, but only
+  when `ENVIRONMENT=production` or `ENVIRONMENT` is unset. The application
+  defaults an unset environment to production. See
+  [access and maintenance](access-and-maintenance.md) for the environment flags
+  and limits.
 
 ## Required environment variables
 
