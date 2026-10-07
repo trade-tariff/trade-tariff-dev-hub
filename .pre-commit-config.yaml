@@ -23,6 +23,7 @@ repos:
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
+        exclude: '^vendor/javascript/'
       - id: check-yaml
       - id: file-contents-sorter
         files: '.env.development|.env.test'
