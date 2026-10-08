@@ -36,7 +36,7 @@ class User < ApplicationRecord
     end
 
     def from_passwordless_payload!(token)
-      return dummy_user! if Rails.env.development?
+      return dummy_user! if TradeTariffDevHub.bypass_authentication?
 
       user_id = token["sub"]
 
@@ -58,12 +58,11 @@ class User < ApplicationRecord
     def dummy_user!
       User.find_or_initialize_by(user_id: "dummy_user", email_address: "dummy@user.com").tap do |user|
         if user.organisation.blank?
-          org = Organisation.find_or_create_by!(organisation_name: "Dummy Dev Org") do |o|
+          user.organisation = Organisation.find_or_create_by!(organisation_name: "Dummy Dev Org") do |o|
             o.description = "Development dummy organisation"
           end
-          org.assign_role!("trade_tariff:full") unless org.has_role?("trade_tariff:full")
-          user.organisation = org
         end
+        Role::SERVICE_ROLE_NAMES.each { |role_name| user.organisation.assign_role!(role_name) }
         user.save!
       end
     end

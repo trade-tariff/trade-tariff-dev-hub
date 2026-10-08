@@ -68,6 +68,12 @@ module TradeTariffDevHub
       self_service_org_creation_enabled?
     end
 
+    # When true, local development signs everyone in as the dummy user without Identity.
+    # Never enabled outside Rails development, whatever BYPASS_AUTHENTICATION says.
+    def bypass_authentication?
+      Rails.env.development? && ENV["BYPASS_AUTHENTICATION"] == "true"
+    end
+
     def documentation_url
       ENV.fetch(
         "DOCUMENTATION_URL",

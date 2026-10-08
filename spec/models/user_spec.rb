@@ -167,11 +167,106 @@ RSpec.describe User, type: :model do
     context "when in development environment" do
       subject(:from_passwordless_payload!) { described_class.from_passwordless_payload!(decoded_token) }
 
-      before { allow(Rails).to receive(:env).and_return("development".inquiry) }
+      let(:bypass_authentication) { nil }
 
-      it { is_expected.to have_attributes(user_id: "dummy_user", email_address: "dummy@user.com") }
-      it { expect { from_passwordless_payload! }.to change(described_class, :count).by(1) }
-      it { expect { from_passwordless_payload! }.to change(Organisation, :count).by(1) }
+      before do
+        allow(Rails).to receive(:env).and_return("development".inquiry)
+        allow(ENV).to receive(:[]).and_call_original
+        allow(ENV).to receive(:[]).with("BYPASS_AUTHENTICATION").and_return(bypass_authentication)
+      end
+
+      context "when the auth bypass is enabled" do
+        let(:bypass_authentication) { "true" }
+
+        it { is_expected.to have_attributes(user_id: "dummy_user", email_address: "dummy@user.com") }
+        it { is_expected.to have_attributes(organisation: have_attributes(organisation_name: "Dummy Dev Org")) }
+        it { expect { from_passwordless_payload! }.to change(described_class, :count).by(1) }
+        it { expect { from_passwordless_payload! }.to change(Organisation, :count).by(1) }
+
+        it "gives the dummy organisation Trade Tariff and FPO access" do
+          expect(from_passwordless_payload!.organisation.roles.pluck(:name)).to contain_exactly("trade_tariff:full", "fpo:full")
+        end
+      end
+
+      context "when the auth bypass is enabled and the dummy user exists with only Trade Tariff access" do
+        let(:bypass_authentication) { "true" }
+
+        before do
+          organisation = Organisation.create!(organisation_name: "Dummy Dev Org", description: "Development dummy organisation")
+          organisation.assign_role!("trade_tariff:full")
+          create(:user, user_id: "dummy_user", email_address: "dummy@user.com", organisation:)
+        end
+
+        it "adds FPO access" do
+          expect(from_passwordless_payload!.organisation.roles.pluck(:name)).to contain_exactly("trade_tariff:full", "fpo:full")
+        end
+      end
+
+      context "when the auth bypass is unset and the user already exists" do
+        let!(:user) do
+          create(:user, user_id: decoded_token["sub"], email_address: decoded_token["email"])
+        end
+
+        it { is_expected.to eq(user) }
+      end
+
+      context "when the auth bypass is disabled and the user already exists" do
+        let(:bypass_authentication) { "false" }
+        let!(:user) do
+          create(:user, user_id: decoded_token["sub"], email_address: decoded_token["email"])
+        end
+
+        it { is_expected.to eq(user) }
+        it { expect { from_passwordless_payload! }.not_to change(described_class, :count) }
+      end
+
+      context "when the auth bypass is disabled and self-service org creation is enabled" do
+        let(:bypass_authentication) { "false" }
+
+        before do
+          allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(true)
+        end
+
+        it { is_expected.to have_attributes(user_id: decoded_token["sub"], email_address: decoded_token["email"]) }
+        it { expect { from_passwordless_payload! }.to change(described_class, :count).by(1) }
+      end
+
+      context "when the auth bypass is disabled and the user is invited" do
+        let(:bypass_authentication) { "false" }
+        let(:inviting_user) { create(:user) }
+        let!(:invitation) do
+          create(
+            :invitation,
+            invitee_email: decoded_token["email"],
+            organisation: inviting_user.organisation,
+            status: :pending,
+            user: inviting_user,
+          )
+        end
+
+        before do
+          allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(false)
+        end
+
+        it "joins the invited organisation as the token account", :aggregate_failures do
+          user = from_passwordless_payload!
+          expect(user.user_id).to eq(decoded_token["sub"])
+          expect(user.organisation).to eq(inviting_user.organisation)
+          expect(invitation.reload).to be_accepted
+        end
+      end
+
+      context "when the auth bypass and self-service org creation are disabled and the user has no invitation" do
+        let(:bypass_authentication) { "false" }
+
+        before do
+          allow(TradeTariffDevHub).to receive(:allow_passwordless_self_service_org_creation?).and_return(false)
+        end
+
+        it "requires an invitation" do
+          expect { from_passwordless_payload! }.to raise_error(Organisation::InvitationRequiredError)
+        end
+      end
     end
   end
 end

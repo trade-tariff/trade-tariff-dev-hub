@@ -88,6 +88,12 @@ RSpec.describe DecodeJwt do
           JWT.encode(payload, key_pair, "RS256", kid: "mock-kid")
         end
       end
+      it_behaves_like "a call with an invalid token", "anything", JWT::DecodeError do
+        let(:token) do
+          payload = { sub: "dummy_user", iss: "https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_eYCVlIQL0", "cognito:groups" => %w[portal] }
+          JWT.encode(payload, nil, "none")
+        end
+      end
       it_behaves_like "a call with an invalid token", "anything", JWT::ExpiredSignature do
         let(:token) do
           payload = { sub: "test", iss: "https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_eYCVlIQL0", exp: (Time.zone.now - 1.day).to_i }
