@@ -45,15 +45,6 @@ Rails.application.routes.draw do
     end
   end
 
-  namespace :user_verification do
-    resources :steps, only: %i[show update index] do
-      collection do
-        get :completed
-        get :rejected
-      end
-    end
-  end
-
   namespace :admin do
     resources :organisations, only: %i[index show], path: "organisations" do
       post :roles, to: "organisation_roles#create"
