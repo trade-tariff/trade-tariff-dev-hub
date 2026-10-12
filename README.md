@@ -33,6 +33,13 @@ Put local overrides in `.env.development.local`. The tracked
 [.env.development](.env.development) contains defaults, not a complete working
 Identity or AWS environment. Do not use production credentials for local work.
 
+In Rails development mode, `BYPASS_AUTHENTICATION=true` (set in
+`.env.development`) signs you in as the dummy account (`dummy@user.com`,
+**Dummy Dev Org**) when you click **Start now**, without Identity. Set
+`BYPASS_AUTHENTICATION=false` in `.env.development.local` to sign in through
+Identity instead. When the variable is unset, sign-in uses Identity. It has no
+effect in other Rails environments.
+
 [config/database.yml](config/database.yml) reads `PGHOST` and `DB_USER`, which
 default to `localhost` and `postgres`. The databases are
 `tariff_dev_hub_development` and `tariff_dev_hub_test`.

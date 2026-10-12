@@ -28,7 +28,21 @@ protected
     # (authenticated? handles cookie matching, so if it returned false, session is invalid)
     clear_authentication! if user_session.present?
 
+    return sign_in_dummy_user if TradeTariffDevHub.bypass_authentication?
+
     redirect_to TradeTariffDevHub.identity_consumer_url, allow_other_host: true
+  end
+
+  # Development only: an unsigned token that the normal /auth/redirect handler maps to the dummy user.
+  # Outside development, token signatures are verified, so this token is rejected.
+  def sign_in_dummy_user
+    payload = { "sub" => "dummy_user", "email" => "dummy@user.com", "cognito:groups" => [TradeTariffDevHub.identity_consumer] }
+
+    cookies[TradeTariffDevHub.id_token_cookie_name] = {
+      value: JWT.encode(payload, nil, "none"),
+      domain: TradeTariffDevHub.identity_cookie_domain,
+    }
+    redirect_to auth_redirect_path
   end
 
   def organisation

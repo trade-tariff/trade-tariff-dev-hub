@@ -422,6 +422,33 @@ RSpec.describe TradeTariffDevHub do
     end
   end
 
+  describe ".bypass_authentication?" do
+    subject(:bypass_authentication?) { described_class.bypass_authentication? }
+
+    before do
+      allow(Rails).to receive(:env).and_return(rails_env.inquiry)
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("BYPASS_AUTHENTICATION").and_return(bypass_authentication)
+    end
+
+    [
+      ["development", "true", true],
+      ["development", nil, false],
+      ["development", "false", false],
+      ["development", "1", false],
+      ["development", "yes", false],
+      ["test", "true", false],
+      ["production", "true", false],
+    ].each do |env_name, flag, expected|
+      context "when Rails.env is #{env_name} and BYPASS_AUTHENTICATION is #{flag.inspect}" do
+        let(:rails_env) { env_name }
+        let(:bypass_authentication) { flag }
+
+        it { is_expected.to be(expected) }
+      end
+    end
+  end
+
   describe "remaining environment helpers" do
     include_context "with restored ENVIRONMENT"
 
