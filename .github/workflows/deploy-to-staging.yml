@@ -20,4 +20,3 @@ jobs:
       migrate: true
     secrets:
       slack-webhook: ${{ secrets.SLACK_WEBHOOK }}
-      ssh-key: ${{ secrets.PRIVATE_SSH_KEY }}
