@@ -44,7 +44,8 @@ RUN apk add --update --no-cache \
   postgresql-client \
   bash \
   socat \
-  tzdata && \
+  tzdata \
+  util-linux-misc && \
   apk upgrade --no-cache libcrypto3 libssl3 && \
   cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
   echo "Europe/London" > /etc/timezone && \
