@@ -7,6 +7,18 @@ RSpec.describe "Trade Tariff keys", type: :request do
     current_user.organisation.assign_role!("trade_tariff:full")
   end
 
+  describe "GET /trade_tariff_keys" do
+    let!(:trade_tariff_key) do
+      create(:trade_tariff_key, organisation: current_user.organisation, client_id: "cognito-client-id-123456")
+    end
+
+    it "shows the full client ID" do
+      get trade_tariff_keys_path
+
+      expect(response.body).to include(trade_tariff_key.client_id)
+    end
+  end
+
   describe "POST /trade_tariff_keys" do
     let(:create_service) { instance_double(TradeTariff::CreateTradeTariffKey) }
     let(:trade_tariff_key) { create(:trade_tariff_key, :cognito_provisioned, organisation: current_user.organisation) }
