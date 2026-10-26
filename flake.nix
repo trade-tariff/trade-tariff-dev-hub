@@ -15,6 +15,7 @@
 
   outputs =
     {
+      self,
       nixpkgs,
       flake-utils,
       pre-commit-hooks,
@@ -104,6 +105,173 @@
         '';
         init = pkgs.writeShellScriptBin "init" "cd terraform && terraform init -backend=false";
         update-providers = pkgs.writeShellScriptBin "update-providers" "cd terraform && terraform init -backend=false -reconfigure -upgrade";
+
+        reviewEnvironment = ''
+          if [ "''${REVIEW_SANDBOX:-}" != 1 ] || [ "$PWD" != /workspace ]; then exit 64; fi
+          export TMPDIR=/workspace/.review/tmp PRE_COMMIT_HOME=/workspace/.review/pre-commit
+          export GEM_HOME=/workspace/.review/gems
+          export GEM_PATH="$GEM_HOME''${REVIEW_GEM_CACHE:+:$REVIEW_GEM_CACHE}"
+          export PATH="$GEM_HOME/bin:$PATH" BUNDLE_BIN="$GEM_HOME/bin"
+          export BUNDLE_IGNORE_CONFIG=1 BUNDLE_PATH__SYSTEM=true BUNDLE_FROZEN=true
+          export RAILS_ENV=test ENVIRONMENT=test CI=true DISABLE_BOOTSNAP_COMPILE_CACHE=1
+          export PGDATA=/workspace/.review/postgres PGHOST=/workspace/.review/pg PGUSER=postgres DB_USER=postgres PGPORT=5432
+          LD_LIBRARY_PATH="$(${pgConfig}/bin/pg_config --libdir):${pkgs.libyaml.out}/lib:${pkgs.openssl.out}/lib"
+          export LD_LIBRARY_PATH
+          export TF_CLI_CONFIG_FILE=/workspace/.review/terraform.rc TF_IN_AUTOMATION=1 TF_INPUT=0 CHECKPOINT_DISABLE=1 AWS_EC2_METADATA_DISABLED=true
+          unset BUNDLE_PATH BUNDLE_APP_CONFIG BUNDLE_WITHOUT TF_PLUGIN_CACHE_DIR DATABASE_URL
+          mkdir -p "$TMPDIR" "$GEM_HOME" "$PGHOST"
+        '';
+        reviewTools =
+          import
+            (builtins.fetchTree {
+              type = "github";
+              owner = "NixOS";
+              repo = "nixpkgs";
+              rev = "4a29d733e8a7d5b824c3d8c958a946a9867b3eb2";
+              narHash = "sha256-f+JACbTqzZ+G92DSnXOUGRhGANb8Blh7CoeYOeBF8/U=";
+            })
+            {
+              inherit system;
+              config.allowUnfree = true;
+            };
+        reviewLatestTools = import (builtins.fetchTree {
+          type = "github";
+          owner = "NixOS";
+          repo = "nixpkgs";
+          rev = "55bfb4d7437bd4e09ab7cba58a43bd68eb310044";
+          narHash = "sha256-jBYGPi4udQ9uo4KQp9m2J0546nJVQitG15gvZSaVVAs=";
+        }) { inherit system; };
+        reviewTerraformHooks = builtins.fetchTree {
+          type = "github";
+          owner = "antonbabenko";
+          repo = "pre-commit-terraform";
+          rev = "d61ded22bf9aa0f757303ebcbb0d6d71c4b54015";
+          narHash = "sha256-IPONqvEUoGrsnQkD0RTLW28QKoKqv8wf/ooExmSTJmE=";
+        };
+        reviewRubyHooks = builtins.fetchTree {
+          type = "github";
+          owner = "mattlqx";
+          repo = "pre-commit-ruby";
+          rev = "1f893f2c0db4068fafa19b8ea7d7db1253ea0cc1";
+          narHash = "sha256-7S84RvncmcXVIjgNhzFyN4HnKJk+tKxHYvfOLcuiw8c=";
+        };
+        reviewTrufflehogScan = pkgs.writeShellScript "trufflehog-pre-commit" ''
+          set -euo pipefail
+          exclude_file="$(mktemp)"
+          trap 'rm -f "$exclude_file"' EXIT
+          printf '%s\n' '(^|/)\.git(/|$)' '(^|/)\.terraform(/|$)' '(^|/)\.terragrunt-cache(/|$)' > "$exclude_file"
+          while IFS= read -r ignored; do
+            [ -n "$ignored" ] || continue
+            escaped="$(printf '%s' "''${ignored%/}" | sed 's/[][(){}.^$*+?|\\]/\\&/g')"
+            case "$ignored" in
+              */) printf '(^|/)%s(/|$)\n' "$escaped" >> "$exclude_file" ;;
+              *) printf '(^|/)%s$\n' "$escaped" >> "$exclude_file" ;;
+            esac
+          done < <(git ls-files --others --ignored --exclude-standard --directory)
+          exec ${reviewLatestTools.trufflehog}/bin/trufflehog filesystem "$(pwd -P)" --exclude-paths="$exclude_file" --results=verified,unknown --fail
+        '';
+        reviewHook =
+          id: entry: attrs:
+          {
+            inherit id entry;
+            name = id;
+            language = "system";
+          }
+          // attrs;
+        reviewPreCommitConfig = pkgs.writeText "review-pre-commit.json" (
+          builtins.toJSON {
+            default_install_hook_types = [
+              "pre-commit"
+              "pre-push"
+            ];
+            default_stages = [ "pre-commit" ];
+            repos = [
+              {
+                repo = "local";
+                hooks = [
+                  (reviewHook "terraform_fmt" "${reviewTerraformHooks}/hooks/terraform_fmt.sh" {
+                    files = "\\.(tf|tofu|tfvars|(tftest|tofutest|tfmock|tfquery)\\.hcl)$";
+                    exclude = "\\.terraform/.*$";
+                  })
+                  (reviewHook "terraform_validate" "${reviewTerraformHooks}/hooks/terraform_validate.sh" {
+                    files = "\\.(tf|tofu|tfvars|terraform\\.lock\\.hcl)$";
+                    exclude = "\\.terraform/.*$";
+                    require_serial = true;
+                  })
+                  (reviewHook "terraform_tflint" "${reviewTerraformHooks}/hooks/terraform_tflint.sh" {
+                    files = "\\.(tf|tofu|tfvars)$";
+                    exclude = "\\.terraform/.*$";
+                    require_serial = true;
+                  })
+                  (reviewHook "terraform_docs" "${reviewTerraformHooks}/hooks/terraform_docs.sh" {
+                    files = "\\.(tf|tofu|terraform\\.lock\\.hcl)$";
+                    exclude = "\\.terraform/.*$";
+                    require_serial = true;
+                    args = [
+                      "--hook-config=--add-to-existing-file=true"
+                      "--hook-config=--path-to-file=README.md"
+                      "--hook-config=--create-file-if-not-exist=true"
+                    ];
+                  })
+                  (reviewHook "trailing-whitespace"
+                    "${reviewTools.python3Packages.pre-commit-hooks}/bin/trailing-whitespace-fixer"
+                    {
+                      types = [ "text" ];
+                      stages = [
+                        "pre-commit"
+                        "pre-push"
+                        "manual"
+                      ];
+                    }
+                  )
+                  (reviewHook "end-of-file-fixer"
+                    "${reviewTools.python3Packages.pre-commit-hooks}/bin/end-of-file-fixer"
+                    {
+                      types = [ "text" ];
+                      stages = [
+                        "pre-commit"
+                        "pre-push"
+                        "manual"
+                      ];
+                      exclude = "^vendor/javascript/";
+                    }
+                  )
+                  (reviewHook "check-yaml" "${reviewTools.python3Packages.pre-commit-hooks}/bin/check-yaml" {
+                    types = [ "yaml" ];
+                  })
+                  (reviewHook "file-contents-sorter"
+                    "${reviewTools.python3Packages.pre-commit-hooks}/bin/file-contents-sorter"
+                    { files = ".env.development|.env.test"; }
+                  )
+                  (reviewHook "markdownlint-fix" "${reviewTools.markdownlint-cli}/bin/markdownlint --fix" {
+                    types = [ "markdown" ];
+                    args = [
+                      "--disable"
+                      "MD013"
+                      "--ignore"
+                      "terraform"
+                    ];
+                  })
+                  (reviewHook "rubocop" "${reviewRubyHooks}/bin/rubocop-wrapper.sh" {
+                    types = [ "ruby" ];
+                    args = [ "--autocorrect" ];
+                    pass_filenames = true;
+                  })
+                  (reviewHook "actionlint-docker" "${reviewTools.actionlint}/bin/actionlint" {
+                    types = [ "yaml" ];
+                    files = "^\\.github/workflows/";
+                  })
+                  (reviewHook "trufflehog" "${reviewTrufflehogScan}" {
+                    stages = [
+                      "pre-commit"
+                      "pre-push"
+                    ];
+                  })
+                ];
+              }
+            ];
+          }
+        );
 
         preCommitCheck = pre-commit-hooks.lib.${system}.run {
           src = ./.;
@@ -296,6 +464,77 @@
         '';
       in
       {
+        devShells.review = self.devShells.${system}.default.overrideAttrs (old: {
+          shellHook = "";
+          PRE_COMMIT_NO_CONCURRENCY = "1";
+          GOMAXPROCS = "2";
+          nativeBuildInputs = [
+            pkgs.gitMinimal
+            pkgs.pre-commit
+            pkgs.curl
+            pkgs.jq
+            pkgs.util-linux
+            reviewTools.terraform
+            reviewTools.tflint
+            reviewTools.terraform-docs
+            (pkgs.writeShellApplication {
+              name = "review-bootstrap";
+              text = reviewEnvironment + ''
+                for archive in /deps/gem-archives/*.gem; do
+                  [ -f "$archive" ] || continue
+                  gem install --local --no-document --ignore-dependencies "$archive"
+                done
+                bundle check || bundle install --local
+                bundle binstubs --all
+                initdb -D "$PGDATA" -U postgres --auth=trust --encoding=UTF8 --no-locale
+                pg_ctl -D "$PGDATA" -l "$TMPDIR/postgres.log" -o "-k $PGHOST -c listen_addresses=" -w start
+                pg_isready -h "$PGHOST" -U postgres
+                bundle exec rails db:create db:schema:load
+                printf 'disable_checkpoint = true\nprovider_installation {\n filesystem_mirror {\n path = "/deps/terraform-inputs/providers"\n include = ["registry.terraform.io/*/*"]\n }\n}\n' > "$TF_CLI_CONFIG_FILE"
+                files="$(git ls-files '*.tf')"
+                test -n "$files"
+                mapfile -t roots < <(printf '%s\n' "$files" | while IFS= read -r file; do dirname "$file"; done | sort -u)
+                for root in "''${roots[@]}"; do
+                  mkdir -p "$root/.terraform/modules"
+                  if [ -f "/deps/terraform-inputs/roots/$root/modules.json" ]; then cp "/deps/terraform-inputs/roots/$root/modules.json" "$root/.terraform/modules/modules.json"; fi
+                  if [ ! -f "$root/.terraform.lock.hcl" ]; then cp "/deps/terraform-inputs/roots/$root/lock.hcl" "$root/.terraform.lock.hcl"; fi
+                  terraform -chdir="$root" init -backend=false -input=false -lockfile=readonly -no-color
+                  mkdir -p "/workspace/.review/terraform-locks/$root"
+                  cp "$root/.terraform.lock.hcl" "/workspace/.review/terraform-locks/$root/.terraform.lock.hcl"
+                  # Init verifies the ZIP against the committed hashes. Validate also needs
+                  # the Linux content hash, which providers lock records from that mirror.
+                  terraform -chdir="$root" providers lock -fs-mirror=/deps/terraform-inputs/providers -platform=linux_amd64
+                done
+              '';
+            })
+            (pkgs.writeShellApplication {
+              name = "review-check";
+              text = reviewEnvironment + ''
+                restore_review_locks() {
+                  while IFS= read -r -d "" lockfile; do
+                    cp "$lockfile" "''${lockfile#/workspace/.review/terraform-locks/}"
+                  done < <(find /workspace/.review/terraform-locks -type f -name .terraform.lock.hcl -print0)
+                }
+                trap restore_review_locks EXIT
+                status=0
+                pre-commit run --all-files --config ${reviewPreCommitConfig} || status=$?
+                pre-commit run --all-files --hook-stage pre-push --config ${reviewPreCommitConfig} || status=$?
+                bundle exec brakeman || status=$?
+                bundle exec rspec --format progress --format json --out "$TMPDIR/unit.json" || status=$?
+                ruby -rjson -e 's = JSON.parse(File.read(ARGV[0])).fetch("summary"); abort "Unit tests failed or skipped" unless s.fetch("example_count").positive? && s.fetch("failure_count").zero? && s.fetch("pending_count").zero?' "$TMPDIR/unit.json" || status=$?
+                restore_review_locks
+                trap - EXIT
+                exit "$status"
+              '';
+            })
+          ]
+          ++ (old.nativeBuildInputs or [ ]);
+          BUNDLE_BUILD__PG = builtins.concatStringsSep " " postgresqlBuildFlags;
+          BUNDLE_BUILD__PSYCH = builtins.concatStringsSep " " psychBuildFlags;
+          TZDIR = "${pkgs.tzdata.outPath}/share/zoneinfo";
+          SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+        });
+
         devShells.default = pkgs.mkShell {
           shellHook = ''
             # Worktree-aware Bundler/Ruby isolation
