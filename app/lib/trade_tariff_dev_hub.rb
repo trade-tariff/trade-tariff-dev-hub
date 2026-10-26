@@ -160,7 +160,7 @@ module TradeTariffDevHub
     end
 
     # OAuth2 token endpoint where consumers exchange client_id + client_secret for an access token.
-    # Set COGNITO_TOKEN_ENDPOINT explicitly, or it is derived from ENVIRONMENT (development/staging/production).
+    # Set COGNITO_TOKEN_ENDPOINT explicitly, or it is derived from ENVIRONMENT (development/staging/uat/production).
     # Outside deployed envs (e.g. test), falls back to development URL so tests do not hit production auth.
     def cognito_token_endpoint
       @cognito_token_endpoint ||= if ENV["COGNITO_TOKEN_ENDPOINT"].present?
@@ -169,6 +169,7 @@ module TradeTariffDevHub
                                     base = case environment
                                            when "development" then "https://auth.id.dev.trade-tariff.service.gov.uk"
                                            when "staging" then "https://auth.id.staging.trade-tariff.service.gov.uk"
+                                           when "uat" then "https://auth.id.uat.trade-tariff.service.gov.uk"
                                            when "production" then "https://auth.id.trade-tariff.service.gov.uk"
                                            else "https://auth.id.dev.trade-tariff.service.gov.uk"
                                            end
@@ -258,11 +259,11 @@ module TradeTariffDevHub
       ENV.fetch("ENVIRONMENT", "production")
     end
 
-    # Returns true for deployed environments (staging + production).
+    # Returns true for deployed environments (staging, uat and production).
     # Uses ENVIRONMENT (not Rails.env) so that AWS development, where ENVIRONMENT=development
     # but RAILS_ENV may be production, is correctly treated as non-deployed.
     def deployed_environment?
-      %w[production staging].include?(environment)
+      %w[production staging uat].include?(environment)
     end
 
     # True only for the live production slot (ENVIRONMENT=production). Not staging, dev, or test.

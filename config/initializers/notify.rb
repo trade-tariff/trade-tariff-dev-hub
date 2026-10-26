@@ -9,7 +9,7 @@ NOTIFY_CONFIGURATION = if ENV['ENVIRONMENT'] == 'production'
       },
     }
   }
-elsif ENV['ENVIRONMENT'] == 'staging'
+elsif %w[staging uat].include?(ENV['ENVIRONMENT'])
   {
     templates: {
       developer_portal: {
