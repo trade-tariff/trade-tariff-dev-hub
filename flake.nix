@@ -140,6 +140,7 @@
             };
             end-of-file-fixer = {
               enable = true;
+              excludes = [ "^vendor/javascript/" ];
               stages = [ "pre-commit" ];
             };
             markdownlint = {
