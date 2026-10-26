@@ -351,6 +351,7 @@ RSpec.describe TradeTariffDevHub do
     {
       "development" => "https://auth.id.dev.trade-tariff.service.gov.uk/oauth2/token",
       "staging" => "https://auth.id.staging.trade-tariff.service.gov.uk/oauth2/token",
+      "uat" => "https://auth.id.uat.trade-tariff.service.gov.uk/oauth2/token",
       "production" => "https://auth.id.trade-tariff.service.gov.uk/oauth2/token",
       "test" => "https://auth.id.dev.trade-tariff.service.gov.uk/oauth2/token",
     }.each do |environment, endpoint|
@@ -464,6 +465,12 @@ RSpec.describe TradeTariffDevHub do
 
     it "identifies a deployed environment" do
       ENV["ENVIRONMENT"] = "staging"
+
+      expect(described_class.deployed_environment?).to be(true)
+    end
+
+    it "identifies uat as a deployed environment" do
+      ENV["ENVIRONMENT"] = "uat"
 
       expect(described_class.deployed_environment?).to be(true)
     end
