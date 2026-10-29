@@ -55,3 +55,15 @@ variable "enable_observability_alerts" {
   type        = bool
   default     = false
 }
+
+variable "generated_secrets" {
+  description = "UAT only. Environment variables mapped to the Secrets Manager secret that has the value. The common stack creates these secrets on each start. They replace the values in the configuration secret."
+  type        = map(string)
+  default     = {}
+}
+
+variable "generated_parameters" {
+  description = "UAT only. Environment variables mapped to the SSM parameter that has the value. The common stack creates these parameters on each start. They replace the values in the configuration secret."
+  type        = map(string)
+  default     = {}
+}
