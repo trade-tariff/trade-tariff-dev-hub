@@ -14,4 +14,8 @@ module ApiKeysHelper
       "Revoked on #{api_key.updated_at.to_date.to_formatted_s(:govuk)}"
     end
   end
+
+  def creation_date(api_key)
+    api_key.created_at.strftime("%d %B %Y")
+  end
 end
