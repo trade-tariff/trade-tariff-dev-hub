@@ -44,7 +44,12 @@ module ApplicationHelper
 
   def status_tag(text, status: :default)
     classes = ["govuk-tag", status_tag_class(status)].compact.join(" ")
-    content_tag(:strong, text, class: classes)
+    content_tag(
+      :strong,
+      text,
+      class: classes,
+      data: { testid: "status_tag" },
+    )
   end
 
   def pending_role_requests_count
