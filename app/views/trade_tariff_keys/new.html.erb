@@ -1,11 +1,30 @@
+<% content_for :back_link do %>
+  <%= govuk_back_link(href: trade_tariff_keys_path) %>
+<% end %>
 <%= form_with url: trade_tariff_keys_path, method: :post do |f| %>
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-      <h1 class="govuk-heading-l">Enter a description for this Trade Tariff API key</h1>
-      <%= f.govuk_text_field :trade_tariff_key_description, width: 'two-thirds', label: nil, hint: { text: "Use a description you will recognise in the future so that you know which system or developer is using this Trade Tariff API key. Do not reuse the same description across Trade Tariff API keys." } %>
+      <%= f.govuk_text_field :trade_tariff_key_description,
+                              width: 'two-thirds',
+                              label: {
+                                text: 'Enter a description for this Trade Tariff API key',
+                                size: 'l',
+                                tag: 'h1'
+                              },
+                              hint: {
+                                text: "Use a description you will recognise in the future so that you know which system or developer is using this Trade Tariff API key. Do not reuse the same description across Trade Tariff API keys."
+                              },
+                              data: {
+                                testid: 'key_description_input'
+                              }
+      %>
       <div class="govuk-button-group">
         <%= f.govuk_submit "Continue" %>
-        <%= govuk_link_to('Cancel', trade_tariff_keys_path) %>
+        <%= govuk_link_to('Cancel',
+                          trade_tariff_keys_path,
+                          class: 'govuk-button govuk-button--secondary'
+                        )
+        %>
       </div>
     </div>
   </div>
