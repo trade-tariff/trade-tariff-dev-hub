@@ -22,7 +22,7 @@ RSpec.describe ApiKeysHelper, type: :helper do
     context "when disabled" do
       let(:enabled) { false }
 
-      it { is_expected.to eq("Revoked on #{api_key.updated_at.to_date.to_formatted_s(:govuk)}") }
+      it { is_expected.to eq("Revoked") }
     end
   end
 end
