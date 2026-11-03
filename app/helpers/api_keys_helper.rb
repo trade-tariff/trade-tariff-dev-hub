@@ -8,10 +8,6 @@ module ApiKeysHelper
   end
 
   def api_key_status(api_key)
-    if api_key.enabled
-      "Active"
-    else
-      "Revoked on #{api_key.updated_at.to_date.to_formatted_s(:govuk)}"
-    end
+    api_key.enabled ? "Active" : "Revoked"
   end
 end
