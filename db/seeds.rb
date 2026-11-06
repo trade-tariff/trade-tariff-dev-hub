@@ -1,22 +1,4 @@
-# Create roles
-[
-  {
-    name: 'admin',
-    description: 'Full access to all features and settings',
-  },
-  {
-    name: 'fpo:full',
-    description: 'Full access to FPO (Fast Parcel Operator) API keys',
-  },
-  {
-    name: 'trade_tariff:full',
-    description: 'Full access to Trade Tariff public API keys',
-  },
-].each do |role_attrs|
-  Role.find_or_create_by(name: role_attrs[:name]) do |role|
-    role.description = role_attrs[:description]
-  end
-end
+Role.ensure_defaults!
 
 if Rails.env.development?
   # Default to localhost if LOCALSTACK_HOST is not set
