@@ -18,6 +18,11 @@ class Role < ApplicationRecord
   TRADE_TARIFF_ROLE_NAME = "trade_tariff:full".freeze
   FPO_ROLE_NAME = "fpo:full".freeze
   SERVICE_ROLE_NAMES = [TRADE_TARIFF_ROLE_NAME, FPO_ROLE_NAME].freeze
+  DEFAULT_ROLES = {
+    ADMIN_ROLE_NAME => "Full access to all features and settings",
+    FPO_ROLE_NAME => "Full access to FPO (Fast Parcel Operator) API keys",
+    TRADE_TARIFF_ROLE_NAME => "Full access to Trade Tariff public API keys",
+  }.freeze
 
   validates :name, presence: true, uniqueness: true
   validates :description, presence: true
@@ -27,6 +32,12 @@ class Role < ApplicationRecord
 
   scope :service_roles, -> { where(name: SERVICE_ROLE_NAMES) }
   scope :not_assigned_to, ->(organisation) { where.not(id: organisation.roles.select(:id)) }
+
+  def self.ensure_defaults!
+    DEFAULT_ROLES.each do |name, description|
+      find_or_create_by!(name:) { |role| role.description = description }
+    end
+  end
 
   def self.available_service_roles_for(organisation)
     service_roles.not_assigned_to(organisation).order(:name)
